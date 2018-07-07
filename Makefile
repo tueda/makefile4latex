@@ -930,3 +930,4 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 
 -include $(DEPDIR)/*.d
 -include .conf.mk
+-include conf.mk
