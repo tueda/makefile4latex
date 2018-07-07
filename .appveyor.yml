@@ -1,0 +1,12 @@
+environment:
+    matrix:
+      - TARGET: cygwin64
+
+install:
+  - cmd: if [%TARGET%]==[cygwin64] (
+      C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P texlive-collection-latex )
+
+build_script:
+  - cmd: if [%TARGET%]==[cygwin64] (
+      C:\cygwin64\bin\bash -e -l -c "git clone `cygpath $APPVEYOR_BUILD_FOLDER`" &&
+      C:\cygwin64\bin\bash -e -l -c "make -C $APPVEYOR_PROJECT_NAME check" )

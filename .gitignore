@@ -1,0 +1,26 @@
+# https://github.com/tueda/makefile4latex
+
+*.ax1
+*.ax2
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fls
+*.fmt
+*.log
+*.nav
+*.out
+*.pdf
+*.ps
+*.snm
+*.tar.gz
+*.tmp
+*.tmp*.*
+*.toc
+*.vrb
+
+.dep/
+!images/*.pdf
+!resources/*.pdf
+*-eps-converted-to.pdf
