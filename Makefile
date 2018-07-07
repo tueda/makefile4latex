@@ -181,7 +181,7 @@ pathsearch_impl = \
 	$(if $(retval),,$(eval retval := $(call type,$1))) \
 	$(if $(retval),,$(if $(strip $2 $3 $4 $5 $6 $7 $8 $9),$(call pathsearch_impl,$2,$3,$4,$5,$6,$7,$8,$9)))
 
-# $(target)
+# $(target) gives all targets.
 target = $(call cache,target_impl)
 
 target_impl = $(strip \
@@ -198,12 +198,12 @@ target_impl_from_tex = $(strip \
 	$(retval) \
 )
 
-# $(target_basename)
+# $(target_basename) gives the result of $(basename $(target)).
 target_basename = $(call cache,target_basename_impl)
 
 target_basename_impl = $(basename $(target))
 
-# $(srctexfiles)
+# $(srctexfiles) gives all LaTeX source files.
 srctexfiles = $(call cache,srctexfiles_impl)
 
 srctexfiles_impl = $(strip $(sort \
@@ -211,17 +211,17 @@ srctexfiles_impl = $(strip $(sort \
 	$(shell awk 'FNR==1{if ($$0~"%&") print FILENAME;}' *.tex 2>/dev/null) \
 ))
 
-# $(srcltxfiles)
+# $(srcltxfiles) gives all .ltx files.
 srcltxfiles = $(call cache,srcltxfiles_impl)
 
 srcltxfiles_impl = $(wildcard *.ltx)
 
-# $(srcdtxfiles)
+# $(srcdtxfiles) gives all .dtx files.
 srcdtxfiles = $(call cache,srcdtxfiles_impl)
 
 srcdtxfiles_impl = $(wildcard *.dtx)
 
-# $(subdirs)
+# $(subdirs) gives all subdirectories.
 subdirs = $(call cache,subdirs_impl)
 
 subdirs_impl = $(strip \
@@ -244,7 +244,6 @@ latex_noopt = $(call cache,latex_noopt_impl)
 latex_noopt_impl = $(call pathsearch,latex,,$(LATEX),latex)
 
 # $(pdflatex)
-
 pdflatex = $(call cache,pdflatex_impl)
 
 pdflatex_impl = $(strip \
@@ -330,7 +329,8 @@ soffice_impl = $(call pathsearch,soffice,, \
 	/cygdrive/c/Program Files (x86)/LibreOffice 4/program/soffice \
 )
 
-# $(mostlycleanfiles)
+# $(mostlycleanfiles) gives all intermediately generated files, to be deleted by
+# "make mostlyclean".
 #   .aux - LaTeX auxiliary file
 #   .ax1 - axodraw2 auxiliary (axohelp input) file
 #   .ax2 - axohelp output file
@@ -399,7 +399,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(MOSTLYCLEANFILES) \
 ))
 
-# $(cleanfiles)
+# $(cleanfiles) gives all generated files to be deleted by "make clean".
 cleanfiles = $(call cache,cleanfiles_impl)
 
 cleanfiles_impl = $(wildcard $(strip \
@@ -415,7 +415,8 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(mostlycleanfiles) \
 ))
 
-# $(call colorize,COMMAND-WITH-COLOR,COMMAND-WITHOUT-COLOR)
+# $(call colorize,COMMAND-WITH-COLOR,COMMAND-WITHOUT-COLOR) invokes the first
+# command when coloring is enabled, otherwise invokes the second command.
 colorize = \
 	if [ "$(make_colors)" = "always" ]; then \
 		$1; \
@@ -429,7 +430,7 @@ colorize = \
 		fi; \
 	fi
 
-# $(call error_message,MESSAGE)
+# $(call error_message,MESSAGE) prints an error message.
 error_message = \
 	$(call colorize, \
 		printf "\033$(CL_ERROR)Error: $1\033$(CL_NORMAL)\n" >&2 \
@@ -437,8 +438,8 @@ error_message = \
 		echo "Error: $1" >&2 \
 	)
 
-# $(call exec,COMMAND)
-# $(call exec,COMMAND,false)
+# $(call exec,COMMAND) invokes the command with checking the exit status.
+# $(call exec,COMMAND,false) invokes the command but skips the check.
 exec = \
 	$(if $(and $(findstring not found,$1),$(findstring exit 1,$1)), \
 		$1 \
@@ -466,7 +467,7 @@ colorize_output = \
 	sed 's/^\(!.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
 	     s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No pages of output.*\|Underfull.*\|Overfull.*\|Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
-# $(call cmpver,VER1,OP,VER2)
+# $(call cmpver,VER1,OP,VER2) compares the given two version numbers.
 cmpver = { \
 	cmpver_ver1_="$1"; \
 	cmpver_ver2_="$3"; \
@@ -521,28 +522,36 @@ $(target_basename:=.pdf): | prerequisite
 
 prerequisite:
 	@for dir in $(subdirs); do \
-		$(MAKE) -C $$dir $(PREREQUISITE_SUBDIRS); \
+		if $(MAKE) -n -C $$dir $(PREREQUISITE_SUBDIRS) >/dev/null 2>&1; then \
+			$(MAKE) -C $$dir $(PREREQUISITE_SUBDIRS); \
+		fi; \
 	done; :
 
 endif
 
 mostlyclean:
 	@for dir in $(subdirs); do \
-		$(MAKE) -C $$dir mostlyclean; \
+		if $(MAKE) -n -C $$dir mostlyclean >/dev/null 2>&1; then \
+			$(MAKE) -C $$dir mostlyclean; \
+		fi; \
 	done; :
 	@$(if $(mostlycleanfiles),$(call exec,rm -f $(mostlycleanfiles)))
 	@$(if $(wildcard $(DEPDIR)),$(call exec,rm -rf $(DEPDIR)))
 
 clean:
 	@for dir in $(subdirs); do \
-		$(MAKE) -C $$dir clean; \
+		if $(MAKE) -n -C $$dir clean >/dev/null 2>&1; then \
+			$(MAKE) -C $$dir clean; \
+		fi; \
 	done; :
 	@$(if $(cleanfiles),$(call exec,rm -f $(cleanfiles)))
 	@$(if $(wildcard $(DEPDIR)),$(call exec,rm -rf $(DEPDIR)))
 
 check:
 	@for dir in $(subdirs); do \
-		$(MAKE) -C $$dir check; \
+		if $(MAKE) -n -C $$dir check >/dev/null 2>&1; then \
+			$(MAKE) -C $$dir check; \
+		fi; \
 	done
 	@for test in $(TESTS); do \
 		if [ -f "$$test" ]; then \
@@ -573,8 +582,8 @@ upgrade:
 
 .PHONY : all check clean dist dvi eps fmt help mostlyclean pdf ps prerequisite upgrade watch
 
-# $(call typeset,LATEX-COMMAND)
-# $(call typeset,LATEX-COMMAND,false)
+# $(call typeset,LATEX-COMMAND) tries to typeset the document.
+# $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
 typeset = \
 	rmfile=$@; \
 	$(if $2,rmfile=;dont_delete_on_failure=1;) \
@@ -616,9 +625,9 @@ typeset = \
 	done; \
 	touch $@; \
 	rmfile=; \
-	$(call flsdep,$@,$*.fls); \
-	$(call blgdep,$@,$*.blg); \
-	$(check_reffile) && $(call refdep,$@,$(<:.tex=.ref)); \
+	$(call mk_fls_dep,$@,$*.fls); \
+	$(call mk_blg_dep,$@,$*.blg); \
+	$(check_reffile) && $(call mk_ref_dep,$@,$(<:.tex=.ref)); \
 	:
 
 # $(call do_backup,FILE) creates a backup file.
@@ -642,7 +651,7 @@ check_modified_impl = \
 	fi
 
 # $(call do_latex,LATEX-COMMAND)
-# $(call do_latex,LATEX-COMMAND,false)
+# $(call do_latex,LATEX-COMMAND,false) skips the check.
 do_latex = \
 	if $$need_latex; then \
 		need_latex=false; \
@@ -725,8 +734,8 @@ do_kpsewhich = \
 	fi; \
 	$1=$$fullpath_kpsewhich_impl
 
-# $(call flsdep,TARGET,FLS-FILE)
-flsdep = \
+# $(call mk_fls_dep,TARGET,FLS-FILE) saves dependencies from a .fls file.
+mk_fls_dep = \
 	if [ -f '$2' ]; then \
 		mkdir -p $(DEPDIR); \
 		{ \
@@ -740,8 +749,8 @@ flsdep = \
 		} >$(DEPDIR)/$1.fls.d; \
 	fi
 
-# $(call blgdep,TARGET,BLG-FILE)
-blgdep = \
+# $(call mk_blg_dep,TARGET,BLG-FILE) saves dependencies from a .blg file.
+mk_blg_dep = \
 	if [ -f '$2' ]; then \
 		mkdir -p $(DEPDIR); \
 		{ \
@@ -751,8 +760,8 @@ blgdep = \
 		} >$(DEPDIR)/$1.blg.d; \
 	fi
 
-# $(call refdep,TARGET,REF-FILE)
-refdep = \
+# $(call mk_ref_dep,TARGET,REF-FILE) saves dependencies from a .ref file.
+mk_ref_dep = \
 	if [ -f '$2' ]; then \
 		mkdir -p $(DEPDIR); \
 		echo '$1: $2' >$(DEPDIR)/$1.ref.d; \
