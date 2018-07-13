@@ -462,10 +462,25 @@ exec = \
 # $(check_failed)
 check_failed = $$failed && { [ -n "$dont_delete_on_failure" ] || rm -f $@; exit 1; }; :
 
-# $(colorize_output)
+# $(colorize_output) gives sed commands for colorful output.
+# Errors:
+#   "! ...": TeX
+#   "I couldn't open database file ...": BibTeX
+#   "I found no database files---while reading file ...": BibTeX
+#   "I found no \bibstyle command---while reading file ...": BibTeX
+#   "I found no \citation commands---while reading file ...": BibTeX
+# Warnings:
+#   "LaTeX Warning ...": \@latex@warning
+#   "Package Warning ...": \PackageWarning or \PackageWarningNoLine
+#   "Class Warning ...": \ClassWarning or \ClassWarningNoLine
+#   "No file ...": \@input{filename}
+#   "No pages of output.": TeX
+#   "Underfull ...": TeX
+#   "Overfull ...": TeX
+#   "Warning-- ...": BibTeX
 colorize_output = \
-	sed 's/^\(!.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
-	     s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No pages of output.*\|Underfull.*\|Overfull.*\|Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+	sed 's/^\(!.*\|I couldn.t open database file.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	     s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
 # $(call cmpver,VER1,OP,VER2) compares the given two version numbers.
 cmpver = { \
@@ -586,9 +601,10 @@ upgrade:
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
 typeset = \
 	rmfile=$@; \
+	rmauxfile=; \
 	$(if $2,rmfile=;dont_delete_on_failure=1;) \
 	oldfile_prefix=$*.tmp$$$$.$$RANDOM$$RANDOM; \
-	trap 'rm -f $$rmfile $$oldfile_prefix*' 0 1 2 3 15; \
+	trap 'rm -f $$rmfile $$rmauxfile $$oldfile_prefix*' 0 1 2 3 15; \
 	failed=false; \
 	if [ -f '$@' ]; then \
 		need_latex=$(if $(filter-out %.ref %.bib %.bst %.idx %.glo,$?),:,false); \
@@ -667,6 +683,8 @@ do_latex = \
 			$(check_bblfile) && need_bibtex=:; \
 			$(check_reffile) && need_sortref=:; \
 			$(check_glsfile) && need_makeglossaries=:; \
+		else \
+			$(check_nobblfile) && need_bibtex=:; \
 		fi; \
 		if $(call check_modified,$*.idx); then \
 			$(check_indfile) && need_makeindex=:; \
@@ -685,7 +703,9 @@ do_bibtex = \
 	if $$need_bibtex; then \
 		need_bibtex=false; \
 		$(call do_backup,$*.bbl); \
+		rmauxfile=$*.bbl; \
 		$(call exec,$(bibtex) $(<:.tex=)); \
+		rmauxfile=; \
 		$(call check_modified,$*.bbl) && need_latex=:; \
 	fi
 
@@ -770,6 +790,8 @@ mk_ref_dep = \
 check_noreffile = grep "File \`$*_ref.tex' not found" $*.log >/dev/null 2>&1
 
 check_bblfile = grep '$*.bbl' $*.log >/dev/null 2>&1
+
+check_nobblfile = grep 'No file $*.bbl' $*.log >/dev/null 2>&1
 
 check_reffile = grep '$*_ref.tex' $*.log >/dev/null 2>&1
 
