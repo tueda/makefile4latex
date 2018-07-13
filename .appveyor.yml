@@ -9,4 +9,4 @@ install:
 build_script:
   - cmd: if [%TARGET%]==[cygwin64] (
       C:\cygwin64\bin\bash -e -l -c "git clone `cygpath $APPVEYOR_BUILD_FOLDER`" &&
-      C:\cygwin64\bin\bash -e -l -c "make -C $APPVEYOR_PROJECT_NAME check" )
+      C:\cygwin64\bin\bash -e -l -c "MAKE_COLORS=always make -C $APPVEYOR_PROJECT_NAME check" )
