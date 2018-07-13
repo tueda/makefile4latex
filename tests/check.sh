@@ -5,7 +5,7 @@ set -o pipefail
 check_dir() {
   (
     cd "$1"
-    make clean
+    make MAKE_COLORS=always clean
     make MAKE_COLORS=always | tee make.out
   )
 
@@ -25,4 +25,5 @@ check_dir() {
   rm "$1/make.out"
 }
 
-check_dir basic_latex 5
+check_dir latex 5
+check_dir bibtex 3
