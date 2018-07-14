@@ -342,6 +342,7 @@ soffice_impl = $(call pathsearch,soffice,, \
 #   .glg - glossary log file
 #   .glo - glossary entries
 #   .gls - glossary output
+#   .glsdefs - glossary output
 #   .idx - index entries
 #   .ilg - index log file
 #   .ind - index output
@@ -375,6 +376,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.glg) \
 	$(srctexfiles:.tex=.glo) \
 	$(srctexfiles:.tex=.gls) \
+	$(srctexfiles:.tex=.glsdefs) \
 	$(srctexfiles:.tex=.idx) \
 	$(srctexfiles:.tex=.ilg) \
 	$(srctexfiles:.tex=.ind) \

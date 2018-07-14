@@ -16,7 +16,7 @@ Features
 - Only a single file (`Makefile`).
 - Automatic detection of LaTeX source files.
 - Dependency tracking.
-- Handling BibTeX, Makeindex, axohelp etc.
+- Handling BibTeX, makeindex, makeglossaries, axohelp etc.
 - Colorized output.
 - Can watch sources and automatically typeset documents (`make watch`).
 

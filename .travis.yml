@@ -30,8 +30,8 @@ before_install:
       TEXMFSYSCONFIG ./texlive/texmf-config
       TEXMFSYSVAR ./texlive/texmf-var
       TEXMFVAR ~/.texlive/texmf-var
-      collection-fontsrecommended 1
       collection-latex 1
+      collection-latexextra 1
       option_doc 0
       option_src 0
       " | sed -e 's/^ *//' >texlive.profile

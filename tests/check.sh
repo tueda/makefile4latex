@@ -18,7 +18,7 @@ check_dir() {
 
   num=$(grep halt-on-error "$1/make.out" | wc -l)
   if [ $2 -ne $num ]; then
-    echo "FAIL: wrong number of running LaTeX: $2 (must be $num)" >&2
+    echo "FAIL: wrong number of running LaTeX: $num (must be $2)" >&2
     exit 1
   fi
 
@@ -27,3 +27,6 @@ check_dir() {
 
 check_dir latex 5
 check_dir bibtex 3
+check_dir makeindex 2
+check_dir makeglossaries 2
+echo "OK: all tests passed."

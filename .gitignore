@@ -8,6 +8,14 @@
 *.dvi
 *.fls
 *.fmt
+*.glg
+*.glo
+*.gls
+*.glsdefs
+*.idx
+*.ilg
+*.ind
+*.ist
 *.log
 *.nav
 *.out
