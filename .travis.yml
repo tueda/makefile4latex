@@ -32,6 +32,7 @@ before_install:
       TEXMFVAR ~/.texlive/texmf-var
       collection-latex 1
       collection-latexextra 1
+      collection-mathscience 1
       option_doc 0
       option_src 0
       " | sed -e 's/^ *//' >texlive.profile

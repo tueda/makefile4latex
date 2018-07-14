@@ -29,4 +29,5 @@ check_dir latex 5
 check_dir bibtex 3
 check_dir makeindex 2
 check_dir makeglossaries 2
+check_dir axohelp 2
 echo "OK: all tests passed."
