@@ -29,6 +29,9 @@ Targets:
   watch:
     Watch the changes and automatically recreate documents in this directory.
 
+  upgrade:
+    Upgrade the setup.
+
 See also:
   https://github.com/tueda/makefile4latex
 endef
@@ -432,6 +435,22 @@ colorize = \
 		fi; \
 	fi
 
+# $(call notification_message,MESSAGE) prints a notification message.
+notification_message = \
+	$(call colorize, \
+		printf "\033$(CL_NOTICE)$1\033$(CL_NORMAL)\n" >&2 \
+	, \
+		echo "Error: $1" >&2 \
+	)
+
+# $(call warning_message,MESSAGE) prints a warning message.
+warning_message = \
+	$(call colorize, \
+		printf "\033$(CL_WARN)Warning: $1\033$(CL_NORMAL)\n" >&2 \
+	, \
+		echo "Error: $1" >&2 \
+	)
+
 # $(call error_message,MESSAGE) prints an error message.
 error_message = \
 	$(call colorize, \
@@ -588,14 +607,29 @@ watch:
 	done
 
 # Upgrade files in the setup. (Be careful!)
+# When the current directory is a Git repository and doesn't have the .gitignore
+# file, this downloads that of the Makefile4LaTeX repository.
 upgrade:
-	@if grep -q https://github.com/tueda/makefile4latex Makefile >/dev/null 2>&1; then \
-		$(call exec,wget https://raw.githubusercontent.com/tueda/makefile4latex/master/Makefile -O Makefile.tmp) && mv Makefile.tmp Makefile; \
+	@if grep -q 'https://github.com/tueda/makefile4latex' Makefile >/dev/null 2>&1; then \
+		$(call upgrade,Makefile,https://raw.githubusercontent.com/tueda/makefile4latex/master/Makefile); \
 	fi
-	@if grep -q https://github.com/tueda/makefile4latex .gitignore >/dev/null 2>&1 \
+	@if grep -q 'https://github.com/tueda/makefile4latex' .gitignore >/dev/null 2>&1 \
 			|| { [ -d .git ] && [ ! -f .gitignore ]; }; then \
-		$(call exec,wget https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore -O .gitignore.tmp) && mv .gitignore.tmp .gitignore; \
+		$(call upgrade,.gitignore,https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore); \
 	fi
+
+# $(call upgrade,FILE,URL) tries to upgrade the given file.
+upgrade = \
+	wget $2 -O $1.tmp && { \
+		if diff -q $1 $1.tmp >/dev/null 2>&1; then \
+			$(call notification_message,$1 is up to date); \
+			rm -f $1.tmp; \
+		else \
+			mv -v $1.tmp $1; \
+			$(call notification_message,$1 is updated); \
+		fi; \
+		:; \
+	}
 
 .PHONY : all check clean dist dvi eps fmt help mostlyclean pdf ps prerequisite upgrade watch
 

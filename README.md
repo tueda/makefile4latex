@@ -52,3 +52,5 @@ Targets
   Create tar-gzipped archives for [arXiv](https://arxiv.org/) submission.
 - `watch`:
   Watch the changes and automatically recreate documents.
+- `upgrade`:
+  Upgrade the setup. (Be careful not to overwrite any local changes!)
