@@ -914,10 +914,12 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 #    - *.ax2 file unless "\pdfoutput=1" is explicitly used.
 #    This default behaviour may be overwritten by EXTRADISTFILES and
 #    NODISTFILES.
-# 3. 00README.XXX file if exists, and
+# 3. "PoSlogo.pdf" without "\pdfoutput=1" most likely indicates that
+#    "PoSLogo.ps" should be also included for the PoS class.
+# 4. 00README.XXX file if exists, and
 #    - Files listed in 00README.XXX with "ignore".
 #    See https://arxiv.org/help/00README
-# 4. Files listed in ANCILLARYFILES are included under a subdirectory "anc".
+# 5. Files listed in ANCILLARYFILES are included under a subdirectory "anc".
 #    See https://arxiv.org/help/ancillary_files
 %.tar.gz: %.$(default_target)
 	@tmpdir=tmp$$$$_$$RANDOM$$RANDOM; \
@@ -940,20 +942,15 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 					*.ax2) \
 						$$pdfoutput || continue; \
 						;; \
+					PoSlogo.pdf) \
+						if $$pdfoutput; then :; else \
+							if [ -f PoSlogo.ps ]; then \
+								$(call add_dist,PoSlogo.ps,$$tmpdir,dep_files); \
+							fi; \
+						fi; \
+						;; \
 				esac; \
-				ok=:; \
-				for ff in $(NODISTFILES); do \
-					if [ "x$$f" = "x$$ff" ]; then \
-						ok=false; \
-						break; \
-					fi; \
-				done; \
-				if $$ok; then \
-					d=`dirname "$$f"`; \
-					mkdir -p "$$tmpdir/$$d"; \
-					cp "$$f" "$$tmpdir/$$d" || exit 1; \
-					dep_files="$$dep_files $$f"; \
-				fi;; \
+				$(call add_dist,$$f,$$tmpdir,dep_files); \
 		esac; \
 	done; \
 	for ff in $(EXTRADISTFILES); do \
@@ -985,6 +982,24 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	cd .. || exit 1; \
 	$(check_failed); \
 	mv $$tmpdir/$@ $@
+
+# $(call add_dist,FILE,TMPDIR,DEP_FILES_VAR)
+add_dist = { \
+		tmp_ok=:; \
+		for tmp_ff in $(NODISTFILES); do \
+			if [ "x$1" = "x$$tmp_ff" ]; then \
+				tmp_ok=false; \
+				break; \
+			fi; \
+		done; \
+		if $$tmp_ok; then \
+			tmp_d=`dirname "$1"`; \
+			mkdir -p "$2/$$tmp_d"; \
+			cp "$1" "$2/$$tmp_d" || exit 1; \
+			$3="$$$3 $1"; \
+		fi; \
+		:; \
+	}
 
 -include $(DEPDIR)/*.d
 -include .conf.mk
