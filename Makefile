@@ -602,7 +602,9 @@ check:
 watch:
 	@echo "Watching for $(srctexfiles:.tex=.$(default_target)). Press Ctrl+C to quit"
 	@while :; do \
-		$(MAKE) --silent $(srctexfiles:.tex=.log); \
+		if $(MAKE) -q -s $(srctexfiles:.tex=.log); then :; else \
+			time $(MAKE) -s $(srctexfiles:.tex=.log); \
+		fi; \
 		sleep 1; \
 	done
 
@@ -622,7 +624,7 @@ upgrade:
 upgrade = \
 	wget $2 -O $1.tmp && { \
 		if diff -q $1 $1.tmp >/dev/null 2>&1; then \
-			$(call notification_message,$1 is up to date); \
+			$(call notification_message,$1 is up-to-date); \
 			rm -f $1.tmp; \
 		else \
 			mv -v $1.tmp $1; \
@@ -849,7 +851,9 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 .tex.pdf:
 	@$(call typeset,$(pdflatex))
 
+# This always updates the timestamp of the target (.log).
 .tex.log:
+	@touch $@
 	@$(call typeset,$(if $(filter $(default_target),dvi),$(latex),$(pdflatex)),false)
 
 .dvi.ps:
