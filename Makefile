@@ -335,6 +335,7 @@ soffice_impl = $(call pathsearch,soffice,, \
 # $(mostlycleanfiles) gives all intermediately generated files, to be deleted by
 # "make mostlyclean".
 #   .aux - LaTeX auxiliary file
+#   .auxlock - TikZ externalization aux file lock
 #   .ax1 - axodraw2 auxiliary (axohelp input) file
 #   .ax2 - axohelp output file
 #   .bbl - BibTeX output file
@@ -369,6 +370,7 @@ mostlycleanfiles = $(call cache,mostlycleanfiles_impl)
 
 mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.aux) \
+	$(srctexfiles:.tex=.auxlock) \
 	$(srctexfiles:.tex=.ax1) \
 	$(srctexfiles:.tex=.ax2) \
 	$(srctexfiles:.tex=.bbl) \
@@ -401,6 +403,10 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	*.pbm \
 	*-eps-converted-to.pdf \
 	*/*-eps-converted-to.pdf \
+	$(srctexfiles:.tex=-figure*.dpth) \
+	$(srctexfiles:.tex=-figure*.log) \
+	$(srctexfiles:.tex=-figure*.md5) \
+	$(srctexfiles:.tex=-figure*.pdf) \
 	$(MOSTLYCLEANFILES) \
 ))
 

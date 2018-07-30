@@ -3,6 +3,7 @@
 *.ax1
 *.ax2
 *.aux
+*.auxlock
 *.bbl
 *.blg
 *.dvi
@@ -32,3 +33,7 @@
 !images/*.pdf
 !resources/*.pdf
 *-eps-converted-to.pdf
+
+*-figure*.dpth
+*-figure*.md5
+*-figure*.pdf
