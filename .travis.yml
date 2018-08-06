@@ -42,4 +42,4 @@ before_install:
   - tlmgr update --self
 
 script:
-  MAKE_COLORS=always make check
+  MAKE_COLORS=always make -s check
