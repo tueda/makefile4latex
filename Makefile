@@ -1034,5 +1034,4 @@ add_dist = { \
 	}
 
 -include $(DEPDIR)/*.d
--include .conf.mk
--include conf.mk
+-include .latex.mk
