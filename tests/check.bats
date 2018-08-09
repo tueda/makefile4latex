@@ -43,3 +43,7 @@ test_dir() {(
 @test "axohelp" {
   test_dir axohelp 2
 }
+
+@test "platex_dvipdfmx" {
+  test_dir platex_dvipdfmx 1
+}

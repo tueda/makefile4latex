@@ -30,9 +30,11 @@ before_install:
       TEXMFSYSCONFIG ./texlive/texmf-config
       TEXMFSYSVAR ./texlive/texmf-var
       TEXMFVAR ~/.texlive/texmf-var
-      collection-latex 1
-      collection-latexextra 1
-      collection-mathscience 1
+      collection-basic 1         # bibtex, dvipdfmx, makeindex, pdflatex
+      collection-langjapanese 1  # jarticle.sty, platex
+      collection-latexextra 1    # glossaries.sty, makeglossaries
+      collection-mathscience 1   # axodraw2.sty, axohelp
+      collection-xetex 1         # xdvipdfmx
       option_doc 0
       option_src 0
       " | sed -e 's/^ *//' >texlive.profile
@@ -42,4 +44,4 @@ before_install:
   - tlmgr update --self
 
 script:
-  MAKE_COLORS=always make -s check
+  - MAKE_COLORS=always make -s check
