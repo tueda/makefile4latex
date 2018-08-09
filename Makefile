@@ -36,15 +36,33 @@ See also:
   https://github.com/tueda/makefile4latex
 endef
 
-# TODO: Do code refactoring!
+# The default target of this Makefile tries to create this type of files from
+# all *.tex:
+# - dvi
+# - ps
+# - pdf (default)
+default_target = pdf
 
-# The default typeset type: dvi (latex) or pdf (pdflatex).
-default_typeset = pdf
+# The toolchain for typesetting:
+# - latex_dvips
+# - latex_dvipdf
+# - platex_dvips
+# - platex_dvipdfmx
+# - uplatex_dvips
+# - uplatex_dvipdfmx
+# - pdflatex (default)
+# - xelatex
+# - lualatex
+# Aliases:
+# - latex -> latex_dvips
+# - platex -> platex_dvips
+# - uplatex -> uplatex_dvips
+toolchain = pdflatex
 
-# The default target is making this type of files from all *.tex.
-default_target = $(default_typeset)
-
-# Specify if use colors for the output: always, none or auto (default).
+# Specify if use colors for the output:
+# - always
+# - none
+# - auto (default)
 make_colors = $(MAKE_COLORS)
 
 # Files not to be included in a distribution.
@@ -72,9 +90,9 @@ TESTS =
 TARGET =
 SUBDIRS =
 LATEX =
-PDFLATEX =
 DVIPS =
 DVIPDF =
+PS2PDF =
 GS =
 BIBTEX =
 SORTREF =
@@ -89,9 +107,10 @@ SOFFICE =
 
 # Command options.
 LATEX_OPT = -interaction=nonstopmode -halt-on-error
-PDFLATEX_OPT = -interaction=nonstopmode -halt-on-error
+PDFLATEX_DVI_OPT = -output-format=dvi
 DVIPS_OPT = -Ppdf -z
 DVIPDF_OPT =
+PS2PDF_OPT =
 GS_OPT =
 BIBTEX_OPT =
 SORTREF_OPT =
@@ -103,46 +122,6 @@ PDFCROP_OPT =
 EBB_OPT =
 EXTRACTBB_OPT =
 SOFFICE_OPT =
-
-# The following lines enable use of platex+dvipdfmx to create pdf files.
-#LATEX = platex
-#PDFLATEX = ptex2pdf
-#BIBTEX = pbibtex
-#MAKEINDEX = mendex
-#PDFLATEX_OPT = -l -ot '-interaction=nonstopmode -halt-on-error -recorder'
-
-use_platex_dvipdfmx = \
-	$(eval LATEX = platex) \
-	$(eval PDFLATEX = ptex2pdf) \
-	$(eval BIBTEX = pbibtex) \
-	$(eval MAKEINDEX = mendex) \
-	$(eval PDFLATEX_OPT = -l -ot '-interaction=nonstopmode -halt-on-error -recorder')
-
-# The following lines enable use of uplatex+dvipdfmx to create pdf files.
-#LATEX = uplatex
-#PDFLATEX = ptex2pdf
-#BIBTEX = upbibtex
-#MAKEINDEX = upmendex
-#PDFLATEX_OPT = -u -l -ot '-interaction=nonstopmode -halt-on-error -recorder'
-
-use_uplatex_dvipdfmx = \
-	$(eval LATEX = uplatex) \
-	$(eval PDFLATEX = ptex2pdf) \
-	$(eval BIBTEX = upbibtex) \
-	$(eval MAKEINDEX = upmendex) \
-	$(eval PDFLATEX_OPT = -u -l -ot '-interaction=nonstopmode -halt-on-error -recorder')
-
-# The following lines enable use of lualatex to create pdf files.
-#LATEX = lualatex
-#PDFLATEX = lualatex
-#BIBTEX = upbibtex
-#MAKEINDEX = upmendex
-
-use_lualatex = \
-	$(eval LATEX = lualatex) \
-	$(eval PDFLATEX = lualatex) \
-	$(eval BIBTEX = upbibtex) \
-	$(eval MAKEINDEX = upmendex)
 
 # ANSI escape code for colorization.
 CL_NORMAL = [0m
@@ -169,8 +148,22 @@ type = $(if $(strip $1),$(strip \
 	$(type_retval) \
 ))
 
+# $(call switch,STRING,STRING1,VALUE1,STRING2,VALUE2,...) evaluates the value of
+# VALUEi corresponding to the first STRINGi that matches to STRING.
+# Limitation: up to 4 STRING-VALUE pairs.
+switch = \
+	$(if $(filter $2,$1),$3, \
+		$(if $(filter $4,$1),$5, \
+			$(if $(filter $6,$1),$7, \
+				$(if $(filter $8,$1),$9, \
+				) \
+			) \
+		) \
+	)
+
 # $(call pathsearch,PROG-NAME,NOERROR-IF-NOT-FOUND,NAME1,...) tries to find
 # the given executable.
+# Limitation: up to 7 NAMEs.
 pathsearch = $(strip \
 	$(eval retval := ) \
 	$(call pathsearch_impl,$3,$4,$5,$6,$7,$8,$9) \
@@ -234,6 +227,91 @@ subdirs_impl = $(strip \
 	$(retval) \
 )
 
+# $(init_toolchain) initializes the toolchain.
+init_toolchain = $(call cache,init_toolchain_impl)
+
+init_toolchain_impl = $(strip \
+	$(eval $(init_toolchain_$(toolchain))) \
+	$(if $(typeset_mode),,$(error unknown toolchain=$(toolchain))) \
+)
+
+init_toolchain_latex = \
+	$(init_toolchain_latex_dvips)
+
+init_toolchain_latex_dvips = \
+	$(eval typeset_mode = dvips) \
+	$(eval tex_format = latex)
+
+init_toolchain_latex_dvipdf = \
+	$(eval typeset_mode = dvipdf) \
+	$(eval tex_format = latex)
+
+init_toolchain_platex = \
+	$(init_toolchain_platex_dvips)
+
+init_toolchain_platex_dvips = \
+	$(eval typeset_mode = dvips) \
+	$(eval tex_format = platex) \
+	$(eval LATEX = platex) \
+	$(eval BIBTEX = pbibtex) \
+	$(eval MAKEINDEX = mendex)
+
+init_toolchain_platex_dvipdfmx = \
+	$(eval typeset_mode = dvipdf) \
+	$(eval tex_format = platex) \
+	$(eval LATEX = platex) \
+	$(eval DVIPDF = dvipdfmx) \
+	$(eval BIBTEX = pbibtex) \
+	$(eval MAKEINDEX = mendex)
+
+init_toolchain_uplatex = \
+	$(init_toolchain_uplatex_dvips)
+
+init_toolchain_uplatex_dvips = \
+	$(eval typeset_mode = dvips) \
+	$(eval tex_format = uplatex) \
+	$(eval LATEX = uplatex) \
+	$(eval BIBTEX = upbibtex) \
+	$(eval MAKEINDEX = upmendex)
+
+init_toolchain_uplatex_dvipdfmx = \
+	$(eval typeset_mode = dvipdf) \
+	$(eval tex_format = uplatex) \
+	$(eval LATEX = uplatex) \
+	$(eval DVIPDF = dvipdfmx) \
+	$(eval BIBTEX = upbibtex) \
+	$(eval MAKEINDEX = upmendex)
+
+init_toolchain_pdflatex = \
+	$(eval typeset_mode = pdflatex) \
+	$(eval tex_format = pdflatex) \
+	$(eval LATEX = pdflatex)
+
+init_toolchain_xelatex = \
+	$(eval typeset_mode = pdflatex) \
+	$(eval tex_format = xelatex) \
+	$(eval LATEX = xelatex)
+
+init_toolchain_lualatex = \
+	$(eval typeset_mode = pdflatex) \
+	$(eval tex_format = lualatex) \
+	$(eval LATEX = lualatex) \
+	$(eval BIBTEX = upbibtex) \
+	$(eval MAKEINDEX = upmendex)
+
+# The typeset mode: "dvips" or "dvipdf" or "pdflatex".
+typeset_mode =
+
+# The TeX format.
+tex_format =
+
+# $(call pathsearch2,PROG-NAME,VAR-NAME,NAME1,...) is basically pathsearch after
+# calling init_toolchain.
+pathsearch2 = $(strip \
+	$(init_toolchain) \
+	$(call pathsearch,$1,,$($2),$3,$4,$5,$6,$7,$8,$9) \
+)
+
 # $(latex)
 latex = $(call cache,latex_impl)
 
@@ -244,85 +322,77 @@ latex_impl = $(strip \
 
 latex_noopt = $(call cache,latex_noopt_impl)
 
-latex_noopt_impl = $(call pathsearch,latex,,$(LATEX),latex)
-
-# $(pdflatex)
-pdflatex = $(call cache,pdflatex_impl)
-
-pdflatex_impl = $(strip \
-	$(pdflatex_noopt) $(PDFLATEX_OPT) \
-	$(if $(findstring -recorder,$(PDFLATEX_OPT)),,-recorder) \
-)
-
-pdflatex_noopt = $(call cache,pdflatex_noopt_impl)
-
-pdflatex_noopt_impl = $(call pathsearch,pdflatex,,$(PDFLATEX),pdflatex)
+latex_noopt_impl = $(call pathsearch2,latex,LATEX,latex)
 
 # $(dvips)
 dvips = $(call cache,dvips_impl) $(DVIPS_OPT)
 
-dvips_impl = $(call pathsearch,dvips,,$(DVIPS),dvips,dvipsk)
+dvips_impl = $(call pathsearch2,dvips,DVIPS,dvips,dvipsk)
 
 # $(dvipdf)
 dvipdf = $(call cache,dvipdf_impl) $(DVIPDF_OPT)
 
-dvipdf_impl = $(call pathsearch,dvipdf,,$(DVIPDF),dvipdfm,dvipdfmx,dvipdf)
+dvipdf_impl = $(call pathsearch2,dvipdf,DVIPDF,dvipdf,dvipdfm,dvipdfmx)
+
+# $(ps2pdf)
+ps2pdf = $(call cache,ps2pdf_impl) $(PS2PDF_OPT)
+
+ps2pdf_impl = $(call pathsearch2,ps2pdf,PS2PDF,ps2pdf)
 
 # $(gs)
 gs = $(call cache,gs_impl) $(GS_OPT)
 
-gs_impl = $(call pathsearch,gs,,$(GS),gs,gswin32,gswin64,gsos2)
+gs_impl = $(call pathsearch2,gs,GS,gs,gswin32,gswin64,gsos2)
 
 # $(bibtex)
 bibtex = $(call cache,bibtex_impl) $(BIBTEX_OPT)
 
-bibtex_impl = $(call pathsearch,bibtex,,$(BIBTEX),bibtex)
+bibtex_impl = $(call pathsearch2,bibtex,BIBTEX,bibtex)
 
 # $(sortref)
 sortref = $(call cache,sortref_impl) $(SORTREF_OPT)
 
-sortref_impl = $(call pathsearch,sortref,,$(SORTREF),sortref)
+sortref_impl = $(call pathsearch2,sortref,SORTREF,sortref)
 
 # $(makeindex)
 makeindex = $(call cache,makeindex_impl) $(MAKEINDEX_OPT)
 
-makeindex_impl = $(call pathsearch,makeindex,,$(MAKEINDEX),makeindex)
+makeindex_impl = $(call pathsearch2,makeindex,MAKEINDEX,makeindex)
 
 # $(makeglossaries)
 makeglossaries = $(call cache,makeglossaries_impl) $(MAKEGLOSSARIES_OPT)
 
-makeglossaries_impl = $(call pathsearch,makeglossaries,,$(MAKEGLOSSARIES),makeglossaries)
+makeglossaries_impl = $(call pathsearch2,makeglossaries,MAKEGLOSSARIES,makeglossaries)
 
 # $(kpsewhich)
 kpsewhich = $(call cache,kpsewhich_impl) $(KPSEWHICH_OPT)
 
-kpsewhich_impl = $(call pathsearch,kpsewhich,,$(KPSEWHICH),kpsewhich)
+kpsewhich_impl = $(call pathsearch2,kpsewhich,KPSEWHICH,kpsewhich)
 
 # $(axohelp)
 axohelp = $(call cache,axohelp_impl) $(AXOHELP_OPT)
 
-axohelp_impl = $(call pathsearch,axohelp,,$(AXOHELP),axohelp)
+axohelp_impl = $(call pathsearch2,axohelp,AXOHELP,axohelp)
 
 # $(pdfcrop)
 pdfcrop = $(call cache,pdfcrop_impl) $(PDFCROP_OPT)
 
-pdfcrop_impl = $(call pathsearch,pdfcrop,,$(PDFCROP),pdfcrop)
+pdfcrop_impl = $(call pathsearch2,pdfcrop,PDFCROP,pdfcrop)
 
 # $(ebb)
 ebb = $(call cache,ebb_impl) $(EBB_OPT)
 
-ebb_impl = $(call pathsearch,ebb,,$(EBB),ebb)
+ebb_impl = $(call pathsearch2,ebb,EBB,ebb)
 
 # $(extractbb)
 extractbb = $(call cache,extractbb_impl) $(EXTRACTBB_OPT)
 
-extractbb_impl = $(call pathsearch,extractbb,,$(EXTRACTBB),extractbb)
+extractbb_impl = $(call pathsearch2,extractbb,EXTRACTBB,extractbb)
 
 # $(soffice)
 soffice = $(call cache,soffice_impl) $(SOFFICE_OPT)
 
-soffice_impl = $(call pathsearch,soffice,, \
-	$(SOFFICE), \
+soffice_impl = $(call pathsearch2,soffice,SOFFICE, \
 	soffice, \
 	/cygdrive/c/Program Files/LibreOffice 6/program/soffice, \
 	/cygdrive/c/Program Files (x86)/LibreOffice 6/program/soffice, \
@@ -873,24 +943,49 @@ check_ax2file = grep '$*.ax1' $*.log >/dev/null 2>&1
 
 check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty' >/dev/null 2>&1
 
+#NOTE: xelatex doesn't work with -output-format=dvi.
+
 .tex.dvi:
-	@$(call typeset,$(latex))
+	@$(init_toolchain)
+	@$(call switch,$(typeset_mode), \
+		dvips, \
+		$(call typeset,$(latex)), \
+		dvipdf, \
+		$(call typeset,$(latex)), \
+		pdflatex, \
+		$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)), \
+	)
+
+.tex.ps:
+	@$(init_toolchain)
+	@$(call switch,$(typeset_mode), \
+		dvips, \
+		$(call typeset,$(latex)) && $(call exec,$(dvips) $*), \
+		dvipdf, \
+		$(call typeset,$(latex)) && $(call exec,$(dvips) $*), \
+		pdflatex, \
+		$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)), \
+	)
 
 .tex.pdf:
-	@$(call typeset,$(pdflatex))
+	@$(init_toolchain)
+	@$(call switch,$(typeset_mode), \
+		dvips, \
+		$(call typeset,$(latex)) && $(call exec,$(dvips) $*) && $(call exec,$(ps2pdf) $*.ps $*.pdf), \
+		dvipdf, \
+		$(call typeset,$(latex)) && $(call exec,$(dvipdf) $*), \
+		pdflatex, \
+		$(call typeset,$(latex)), \
+	)
 
 # This always updates the timestamp of the target (.log).
 .tex.log:
+	@$(init_toolchain)
 	@touch $@
-	@$(call typeset,$(if $(filter $(default_target),dvi),$(latex),$(pdflatex)),false)
-
-.dvi.ps:
-	@$(call exec,$(dvips) $<)
-
-#.dvi.pdf:
-#	@$(call exec,$(dvipdf) $<)
+	@$(call typeset,$(latex),false)
 
 .dvi.eps:
+	@$(init_toolchain)
 	@trap 'rm -f $*.tmp.ps $*.tmp.pdf' 0 1 2 3 15; \
 	$(call exec,$(dvips) -o $*.tmp.ps $<); \
 	$(call exec,$(gs) -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -dEPSCrop -o $*.tmp.pdf $*.tmp.ps); \
@@ -900,12 +995,13 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 		$(call exec,$(gs) -sDEVICE=eps2write -o $@ $*.tmp.pdf); \
 	fi
 
-# Experimental: only for pdflatex (TeXLive)
+# Experimental (TeXLive)
 .ltx.fmt:
-	@$(call exec,$(pdflatex_noopt) -ini -jobname='$*' '&$(notdir $(basename $(pdflatex_noopt))) $<\dump')
+	@$(init_toolchain)
+	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(notdir $(basename $(latex_noopt))) $<\dump')
 	@$(call exec,rm -f $*.pdf)
 
-# Experimental: only for pdflatex (TeXLive)
+# Experimental (TeXLive)
 #
 # Example:
 #   $ cat foo.tex
@@ -926,7 +1022,8 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 #   stores in a format file.
 #
 .tex.fmt:
-	@$(call exec,$(pdflatex_noopt) -ini -jobname='$*' '&pdflatex' mylatexformat.ltx '$<')
+	@$(init_toolchain)
+	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(tex_format)' mylatexformat.ltx '$<')
 	@$(call exec,rm -f $*.pdf)
 
 .dtx.cls:
