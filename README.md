@@ -54,3 +54,39 @@ Targets
   Watch the changes and automatically recreate documents.
 - `upgrade`:
   Upgrade the setup. (Be careful not to overwrite any local changes!)
+
+Variables
+---------
+
+- `TOOLCHAIN`:
+  Control how PDF files are generated from LaTeX files.
+    - `latex`:
+      Alias to `latex_dvips`.
+    - `latex_dvips`:
+      Use `latex` --> `dvips` --> `ps2pdf`.
+    - `latex_dvipdf`:
+      Use `latex` --> `dvipdf`.
+    - `platex`:
+      Alias to `platex_dvips`.
+    - `platex_dvips`:
+      Use `platex` --> `dvips` --> `ps2pdf`.
+    - `platex_dvipdfmx`:
+      Use `platex` --> `dvipdfmx`.
+    - `uplatex`:
+      Alias to `uplatex_dvips`.
+    - `uplatex_dvips`:
+      Use `uplatex` --> `dvips` --> `ps2pdf`.
+    - `uplatex_dvipdfmx`:
+      Use `uplatex` --> `dvipdfmx`.
+    - `pdflatex` (default):
+      Use `pdflatex`.
+    - `xelatex`:
+      Use `xelatex`.
+    - `lualatex`:
+      Use `lualatex`.
+
+Customization
+-------------
+
+The Makefile includes `.latex.mk` at the very end if exists. It can be used for
+customizing the behaviour of the Makefile, for example, by setting `TOOLCHAIN`.
