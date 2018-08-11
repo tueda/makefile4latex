@@ -57,7 +57,7 @@ default_target = pdf
 # - latex -> latex_dvips
 # - platex -> platex_dvips
 # - uplatex -> uplatex_dvips
-toolchain = pdflatex
+TOOLCHAIN = pdflatex
 
 # Specify if use colors for the output:
 # - always
@@ -231,8 +231,8 @@ subdirs_impl = $(strip \
 init_toolchain = $(call cache,init_toolchain_impl)
 
 init_toolchain_impl = $(strip \
-	$(eval $(init_toolchain_$(toolchain))) \
-	$(if $(typeset_mode),,$(error unknown toolchain=$(toolchain))) \
+	$(eval $(init_toolchain_$(TOOLCHAIN))) \
+	$(if $(typeset_mode),,$(error unknown TOOLCHAIN=$(TOOLCHAIN))) \
 )
 
 init_toolchain_latex = \

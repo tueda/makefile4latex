@@ -1,1 +1,1 @@
-toolchain = platex_dvipdfmx
+TOOLCHAIN = platex_dvipdfmx
