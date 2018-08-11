@@ -110,7 +110,7 @@ LATEX_OPT = -interaction=nonstopmode -halt-on-error
 PDFLATEX_DVI_OPT = -output-format=dvi
 DVIPS_OPT = -Ppdf -z
 DVIPDF_OPT =
-PS2PDF_OPT =
+PS2PDF_OPT = -dPDFSETTINGS=/prepress -dEmbedAllFonts=true
 GS_OPT =
 BIBTEX_OPT =
 SORTREF_OPT =
