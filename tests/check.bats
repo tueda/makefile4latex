@@ -1,4 +1,5 @@
 MAKE_ARGS=
+NO_CLEAN=
 
 test_dir() {(
   set -eu
@@ -6,7 +7,7 @@ test_dir() {(
 
   (
     cd "$1"
-    make clean
+    [ -n "$NO_CLEAN" ] || make clean
     make $MAKE_ARGS | tee make.out
   )
 
@@ -50,6 +51,12 @@ test_dir() {(
   test_dir platex_dvipdfmx 1
 }
 
-@test "latexdiff" {
+@test "latexdiff1" {
   MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
+}
+
+@test "latexdiff2" {
+  MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3 && \
+  MAKE_ARGS='DIFF=44aaae0' NO_CLEAN=1 test_dir latexdiff 2 && \
+  MAKE_ARGS='DIFF=44aaae0..HEAD' NO_CLEAN=1 test_dir latexdiff 1
 }
