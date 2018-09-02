@@ -30,6 +30,7 @@
 *.vrb
 
 .dep/
+.diff/
 !images/*.pdf
 !resources/*.pdf
 *-eps-converted-to.pdf
