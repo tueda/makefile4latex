@@ -31,8 +31,10 @@ before_install:
       TEXMFSYSVAR ./texlive/texmf-var
       TEXMFVAR ~/.texlive/texmf-var
       collection-basic 1         # bibtex, dvipdfmx, makeindex, pdflatex
+      collection-binextra 1      # latexdiff, latexpand
       collection-langjapanese 1  # jarticle.sty, platex
       collection-latexextra 1    # glossaries.sty, makeglossaries
+      collection-plaingeneric 1  # ulem.sty
       collection-mathscience 1   # axodraw2.sty, axohelp
       collection-xetex 1         # xdvipdfmx
       option_doc 0

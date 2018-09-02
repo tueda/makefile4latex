@@ -1,3 +1,5 @@
+MAKE_ARGS=
+
 test_dir() {(
   set -eu
   set -o pipefail
@@ -5,7 +7,7 @@ test_dir() {(
   (
     cd "$1"
     make clean
-    make | tee make.out
+    make $MAKE_ARGS | tee make.out
   )
 
   if grep 'Rerun' $1/*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty'; then
@@ -46,4 +48,8 @@ test_dir() {(
 
 @test "platex_dvipdfmx" {
   test_dir platex_dvipdfmx 1
+}
+
+@test "latexdiff" {
+  MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
 }
