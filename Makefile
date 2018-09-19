@@ -1070,7 +1070,35 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 .tex.log:
 	@$(init_toolchain)
 	@touch $@
-	@$(call typeset,$(latex),false)
+	@$(call switch,$(default_target), \
+		dvi, \
+		$(call switch,$(typeset_mode), \
+			dvips, \
+			$(call typeset,$(latex),false), \
+			dvipdf, \
+			$(call typeset,$(latex),false), \
+			pdflatex, \
+			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false), \
+		), \
+		ps, \
+		$(call switch,$(typeset_mode), \
+			dvips, \
+			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*), \
+			dvipdf, \
+			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*), \
+			pdflatex, \
+			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false), \
+		), \
+		pdf, \
+		$(call switch,$(typeset_mode), \
+			dvips, \
+			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*) && $(call exec,$(ps2pdf) $*.ps $*.pdf), \
+			dvipdf, \
+			$(call typeset,$(latex),false) && $(call exec,$(dvipdf) $*), \
+			pdflatex, \
+			$(call typeset,$(latex),false), \
+		) \
+	)
 
 .dvi.eps:
 	@$(init_toolchain)
