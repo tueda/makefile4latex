@@ -62,7 +62,7 @@ TOOLCHAIN = pdflatex
 # Specify a commit range for latexdiff.
 DIFF =
 
-# For debugging.
+# (for debugging) Keep temporary directories if its value is non-empty.
 KEEP_TEMP =
 
 # Specify if use colors for the output:
@@ -827,7 +827,7 @@ typeset = \
 	rmfile=$@; \
 	rmauxfile=; \
 	$(if $2,rmfile=;dont_delete_on_failure=1;) \
-	oldfile_prefix=$*.tmp$$$$.$$RANDOM$$RANDOM; \
+	oldfile_prefix=$*.tmp$$$$; \
 	trap 'rm -f $$rmfile $$rmauxfile $$oldfile_prefix*' 0 1 2 3 15; \
 	failed=false; \
 	if [ -f '$@' ]; then \
@@ -1167,9 +1167,9 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 # 5. Files listed in ANCILLARYFILES are included under a subdirectory "anc".
 #    See https://arxiv.org/help/ancillary_files
 %.tar.gz: %.$(default_target)
-	@tmpdir=tmp$$$$_$$RANDOM$$RANDOM; \
+	@tmpdir=tmp$$$$; \
 	mkdir $$tmpdir || exit 1; \
-	trap 'rm -rf $$tmpdir' 0 1 2 3 15; \
+	$(if $(KEEP_TEMP),,trap 'rm -rf $$tmpdir' 0 1 2 3 15;) \
 	pdfoutput=false; \
 	if head -5 "$*.tex" | sed 's/%.*//' | grep -q '\pdfoutput=1'; then \
 		pdfoutput=:; \
@@ -1274,7 +1274,7 @@ ifneq ($(DIFF),)
 			exit 1; \
 		fi; \
 	fi; \
-	_tmpdir=tmp$$$$_$$RANDOM$$RANDOM; \
+	_tmpdir=tmp$$$$; \
 	$(if $(KEEP_TEMP),,trap 'rm -rf $$_tmpdir' 0 1 2 3 15;) \
 	_git_root=$$(git rev-parse --show-cdup).; \
 	_git_prefix=$$(git rev-parse --show-prefix); \
