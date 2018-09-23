@@ -88,5 +88,7 @@ Variables
 Customization
 -------------
 
-The Makefile includes `.latex.mk` at the very end if exists. It can be used for
-customizing the behaviour of the Makefile, for example, by setting `TOOLCHAIN`.
+The Makefile includes `.latex.mk` at the very end if exists. This file can be
+put in the user's home directory and/or the current working directory.
+It can be used for customizing the behaviour of the Makefile, for example,
+by setting `TOOLCHAIN`.

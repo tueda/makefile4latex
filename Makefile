@@ -1367,4 +1367,5 @@ latexdiff_insubdir = \
 endif
 
 -include $(DEPDIR)/*.d
+-include ~/.latex.mk
 -include .latex.mk
