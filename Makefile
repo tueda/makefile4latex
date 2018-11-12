@@ -112,6 +112,7 @@ EXTRACTBB =
 LATEXPAND =
 LATEXDIFF =
 SOFFICE =
+WGET =
 
 # Command options.
 LATEX_OPT = -interaction=nonstopmode -halt-on-error
@@ -132,6 +133,7 @@ EXTRACTBB_OPT =
 LATEXPAND_OPT = --expand-usepackage
 LATEXDIFF_OPT =
 SOFFICE_OPT =
+WGET_OPT = -O
 
 # ANSI escape code for colorization.
 CL_NORMAL = [0m
@@ -449,15 +451,20 @@ extractbb = $(call cache,extractbb_impl) $(EXTRACTBB_OPT)
 
 extractbb_impl = $(call pathsearch2,extractbb,EXTRACTBB,extractbb)
 
-# $(latepand)
+# $(latexpand)
 latexpand = $(call cache,latexpand_impl) $(LATEXPAND_OPT)
 
 latexpand_impl = $(call pathsearch2,latexpand,LATEXPAND,latexpand)
 
-# $(latepand)
+# $(latexdiff)
 latexdiff = $(call cache,latexdiff_impl) $(LATEXDIFF_OPT)
 
 latexdiff_impl = $(call pathsearch2,latexdiff,LATEXDIFF,latexdiff)
+
+# $(wget)
+wget = $(call cache,wget_impl) $(WGET_OPT)
+
+wget_impl = $(call pathsearch2,wget,WGET,wget)
 
 # $(soffice)
 soffice = $(call cache,soffice_impl) $(SOFFICE_OPT)
@@ -806,7 +813,7 @@ have_url = grep -q '$2' '$1' >/dev/null 2>&1
 
 # $(call upgrade,FILE,URL) tries to upgrade the given file.
 upgrade = \
-	wget '$2' -O '$1.tmp' && { \
+	$(wget) '$1.tmp' '$2' && { \
 		if diff -q '$1' '$1.tmp' >/dev/null 2>&1; then \
 			$(call notification_message,$1 is up-to-date); \
 			rm -f '$1.tmp'; \
