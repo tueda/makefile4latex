@@ -795,6 +795,9 @@ upgrade:
 	@if $(call have_url,beamer-setup.sty,https://gist.github.com/tueda/80320d5a756e4800b59e50d6da995765); then \
 		$(call upgrade,beamer-setup.sty,https://gist.githubusercontent.com/tueda/80320d5a756e4800b59e50d6da995765/raw/beamer-setup.sty); \
 	fi
+	@if $(call have_url,listings-form.sty,https://gist.github.com/tueda/a7a15955165fe9eb7783b588870dfbd8); then \
+		$(call upgrade,listings-form.sty,https://gist.githubusercontent.com/tueda/a7a15955165fe9eb7783b588870dfbd8/raw/listings-form.sty); \
+	fi
 	@if $(call have_url,my-JHEP.bst,https://gist.github.com/tueda/515c813ad4dc42d8558a20aef94a83c9); then \
 		$(call upgrade,my-JHEP.bst,https://gist.githubusercontent.com/tueda/515c813ad4dc42d8558a20aef94a83c9/raw/my-JHEP.bst); \
 	fi
