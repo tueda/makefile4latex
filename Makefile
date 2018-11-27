@@ -642,7 +642,7 @@ exec = \
 	)
 
 # $(check_failed)
-check_failed = $$failed && { [ -n "$dont_delete_on_failure" ] || rm -f $@; exit 1; }; :
+check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit 1; }; :
 
 # $(colorize_output) gives sed commands for colorful output.
 # Errors:
@@ -769,13 +769,21 @@ check:
 # The "watch" mode. Try .log instead of .pdf/.dvi files, otherwise make would
 # continuously try to typeset for sources previously failed.
 watch:
-	@echo "Watching for $(srctexfiles:.tex=.$(default_target)). Press Ctrl+C to quit"
-	@while :; do \
-		if $(MAKE) -q -s $(srctexfiles:.tex=.log); then :; else \
-			time $(MAKE) -s $(srctexfiles:.tex=.log); \
+	@$(init_toolchain)
+	@if $(if $(srctexfiles:.tex=.$(default_target)),:,false); then \
+		echo "Watching for $(srctexfiles:.tex=.$(default_target)). Press Ctrl+C to quit"; \
+		if $(MAKE) -q -s $(srctexfiles:.tex=.$(default_target)); then :; else \
+			time $(MAKE) -s $(srctexfiles:.tex=.$(default_target)); \
 		fi; \
-		sleep 1; \
-	done
+		while :; do \
+			sleep 1; \
+			if $(MAKE) -q -s $(srctexfiles:.tex=.log); then :; else \
+				time $(MAKE) -s $(srctexfiles:.tex=.log); \
+			fi; \
+		done \
+	else \
+		echo "No files to watch"; \
+	fi
 
 # Upgrade files in the setup. (Be careful!)
 # When the current directory is a Git repository and doesn't have the .gitignore
@@ -1093,18 +1101,18 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 		ps, \
 		$(call switch,$(typeset_mode), \
 			dvips, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*), \
+			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false), \
 			dvipdf, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*), \
+			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false), \
 			pdflatex, \
-			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false), \
+			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false) && $(call exec,$(dvips) $*,false), \
 		), \
 		pdf, \
 		$(call switch,$(typeset_mode), \
 			dvips, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*) && $(call exec,$(ps2pdf) $*.ps $*.pdf), \
+			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false) && $(call exec,$(ps2pdf) $*.ps $*.pdf,false), \
 			dvipdf, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvipdf) $*), \
+			$(call typeset,$(latex),false) && $(call exec,$(dvipdf) $*,false), \
 			pdflatex, \
 			$(call typeset,$(latex),false), \
 		) \
