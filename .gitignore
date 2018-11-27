@@ -28,6 +28,7 @@
 *.tmp*.*
 *.toc
 *.vrb
+*Notes.bib
 
 .dep/
 .diff/
