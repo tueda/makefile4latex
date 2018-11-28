@@ -95,6 +95,8 @@ Variables
       Use `xelatex`.
     - `lualatex`:
       Use `lualatex`.
+    - `luajitlatex`:
+      Use `luajitlatex`.
 
 - `DIFF`:
   Enable the Git-latexdiff mode. Requires `latexdiff` and `latexpand`.

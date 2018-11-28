@@ -53,6 +53,7 @@ default_target = pdf
 # - pdflatex (default)
 # - xelatex
 # - lualatex
+# - luajitlatex
 # Aliases:
 # - latex -> latex_dvips
 # - platex -> platex_dvips
@@ -358,6 +359,14 @@ init_toolchain_lualatex = \
 	$(eval typeset_mode = pdflatex) \
 	$(eval tex_format = lualatex) \
 	$(eval LATEX = lualatex) \
+	$(eval BIBTEX = upbibtex) \
+	$(eval MAKEINDEX = upmendex)
+
+init_toolchain_luajitlatex = \
+	$(eval typeset_mode = pdflatex) \
+	$(eval tex_format = luajitlatex) \
+	$(eval LATEX = luajittex) \
+	$(eval LATEX_OPT := --fmt=luajitlatex.fmt $(LATEX_OPT)) \
 	$(eval BIBTEX = upbibtex) \
 	$(eval MAKEINDEX = upmendex)
 
