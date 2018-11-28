@@ -1079,7 +1079,7 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 		dvipdf, \
 		$(call typeset,$(latex)) && $(call exec,$(dvips) $*), \
 		pdflatex, \
-		$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)), \
+		$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)) && $(call exec,$(dvips) $*), \
 	)
 
 .tex.pdf:
