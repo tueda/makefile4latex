@@ -94,6 +94,7 @@ PREREQUISITE_SUBDIRS =
 TESTS =
 
 # The following variables will be guessed if empty.
+# XXX: in the current implementation, $(init_toolchain) overrides some of them.
 TARGET =
 SUBDIRS =
 LATEX =
@@ -114,6 +115,7 @@ LATEXPAND =
 LATEXDIFF =
 SOFFICE =
 WGET =
+CURL =
 
 # Command options.
 LATEX_OPT = -interaction=nonstopmode -halt-on-error
@@ -134,7 +136,8 @@ EXTRACTBB_OPT =
 LATEXPAND_OPT = --expand-usepackage
 LATEXDIFF_OPT =
 SOFFICE_OPT =
-WGET_OPT = -O
+WGET_OPT =
+CURL_OPT =
 
 # ANSI escape code for colorization.
 CL_NORMAL = [0m
@@ -470,10 +473,27 @@ latexdiff = $(call cache,latexdiff_impl) $(LATEXDIFF_OPT)
 
 latexdiff_impl = $(call pathsearch2,latexdiff,LATEXDIFF,latexdiff)
 
-# $(wget)
-wget = $(call cache,wget_impl) $(WGET_OPT)
+# $(download) <OUTPUT-FILE> <URL>
+download = $(strip \
+	$(if $(_download_wget_found)$(_download_curl_found),,$(call _download_init)) \
+	$(if $(_download_wget_found), \
+		$(_download_wget_found) $(WGET_OPT) -O \
+	, \
+		$(if $(_download_curl_found), \
+			$(_download_curl_found) $(CURL_OPT) -L -o \
+		, \
+			$(call error_message,both wget and curl not found); exit 1; \
+		) \
+	) \
+)
 
-wget_impl = $(call pathsearch2,wget,WGET,wget)
+_download_init = $(strip \
+	$(if $(_download_wget_found),,$(eval _download_wget_found := $(call pathsearch,wget,true,$(WGET),wget))) \
+	$(if $(_download_wget_found)$(_download_curl_found),,$(eval _download_curl_found := $(call pathsearch,curl,true,$(CURL),curl))) \
+)
+
+_download_wget_found =
+_download_curl_found =
 
 # $(soffice)
 soffice = $(call cache,soffice_impl) $(SOFFICE_OPT)
@@ -833,7 +853,7 @@ have_url = grep -q '$2' '$1' >/dev/null 2>&1
 
 # $(call upgrade,FILE,URL) tries to upgrade the given file.
 upgrade = \
-	$(wget) '$1.tmp' '$2' && { \
+	$(download) '$1.tmp' '$2' && { \
 		if diff -q '$1' '$1.tmp' >/dev/null 2>&1; then \
 			$(call notification_message,$1 is up-to-date); \
 			rm -f '$1.tmp'; \
