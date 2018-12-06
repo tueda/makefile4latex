@@ -1380,17 +1380,25 @@ expand_latexdiff_repo = \
 	rm -f $(DIFFDIR)/$1/$$_git_prefix/$(Makefile); \
 	cp $(Makefile) $(DIFFDIR)/$1/$$_git_prefix/$(Makefile); \
 	$(MAKE) -C $(DIFFDIR)/$1/$$_git_prefix -f $(Makefile) $*.tar.gz || exit 1; \
+	case $1 in \
+		*HEAD*) \
+			rm -f $(DIFFDIR)/$1/$$_git_prefix/$*-expanded.tex; \
+			;; \
+	esac; \
 	(cd $(DIFFDIR)/$1/$$_git_prefix && $(call expand_latex_source,$*.tex,$*-expanded.tex))
 
 # $(call expand_latex_source,IN-TEX-FILE,OUT-TEX-FILE) expands a LaTeX source.
 # Optionally a .bbl file is also expanded if exists.
 expand_latex_source = { \
-	_tmp_latexexpand_fbody="$1"; \
-	_tmp_latexexpand_fbody=$${_tmp_latexexpand_fbody%.*}; \
-	if [ -f "$$_tmp_latexexpand_fbody.bbl" ]; then \
-		$(call exec,$(latexpand) --expand-bbl "$$_tmp_latexexpand_fbody.bbl" "$1" >"$2"); \
-	else \
-		$(call exec,$(latexpand) --expand-usepackage "$1" >"$2"); \
+	if [ -f "$2" ]; then :; else \
+		_tmp_latexexpand_fbody="$1"; \
+		_tmp_latexexpand_fbody=$${_tmp_latexexpand_fbody%.*}; \
+		if [ -f "$$_tmp_latexexpand_fbody.bbl" ]; then \
+			$(call exec,$(latexpand) --expand-bbl "$$_tmp_latexexpand_fbody.bbl" "$1" >"$2.tmp"); \
+		else \
+			$(call exec,$(latexpand) "$1" >"$2.tmp"); \
+		fi; \
+		mv "$2.tmp" "$2"; \
 	fi \
 }
 
