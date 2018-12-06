@@ -1331,6 +1331,8 @@ ifneq ($(DIFF),)
 		mkdir $$_tmpdir; \
 		(cd $$_tmpdir && tar xfz ../$(DIFFDIR)/$$_rev1/$$_git_prefix/$*.tar.gz); \
 		(cd $$_tmpdir && tar xfz ../$*.tar.gz); \
+		$(call latexdiff_copy_cache,$(DIFFDIR)/$$_rev1/$$_git_prefix,$$_tmpdir); \
+		$(call latexdiff_copy_cache,.,$$_tmpdir); \
 		cp $(DIFFDIR)/$$_rev1/$$_git_prefix/$*-expanded.tex $$_tmpdir/$*-expanded-old.tex; \
 		$(call expand_latex_source,$<,$$_tmpdir/$*-expanded-new.tex); \
 		$(call latexdiff_insubdir,$$_tmpdir,$<,$*-expanded-old.tex,$*-expanded-new.tex,$*-diff.tex,$*-diff.$(default_target),$(DIFF)..); \
@@ -1340,10 +1342,22 @@ ifneq ($(DIFF),)
 		mkdir $$_tmpdir; \
 		(cd $$_tmpdir && tar xfz ../$(DIFFDIR)/$$_rev1/$$_git_prefix/$*.tar.gz); \
 		(cd $$_tmpdir && tar xfz ../$(DIFFDIR)/$$_rev2/$$_git_prefix/$*.tar.gz); \
+		$(call latexdiff_copy_cache,$(DIFFDIR)/$$_rev1/$$_git_prefix,$$_tmpdir); \
+		$(call latexdiff_copy_cache,$(DIFFDIR)/$$_rev2/$$_git_prefix,$$_tmpdir); \
 		cp $(DIFFDIR)/$$_rev1/$$_git_prefix/$*-expanded.tex $$_tmpdir/$*-expanded-old.tex; \
 		cp $(DIFFDIR)/$$_rev2/$$_git_prefix/$*-expanded.tex $$_tmpdir/$*-expanded-new.tex; \
 		$(call latexdiff_insubdir,$$_tmpdir,$<,$*-expanded-old.tex,$*-expanded-new.tex,$*-diff.tex,$*-diff.$(default_target),$(DIFF)); \
 	fi
+
+# $(call latexdiff_copy_cache,SOURCE-DIRECTORY,DESTINATION-DIRECTORY) copies
+# cache files (i.e., eps-to-pdf) used in typesetting.
+latexdiff_copy_cache = \
+	for _f in $$(find "$2" -name '*.eps'); do \
+		_ff="$1/$$(basename "$$_f" .eps)-eps-converted-to.pdf"; \
+		if [ -f "$$_ff" ]; then \
+			cp "$$_ff" $$(dirname "$$_f"); \
+		fi; \
+	done
 
 # $(call expand_latexdiff_repo,REVISION)
 # Uses: $*, $$_git_root, $$_git_prefix
