@@ -1384,25 +1384,23 @@ expand_latex_source = { \
 # performs latexdiff and then make for the target-diff file.
 # When --math-markup=N is not given in LATEXDIFF_OPT, this code repeats
 # the process with decreasing --math-markup from 3 to 0 until it succeeds.
+# Similarly it also tries --allow-spaces if not given.
 latexdiff_insubdir = \
 	rm -f $1/$2; \
 	cp $(Makefile) $1/$(Makefile); \
-	[ -f .latex.mk ] && cp .latex.mk $1/ ;\
+	[ -f .latex.mk ] && cp .latex.mk $1/; \
 	$(if $(findstring --math-markup=,$(LATEXDIFF_OPT)), \
-		(cd $1 && $(call exec,$(latexdiff) $3 $4 >$5)) || exit 1; \
-		$(MAKE) -C $1 -f $(Makefile) $6 || exit 1; \
+		$(if $(findstring --allow-spaces,$(LATEXDIFF_OPT)), \
+			$(call latexdiff_insubdir_none,$1,$2,$3,$4,$5,$6,$7) \
+		, \
+			$(call latexdiff_insubdir_spaces,$1,$2,$3,$4,$5,$6,$7) \
+		) \
 	, \
-		(cd $1 && $(call exec,$(latexdiff) --math-markup=3 $3 $4 >$5)) || exit 1; \
-		if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
-			(cd $1 && $(call exec,$(latexdiff) --math-markup=2 $3 $4 >$5)) || exit 1; \
-			if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
-				(cd $1 && $(call exec,$(latexdiff) --math-markup=1 $3 $4 >$5)) || exit 1; \
-				if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
-					(cd $1 && $(call exec,$(latexdiff) --math-markup=0 $3 $4 >$5)) || exit 1; \
-					$(MAKE) -C $1 -f $(Makefile) || exit 1; \
-				fi; \
-			fi; \
-		fi; \
+		$(if $(findstring --allow-spaces,$(LATEXDIFF_OPT)), \
+			$(call latexdiff_insubdir_math,$1,$2,$3,$4,$5,$6,$7) \
+		, \
+			$(call latexdiff_insubdir_math_spaces,$1,$2,$3,$4,$5,$6,$7) \
+		) \
 	) \
 	mv $1/$6 .; \
 	if [ -f "$6" ]; then \
@@ -1410,6 +1408,55 @@ latexdiff_insubdir = \
 	else \
 		exit 1; \
 	fi
+
+latexdiff_insubdir_none = \
+	(cd $1 && $(call exec,$(latexdiff) $3 $4 >$5)) || exit 1; \
+	$(MAKE) -C $1 -f $(Makefile) $6 || exit 1;
+
+latexdiff_insubdir_spaces = \
+	(cd $1 && $(call exec,$(latexdiff) $3 $4 >$5)) || exit 1; \
+	if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+		(cd $1 && $(call exec,$(latexdiff) --allow-spaces $3 $4 >$5)) || exit 1; \
+		$(MAKE) -C $1 -f $(Makefile) $6 || exit 1; \
+	fi;
+
+latexdiff_insubdir_math = \
+	(cd $1 && $(call exec,$(latexdiff) --math-markup=3 $3 $4 >$5)) || exit 1; \
+	if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+		(cd $1 && $(call exec,$(latexdiff) --math-markup=2 $3 $4 >$5)) || exit 1; \
+		if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+			(cd $1 && $(call exec,$(latexdiff) --math-markup=1 $3 $4 >$5)) || exit 1; \
+			if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+				(cd $1 && $(call exec,$(latexdiff) --math-markup=0 $3 $4 >$5)) || exit 1; \
+				$(MAKE) -C $1 -f $(Makefile) $6 || exit 1; \
+			fi; \
+		fi; \
+	fi;
+
+latexdiff_insubdir_math_spaces = \
+	(cd $1 && $(call exec,$(latexdiff) --math-markup=3 $3 $4 >$5)) || exit 1; \
+	if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+		(cd $1 && $(call exec,$(latexdiff) --math-markup=2 $3 $4 >$5)) || exit 1; \
+		if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+			(cd $1 && $(call exec,$(latexdiff) --math-markup=1 $3 $4 >$5)) || exit 1; \
+			if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+				(cd $1 && $(call exec,$(latexdiff) --math-markup=0 $3 $4 >$5)) || exit 1; \
+				if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+					(cd $1 && $(call exec,$(latexdiff) --math-markup=3 --allow-spaces $3 $4 >$5)) || exit 1; \
+					if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+						(cd $1 && $(call exec,$(latexdiff) --math-markup=2 --allow-spaces $3 $4 >$5)) || exit 1; \
+						if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+							(cd $1 && $(call exec,$(latexdiff) --math-markup=1 --allow-spaces $3 $4 >$5)) || exit 1; \
+							if $(MAKE) -C $1 -f $(Makefile) $6; then :; else \
+								(cd $1 && $(call exec,$(latexdiff) --math-markup=0 --allow-spaces $3 $4 >$5)) || exit 1; \
+								$(MAKE) -C $1 -f $(Makefile) $6 || exit 1; \
+							fi; \
+						fi; \
+					fi; \
+				fi; \
+			fi; \
+		fi; \
+	fi;
 
 endif
 
