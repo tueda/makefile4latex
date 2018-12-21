@@ -28,14 +28,12 @@
 *.tmp*.*
 *.toc
 *.vrb
-*Notes.bib
-
-.dep/
-.diff/
-!images/*.pdf
-!resources/*.pdf
 *-eps-converted-to.pdf
-
 *-figure*.dpth
 *-figure*.md5
 *-figure*.pdf
+*Notes.bib
+
+# Directories created by the Makefile for LaTeX.
+.dep/
+.diff/
