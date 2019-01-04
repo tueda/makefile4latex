@@ -3,6 +3,9 @@
 # Makefile for typesetting LaTeX documents. Requires GNU Make 3.81 on Linux.
 # See "make help".
 #
+# This file is provided under the MIT License.
+# See https://github.com/tueda/makefile4latex/blob/master/LICENSE.
+#
 
 define help_message
 Makefile for LaTeX
