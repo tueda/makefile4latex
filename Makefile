@@ -36,7 +36,10 @@ Usage:
 
 Targets:
   all (default):
-    Create all possible documents in this directory.
+    Build all documents in the current directory.
+
+  all-recursive:
+    Build all documents in the source tree.
 
   help:
     Show this message.
@@ -51,7 +54,7 @@ Targets:
     Create tar-gzipped archives for arXiv submission.
 
   watch:
-    Watch the changes and automatically recreate documents in this directory.
+    Watch the changes and automatically rebuild documents.
 
   upgrade:
     Upgrade the setup.
@@ -111,8 +114,8 @@ MOSTLYCLEANFILES =
 # Additional files to clean.
 CLEANFILES =
 
-# Prerequisite make targets in subdirectories.
-PREREQUISITE_SUBDIRS =
+# Prerequisite Make targets in subdirectories.
+PREREQUISITE_SUBDIRS = NONE
 
 # Test scripts.
 TESTS =
@@ -745,6 +748,25 @@ cmpver_fmt_ = \
 
 ##
 
+ifneq ($(subdirs),)
+
+# $(call make_for_each_subdir,TARGET) invokes Make for the given target
+# (if exists) in all subdirectories.
+make_for_each_subdir = \
+	for dir in $(subdirs); do \
+		if $(MAKE) -n -C $$dir $1 >/dev/null 2>&1; then \
+			$(MAKE) -C $$dir $1; \
+		fi; \
+	done
+
+else
+
+make_for_each_subdir = :
+
+endif
+
+##
+
 ifeq ($(DIFF),)
 
 all: $(target)
@@ -754,6 +776,10 @@ else
 all: $(diff_target)
 
 endif
+
+all-recursive:
+	@$(call make_for_each_subdir,all-recursive)
+	@$(MAKE) all
 
 help: export help_message1 = $(help_message)
 help:
@@ -771,27 +797,10 @@ dist: $(target_basename:=.tar.gz)
 
 fmt: $(target_basename:=.fmt)
 
-ifneq ($(subdirs),)
-
-# $(call make_for_each_subdir,TARGET) invokes Make for the given target
-# (if exists) in all subdirectories.
-make_for_each_subdir = \
-	for dir in $(subdirs); do \
-		if $(MAKE) -n -C $$dir $1 >/dev/null 2>&1; then \
-			$(MAKE) -C $$dir $1; \
-		fi; \
-	done
-
 $(target_basename:=.dvi) \
 $(target_basename:=.ps) \
 $(target_basename:=.eps) \
 $(target_basename:=.pdf): | prerequisite
-
-else
-
-make_for_each_subdir = :
-
-endif
 
 prerequisite:
 	@$(call make_for_each_subdir,$(PREREQUISITE_SUBDIRS))
@@ -887,7 +896,7 @@ upgrade = \
 
 FORCE:
 
-.PHONY : all check clean dist dvi eps fmt help mostlyclean pdf ps prerequisite upgrade watch FORCE
+.PHONY : all all-recursive check clean dist dvi eps fmt help mostlyclean pdf ps prerequisite upgrade watch FORCE
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.

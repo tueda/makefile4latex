@@ -18,7 +18,10 @@ Features
 - Automatic detection of LaTeX source files. Just type `make` and then
   the Makefile knows what to do.
 - Dependency tracking.
-- Handling BibTeX, makeindex, makeglossaries, axohelp etc.
+- Handling [BibTeX](https://ctan.org/pkg/bibtex),
+  [MakeIndex](https://ctan.org/pkg/makeindex),
+  [glossaries](https://ctan.org/pkg/glossaries),
+  [axodraw2](https://ctan.org/pkg/axodraw2) etc.
 - Colorized output.
 - Can create tar-gzipped source files for [arXiv](https://arxiv.org/)
   submission (`make dist`).
@@ -48,7 +51,9 @@ Targets
 -------
 
 - `all` (default):
-  Create all possible documents.
+  Build all documents in the current directory.
+- `all-recursive`:
+  Build all documents in the source tree.
 - `help`:
   Show help message.
 - `clean`:
@@ -58,7 +63,8 @@ Targets
 - `dist`:
   Create tar-gzipped archives for [arXiv](https://arxiv.org/) submission.
 - `watch`:
-  Watch the changes and automatically recreate documents.
+  Watch the changes and automatically rebuild documents in the current
+  directory.
 - `upgrade`:
   Upgrade the setup. (Be careful not to overwrite any local changes!)
 
