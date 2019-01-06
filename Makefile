@@ -117,6 +117,9 @@ CLEANFILES =
 # Prerequisite Make targets in subdirectories.
 PREREQUISITE_SUBDIRS = NONE
 
+# Lint commands.
+LINTS = check_periods
+
 # Test scripts.
 TESTS =
 
@@ -815,6 +818,30 @@ clean:
 	@$(if $(cleanfiles),$(call exec,rm -f $(cleanfiles)))
 	@$(if $(wildcard $(DEPDIR) $(DIFFDIR)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR)))
 
+lint:
+	@$(builtin_lints) \
+	for file in $(wildcard *.tex); do \
+		for lint in $(LINTS); do \
+			if [ -f "$$lint" ]; then \
+				$(call exec,./$$lint $$file); \
+			else \
+				$(call exec,$$lint $$file); \
+			fi; \
+		done; \
+	done
+
+builtin_lints =
+
+# Check common mistakes about spacing after periods.
+# XXX: --color=always is not POSIX. We may reflect $(make_colors).
+builtin_lints += \
+	check_periods() { \
+		if grep -n --color=always '[A-Z][A-Z][A-Z]*)\?\.' "$$1"; then \
+			$(call error_message,most likely wrong spacing after periods. You may need to insert \\@); \
+			exit 1; \
+		fi; \
+	};
+
 check:
 	@$(call make_for_each_subdir,check)
 	@for test in $(TESTS); do \
@@ -896,7 +923,7 @@ upgrade = \
 
 FORCE:
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help mostlyclean pdf ps prerequisite upgrade watch FORCE
+.PHONY : all all-recursive check clean dist dvi eps fmt help lint mostlyclean pdf ps prerequisite upgrade watch FORCE
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
