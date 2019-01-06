@@ -773,44 +773,41 @@ fmt: $(target_basename:=.fmt)
 
 ifneq ($(subdirs),)
 
+# $(call make_for_each_subdir,TARGET) invokes Make for the given target
+# (if exists) in all subdirectories.
+make_for_each_subdir = \
+	for dir in $(subdirs); do \
+		if $(MAKE) -n -C $$dir $1 >/dev/null 2>&1; then \
+			$(MAKE) -C $$dir $1; \
+		fi; \
+	done
+
 $(target_basename:=.dvi) \
 $(target_basename:=.ps) \
 $(target_basename:=.eps) \
 $(target_basename:=.pdf): | prerequisite
 
-prerequisite:
-	@for dir in $(subdirs); do \
-		if $(MAKE) -n -C $$dir $(PREREQUISITE_SUBDIRS) >/dev/null 2>&1; then \
-			$(MAKE) -C $$dir $(PREREQUISITE_SUBDIRS); \
-		fi; \
-	done; :
+else
+
+make_for_each_subdir = :
 
 endif
 
+prerequisite:
+	@$(call make_for_each_subdir,$(PREREQUISITE_SUBDIRS))
+
 mostlyclean:
-	@for dir in $(subdirs); do \
-		if $(MAKE) -n -C $$dir mostlyclean >/dev/null 2>&1; then \
-			$(MAKE) -C $$dir mostlyclean; \
-		fi; \
-	done; :
+	@$(call make_for_each_subdir,mostlyclean)
 	@$(if $(mostlycleanfiles),$(call exec,rm -f $(mostlycleanfiles)))
 	@$(if $(wildcard $(DEPDIR) $(DIFFDIR)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR)))
 
 clean:
-	@for dir in $(subdirs); do \
-		if $(MAKE) -n -C $$dir clean >/dev/null 2>&1; then \
-			$(MAKE) -C $$dir clean; \
-		fi; \
-	done; :
+	@$(call make_for_each_subdir,clean)
 	@$(if $(cleanfiles),$(call exec,rm -f $(cleanfiles)))
 	@$(if $(wildcard $(DEPDIR) $(DIFFDIR)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR)))
 
 check:
-	@for dir in $(subdirs); do \
-		if $(MAKE) -n -C $$dir check >/dev/null 2>&1; then \
-			$(MAKE) -C $$dir check; \
-		fi; \
-	done
+	@$(call make_for_each_subdir,check)
 	@for test in $(TESTS); do \
 		if [ -f "$$test" ]; then \
 			$(call exec,./$$test); \
