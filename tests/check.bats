@@ -51,6 +51,10 @@ test_dir() {(
   test_dir platex_dvipdfmx 1
 }
 
+@test "platex_dvipdfmx_jpeg" {
+  test_dir platex_dvipdfmx_jpeg 1
+}
+
 @test "latexdiff1" {
   MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
 }
