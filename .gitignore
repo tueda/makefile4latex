@@ -29,6 +29,7 @@
 *.ax2
 *.aux
 *.auxlock
+*.bb
 *.bbl
 *.blg
 *.dvi
@@ -53,6 +54,7 @@
 *.tmp*.*
 *.toc
 *.vrb
+*.xbb
 *-eps-converted-to.pdf
 *-figure*.dpth
 *-figure*.md5

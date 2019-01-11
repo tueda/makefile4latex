@@ -179,7 +179,7 @@ CL_WARN   = [35m
 CL_ERROR  = [31m
 
 .SUFFIXES:
-.SUFFIXES: .log .pdf .odt .eps .ps .jpg .dvi .fmt .tex .cls .sty .ltx .dtx
+.SUFFIXES: .log .bb .xbb .pdf .odt .eps .ps .jpg .png .dvi .fmt .tex .cls .sty .ltx .dtx
 
 DEPDIR = .dep
 DIFFDIR = .diff
@@ -616,6 +616,8 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	*.bmc \
 	*.pbm \
 	*-eps-converted-to.pdf \
+	*.bb \
+	*.xbb \
 	*/*-eps-converted-to.pdf \
 	$(srctexfiles:.tex=-figure*.dpth) \
 	$(srctexfiles:.tex=-figure*.log) \
@@ -1257,6 +1259,24 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 
 .odt.pdf:
 	@$(call exec,$(soffice) --headless --nologo --nofirststartwizard --convert-to pdf $<)
+
+.jpg.bb:
+	$(ebb) $<
+
+.png.bb:
+	$(ebb) $<
+
+.pdf.bb:
+	$(ebb) $<
+
+.jpg.xbb:
+	$(extractbb) $<
+
+.png.xbb:
+	$(extractbb) $<
+
+.pdf.xbb:
+	$(extractbb) $<
 
 # A distribution (for arXiv) needs to include
 # 1. The main tex file.
