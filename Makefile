@@ -114,6 +114,9 @@ MOSTLYCLEANFILES =
 # Additional files to clean.
 CLEANFILES =
 
+# Prerequisite Make targets in the current directory.
+PREREQUISITE =
+
 # Prerequisite Make targets in subdirectories.
 PREREQUISITE_SUBDIRS = NONE
 
@@ -805,7 +808,7 @@ $(target_basename:=.ps) \
 $(target_basename:=.eps) \
 $(target_basename:=.pdf): | prerequisite
 
-prerequisite:
+prerequisite: prerequisite_
 	@$(call make_for_each_subdir,$(PREREQUISITE_SUBDIRS))
 
 mostlyclean:
@@ -1542,3 +1545,7 @@ endif
 -include $(DEPDIR)/*.d
 -include ~/.latex.mk
 -include .latex.mk
+
+prerequisite_: $(PREREQUISITE)
+
+.PHONY: prerequisite_
