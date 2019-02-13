@@ -1,6 +1,8 @@
 MAKE_ARGS=
 NO_CLEAN=
 
+# test_dir <directory>
+# test_dir <directory> <number of runs>
 test_dir() {(
   set -eu
   set -o pipefail
@@ -27,6 +29,18 @@ test_dir() {(
   rm "$1/make.out"
 )}
 
+# check_tarball <file> <number of files>
+check_tarball() {(
+  set -eu
+  set -o pipefail
+
+  num=$(tar tf "$1" | wc -l)
+  if [ $2 -ne $num ]; then
+    echo "FAIL: wrong number of files in archive $1: $num (must be $2)" >&2
+    exit 1
+  fi
+)}
+
 @test "latex" {
   test_dir latex 5
 }
@@ -51,6 +65,15 @@ test_dir() {(
   test_dir platex_dvipdfmx 1
 }
 
+@test "dist" {
+  MAKE_ARGS='dist' test_dir bibtex && \
+  check_tarball bibtex/doc.tar.gz 2 && \
+  MAKE_ARGS='dist' test_dir makeindex && \
+  check_tarball makeindex/doc.tar.gz 2 && \
+  MAKE_ARGS='dist' test_dir makeglossaries && \
+  check_tarball makeglossaries/doc.tar.gz 3
+}
+
 @test "latexdiff1" {
   MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
 }
@@ -59,4 +82,8 @@ test_dir() {(
   MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3 && \
   MAKE_ARGS='DIFF=44aaae0' NO_CLEAN=1 test_dir latexdiff 2 && \
   MAKE_ARGS='DIFF=44aaae0..HEAD' NO_CLEAN=1 test_dir latexdiff 1
+}
+
+teardown() {
+  find . -name make.out -exec rm {} \;
 }
