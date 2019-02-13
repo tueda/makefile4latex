@@ -1350,7 +1350,7 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 		done; \
 	} >$(DEPDIR)/$@.d; \
 	cd $$tmpdir || exit 1; \
-	$(call exec,tar cfv - * | gzip -9 -n >$@,false); \
+	$(call exec,tar cfv - --exclude $@ * | gzip -9 -n >$@,false); \
 	cd .. || exit 1; \
 	$(check_failed); \
 	mv $$tmpdir/$@ $@
