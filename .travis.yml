@@ -39,7 +39,7 @@ before_install:
       collection-xetex 1         # xdvipdfmx
       option_doc 0
       option_src 0
-      " | sed -e 's/^ *//' >texlive.profile
+      " | sed -e 's/^ *//' | sed -e 's/ *#.*$//' >texlive.profile
       ./install-tl-20*/install-tl --profile texlive.profile
     fi
   - export PATH=$(pwd)/texlive/bin/$arch:$PATH
