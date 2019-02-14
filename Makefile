@@ -665,7 +665,7 @@ notification_message = \
 	$(call colorize, \
 		printf "\033$(CL_NOTICE)$1\033$(CL_NORMAL)\n" >&2 \
 	, \
-		echo "Error: $1" >&2 \
+		echo "$1" >&2 \
 	)
 
 # $(call warning_message,MESSAGE) prints a warning message.
@@ -673,7 +673,7 @@ warning_message = \
 	$(call colorize, \
 		printf "\033$(CL_WARN)Warning: $1\033$(CL_NORMAL)\n" >&2 \
 	, \
-		echo "Error: $1" >&2 \
+		echo "Warning: $1" >&2 \
 	)
 
 # $(call error_message,MESSAGE) prints an error message.
