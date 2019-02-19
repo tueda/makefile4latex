@@ -25,13 +25,18 @@
 # SOFTWARE.
 #
 
-*.ax1
-*.ax2
+*-eps-converted-to.pdf
+*-figure*.dpth
+*-figure*.md5
+*-figure*.pdf
 *.aux
 *.auxlock
+*.ax1
+*.ax2
 *.bb
 *.bbl
 *.blg
+*.bmc
 *.dvi
 *.fls
 *.fmt
@@ -43,22 +48,25 @@
 *.ilg
 *.ind
 *.ist
+*.lof
 *.log
+*.lot
 *.nav
 *.out
+*.pbm
 *.pdf
 *.ps
 *.snm
+*.spl
+*.synctex
+*.synctex.gz
 *.tar.gz
 *.tmp
 *.tmp*.*
 *.toc
 *.vrb
 *.xbb
-*-eps-converted-to.pdf
-*-figure*.dpth
-*-figure*.md5
-*-figure*.pdf
+*.xdy
 *Notes.bib
 
 # Directories created by the Makefile for LaTeX.
