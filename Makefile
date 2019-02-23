@@ -694,6 +694,9 @@ error_message = \
 		echo "Error: $1" >&2 \
 	)
 
+# $(call set_title,TITLE) changes the window title. (Default: do nothing.)
+set_title = :
+
 # $(call exec,COMMAND) invokes the command with checking the exit status.
 # $(call exec,COMMAND,false) invokes the command but skips the check.
 exec = \
@@ -873,13 +876,24 @@ watch:
 	@$(init_toolchain)
 	@if $(if $(srctexfiles:.tex=.$(default_target)),:,false); then \
 		echo "Watching for $(srctexfiles:.tex=.$(default_target)). Press Ctrl+C to quit"; \
+		$(call set_title,watching); \
 		if $(MAKE) -q -s $(srctexfiles:.tex=.$(default_target)); then :; else \
-			time $(MAKE) -s $(srctexfiles:.tex=.$(default_target)); \
+			$(call set_title,running); \
+			if time $(MAKE) -s $(srctexfiles:.tex=.$(default_target)); then \
+				$(call set_title,watching); \
+			else \
+				$(call set_title,failed); \
+			fi; \
 		fi; \
 		while :; do \
 			sleep 1; \
 			if $(MAKE) -q -s $(srctexfiles:.tex=.log); then :; else \
-				time $(MAKE) -s $(srctexfiles:.tex=.log); \
+				$(call set_title,running); \
+				if time $(MAKE) -s $(srctexfiles:.tex=.log); then \
+					$(call set_title,watching); \
+				else \
+					$(call set_title,failed); \
+				fi; \
 			fi; \
 		done \
 	else \
