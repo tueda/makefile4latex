@@ -123,5 +123,7 @@ by setting `TOOLCHAIN`. For example, if you want to use the `latex` -> `dvips`
 -> `ps2pdf` toolchain instead of the default one `pdflatex`, then run the
 following command:
 ```shell
-echo 'TOOLCHAIN = latex_dvips' >.latex.mk
+echo 'TOOLCHAIN = latex_dvips' >>.latex.mk
 ```
+See also the [Wiki page](https://github.com/tueda/makefile4latex/wiki) for
+more customizations.
