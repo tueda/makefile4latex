@@ -628,6 +628,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	*-eps-converted-to.pdf \
 	*.bb \
 	*.xbb \
+	*_tmp.??? \
 	*/*-eps-converted-to.pdf \
 	$(srctexfiles:.tex=-figure*.dpth) \
 	$(srctexfiles:.tex=-figure*.log) \

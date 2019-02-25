@@ -69,6 +69,7 @@
 *.xbb
 *.xdy
 *Notes.bib
+*_tmp.???
 
 # Directories created by the Makefile for LaTeX.
 .dep/
