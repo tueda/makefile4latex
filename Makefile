@@ -902,50 +902,39 @@ watch:
 	fi
 
 # Upgrade files in the setup. (Be careful!)
+# Files to be upgraded must have a tag like
+#
+#   latest-raw-url: https://raw.githubusercontent.com/tueda/makefile4latex/master/Makefile
+#
 # When the current directory is a Git repository and doesn't have the .gitignore
-# file, this target downloads that of the Makefile4LaTeX repository. It also
-# tries to upgrade some other files on Gist.
+# file, this target downloads that of the Makefile4LaTeX repository.
 upgrade:
-	@if $(call have_url,Makefile,https://github.com/tueda/makefile4latex); then \
-		$(call upgrade,Makefile,https://raw.githubusercontent.com/tueda/makefile4latex/master/Makefile); \
-	fi
-	@if $(call have_url,.gitignore,https://github.com/tueda/makefile4latex) \
-			|| { [ -d .git ] && [ ! -f .gitignore ]; }; then \
+	@$(call make_for_each_subdir,upgrade)
+	@for file in * .*; do \
+		case "$$file" in \
+			*.swp|*.tmp|*~) \
+				continue \
+				;; \
+		esac; \
+		if [ -f "$$file" ] && [ ! -L "$$file" ]; then \
+			if grep -q 'latest-raw-url *: *.' "$$file" >/dev/null 2>&1; then \
+				url=$$(grep 'latest-raw-url *: *.' "$$file" | head -1 | sed 's/.*latest-raw-url *: *//' | sed 's/ .*//'); \
+				$(call upgrade,$$file,$$url); \
+			fi \
+		fi; \
+	done
+	@if [ -d .git ] && [ ! -f .gitignore ]; then \
 		$(call upgrade,.gitignore,https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore); \
 	fi
-	@if $(call have_url,axodraw2e.sty,https://gist.github.com/tueda/5d8a7ff9181ef630160703606f449597); then \
-		$(call upgrade,axodraw2e.sty,https://gist.githubusercontent.com/tueda/5d8a7ff9181ef630160703606f449597/raw/axodraw2e.sty); \
-	fi
-	@if $(call have_url,beamer-setup.sty,https://gist.github.com/tueda/80320d5a756e4800b59e50d6da995765); then \
-		$(call upgrade,beamer-setup.sty,https://gist.githubusercontent.com/tueda/80320d5a756e4800b59e50d6da995765/raw/beamer-setup.sty); \
-	fi
-	@if $(call have_url,listings-form.sty,https://gist.github.com/tueda/a7a15955165fe9eb7783b588870dfbd8); then \
-		$(call upgrade,listings-form.sty,https://gist.githubusercontent.com/tueda/a7a15955165fe9eb7783b588870dfbd8/raw/listings-form.sty); \
-	fi
-	@if $(call have_url,my-JHEP.bst,https://gist.github.com/tueda/515c813ad4dc42d8558a20aef94a83c9); then \
-		$(call upgrade,my-JHEP.bst,https://gist.githubusercontent.com/tueda/515c813ad4dc42d8558a20aef94a83c9/raw/my-JHEP.bst); \
-	fi
-	@if $(call have_url,JHEP.bst,https://gist.github.com/tueda/515c813ad4dc42d8558a20aef94a83c9); then \
-		$(call upgrade,JHEP.bst,https://gist.githubusercontent.com/tueda/515c813ad4dc42d8558a20aef94a83c9/raw/my-JHEP.bst); \
-	fi
-	@if $(call have_url,my-iopart-num.bst,https://gist.github.com/tueda/e256d86c9f340f3693419a4cd1311edb); then \
-		$(call upgrade,my-iopart-num.bst,https://gist.githubusercontent.com/tueda/e256d86c9f340f3693419a4cd1311edb/raw/my-iopart-num.bst); \
-	fi
-	@if $(call have_url,iopart-num.bst,https://gist.github.com/tueda/e256d86c9f340f3693419a4cd1311edb); then \
-		$(call upgrade,iopart-num.bst,https://gist.githubusercontent.com/tueda/e256d86c9f340f3693419a4cd1311edb/raw/my-iopart-num.bst); \
-	fi
-
-# $(call have_url,FILE,URL) checks if the URL is contained in the file.
-have_url = grep -q '$2' '$1' >/dev/null 2>&1
 
 # $(call upgrade,FILE,URL) tries to upgrade the given file.
 upgrade = \
-	$(download) '$1.tmp' '$2' && { \
-		if diff -q '$1' '$1.tmp' >/dev/null 2>&1; then \
+	$(download) "$1.tmp" "$2" && { \
+		if diff -q "$1" "$1.tmp" >/dev/null 2>&1; then \
 			$(call notification_message,$1 is up-to-date); \
-			rm -f '$1.tmp'; \
+			rm -f "$1.tmp"; \
 		else \
-			mv -v '$1.tmp' '$1'; \
+			mv -v "$1.tmp" "$1"; \
 			$(call notification_message,$1 is updated); \
 		fi; \
 		:; \

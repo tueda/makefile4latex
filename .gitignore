@@ -1,5 +1,3 @@
-# https://github.com/tueda/makefile4latex
-
 # This file is provided under the MIT License:
 #
 # MIT License
@@ -24,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+
+# latest-raw-url: https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore
 
 *-convbkmk.ps
 *-eps-converted-to.pdf
