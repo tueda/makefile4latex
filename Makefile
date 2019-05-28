@@ -729,6 +729,7 @@ check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit
 #   "I found no database files---while reading file ...": BibTeX
 #   "I found no \bibstyle command---while reading file ...": BibTeX
 #   "I found no \citation commands---while reading file ...": BibTeX
+#   "Repeated entry--- ...": BibTeX
 # Warnings:
 #   "LaTeX Warning ...": \@latex@warning
 #   "Package Warning ...": \PackageWarning or \PackageWarningNoLine
@@ -737,10 +738,11 @@ check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit
 #   "No pages of output.": TeX
 #   "Underfull ...": TeX
 #   "Overfull ...": TeX
+#   "pdfTeX warning ...": pdfTeX
 #   "Warning-- ...": BibTeX
 colorize_output = \
-	sed 's/^\(!.*\|I couldn.t open database file.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
-	     s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+	sed 's/^\(!.*\|I couldn.t open database file.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	     s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\|Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
 # $(call cmpver,VER1,OP,VER2) compares the given two version numbers.
 cmpver = { \
