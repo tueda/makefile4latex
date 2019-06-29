@@ -1,5 +1,6 @@
 MAKE_ARGS=
 NO_CLEAN=
+WITH_LONG_NAME=
 
 # test_dir <directory>
 # test_dir <directory> <number of runs>
@@ -9,6 +10,13 @@ test_dir() {(
 
   (
     cd "$1"
+    if [ -n "$WITH_LONG_NAME" ]; then
+      longsuffix=-very-long-abcd-efgh-ijkl-mnop-qrst-uvwx-yzab-cdef-ghij-klmn-opqr-stuv-wxyz-1234-5678-9012-3456-7890
+      longname=${WITH_LONG_NAME%.*}$longsuffix.${WITH_LONG_NAME##*.}
+      if [ ! -f "$longname" ]; then
+        ln -s "$WITH_LONG_NAME" "$longname"
+      fi
+    fi
     [ -n "$NO_CLEAN" ] || make clean
     make $MAKE_ARGS | tee make.out
   )
@@ -46,19 +54,19 @@ check_tarball() {(
 }
 
 @test "bibtex" {
-  test_dir bibtex 3
+  WITH_LONG_NAME=doc.tex test_dir bibtex 6
 }
 
 @test "makeindex" {
-  test_dir makeindex 2
+  WITH_LONG_NAME=doc.tex test_dir makeindex 4
 }
 
 @test "makeglossaries" {
-  test_dir makeglossaries 2
+  WITH_LONG_NAME=doc.tex test_dir makeglossaries 4
 }
 
 @test "axohelp" {
-  test_dir axohelp 2
+  WITH_LONG_NAME=doc.tex test_dir axohelp 4
 }
 
 @test "platex_dvipdfmx" {
@@ -86,4 +94,5 @@ check_tarball() {(
 
 teardown() {
   find . -name make.out -exec rm {} \;
+  find . -name '*-very-long-*' -exec rm {} \;
 }

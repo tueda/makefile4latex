@@ -1136,23 +1136,29 @@ mk_ref_dep = \
 		echo '$1: $2' >$(DEPDIR)/$1.ref.d; \
 	fi
 
-check_noreffile = grep "File \`$*_ref.tex' not found" $*.log >/dev/null 2>&1
+# $(call grep_lines,PATTERN,FILE) greps PATTERN and prints lines around matches
+# without new line characters.
+# NOTE: the grep -B NUM option is not in POSIX.
+grep_lines = \
+	grep -B 3 $1 $2 | tr -d '\n'
 
-check_bblfile = grep '$*.bbl' $*.log >/dev/null 2>&1
+check_noreffile = $(call grep_lines,'_ref.tex','$*.log') | grep "File \`$*_ref.tex' not found" >/dev/null 2>&1
 
-check_nobblfile = grep 'No file $*.bbl' $*.log >/dev/null 2>&1
+check_bblfile = $(call grep_lines,'.bbl','$*.log') | grep '$*.bbl' >/dev/null 2>&1
 
-check_reffile = grep '$*_ref.tex' $*.log >/dev/null 2>&1
+check_nobblfile = $(call grep_lines,'.bbl','$*.log') | grep 'No file $*.bbl' >/dev/null 2>&1
 
-check_indfile = grep '$*.ind' $*.log >/dev/null 2>&1
+check_reffile = $(call grep_lines,'_ref.tex','$*.log') | grep '$*_ref.tex' >/dev/null 2>&1
 
-check_glsfile = grep '$*.gls' $*.log >/dev/null 2>&1
+check_indfile = $(call grep_lines,'.ind','$*.log') | grep '$*.ind' >/dev/null 2>&1
+
+check_glsfile = $(call grep_lines,'.gls','$*.log') | grep '$*.gls' >/dev/null 2>&1
 
 # axodraw2.sty uses primitive control sequences for reading .ax2 file, instead
 # of \input, without writing any jobname.ax2 in the log file. So we look for
 # jobname.ax1; if it is found in the log file, it means axodraw2.sty tries to
 # read jobname.ax2.
-check_ax2file = grep '$*.ax1' $*.log >/dev/null 2>&1
+check_ax2file = $(call grep_lines,'.ax1','$*.log') | grep '$*.ax1' >/dev/null 2>&1
 
 check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty' >/dev/null 2>&1
 
