@@ -114,6 +114,12 @@ MOSTLYCLEANFILES =
 # Additional files to clean.
 CLEANFILES =
 
+# Additional directories to mostly-clean.
+MOSTLYCLEANDIRS =
+
+# Additional directories to clean.
+CLEANDIRS =
+
 # Prerequisite Make targets in the current directory.
 PREREQUISITE =
 
@@ -832,12 +838,12 @@ prerequisite: prerequisite_
 mostlyclean:
 	@$(call make_for_each_subdir,mostlyclean)
 	@$(if $(mostlycleanfiles),$(call exec,rm -f $(mostlycleanfiles)))
-	@$(if $(wildcard $(DEPDIR) $(DIFFDIR)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR)))
+	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS)))
 
 clean:
 	@$(call make_for_each_subdir,clean)
 	@$(if $(cleanfiles),$(call exec,rm -f $(cleanfiles)))
-	@$(if $(wildcard $(DEPDIR) $(DIFFDIR)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR)))
+	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)))
 
 lint:
 	@$(builtin_lints) \
