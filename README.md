@@ -14,7 +14,7 @@ documents.
 Features
 --------
 
-- Only a single file (`Makefile`).
+- Only a single file ([`Makefile`](https://github.com/tueda/makefile4latex/blob/master/Makefile)).
 - Automatic detection of LaTeX source files. Just type `make` and then
   the Makefile knows what to do.
 - Dependency tracking.
@@ -54,6 +54,8 @@ Targets
   Build all documents in the current directory.
 - `all-recursive`:
   Build all documents in the source tree.
+- `dvi`, `ps`, `pdf`, `eps`, `svg`, `jpg`, `png`:
+  Build all documents with the specified file format in the current directory.
 - `help`:
   Show help message.
 - `clean`:
@@ -66,7 +68,9 @@ Targets
   Watch the changes and automatically rebuild documents in the current
   directory.
 - `upgrade`:
-  Upgrade the setup. (Be careful not to overwrite any local changes!)
+  Upgrade the setup. For a Git repository, if there is no `.gitignore` file, it
+  installs the default [`.gitignore`](https://github.com/tueda/makefile4latex/blob/master/.gitignore).
+  (Be careful not to overwrite any local changes!)
 
 It is also possible to make each target file. For example, `make foo.pdf` tries
 to generate the pdf file from `foo.tex`.

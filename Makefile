@@ -41,6 +41,9 @@ Targets:
   all-recursive:
     Build all documents in the source tree.
 
+  dvi, ps, pdf, eps, svg, jpg, png:
+    Build all documents with the specified file format in the current directory.
+
   help:
     Show this message.
 
