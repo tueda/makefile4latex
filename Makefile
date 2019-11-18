@@ -140,6 +140,8 @@ LATEX =
 DVIPS =
 DVIPDF =
 PS2PDF =
+DVISVGM =
+PDFTOPPM =
 GS =
 BIBTEX =
 SORTREF =
@@ -163,6 +165,10 @@ PDFLATEX_DVI_OPT = -output-format=dvi
 DVIPS_OPT = -Ppdf -z
 DVIPDF_OPT =
 PS2PDF_OPT = -dPDFSETTINGS=/prepress -dEmbedAllFonts=true
+DVISVGM_OPT = -n
+PDFTOPPM_OPT = -singlefile
+PDFTOPPM_JPG_OPT = -jpeg
+PDFTOPPM_PNG_OPT = -png
 GS_OPT =
 BIBTEX_OPT =
 SORTREF_OPT =
@@ -187,7 +193,7 @@ CL_WARN   = [35m
 CL_ERROR  = [31m
 
 .SUFFIXES:
-.SUFFIXES: .log .bb .xbb .pdf .odt .eps .ps .jpg .png .dvi .fmt .tex .cls .sty .ltx .dtx
+.SUFFIXES: .log .bb .xbb .pdf .odt .eps .ps .jpg .png .svg .dvi .fmt .tex .cls .sty .ltx .dtx
 
 DEPDIR = .dep
 DIFFDIR = .diff
@@ -454,6 +460,16 @@ ps2pdf = $(call cache,ps2pdf_impl) $(PS2PDF_OPT)
 
 ps2pdf_impl = $(call pathsearch2,ps2pdf,PS2PDF,ps2pdf)
 
+# $(dvisvgm)
+dvisvgm = $(call cache,dvisvgm_impl) $(DVISVGM_OPT)
+
+dvisvgm_impl = $(call pathsearch2,dvisvgm,DVISVGM,dvisvgm)
+
+# $(pdftoppm)
+pdftoppm = $(call cache,pdftoppm_impl) $(PDFTOPPM_OPT)
+
+pdftoppm_impl = $(call pathsearch2,pdftoppm,PDFTOPPM,pdftoppm)
+
 # $(gs)
 gs = $(call cache,gs_impl) $(GS_OPT)
 
@@ -655,6 +671,9 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.ps) \
 	$(srctexfiles:.tex=.eps) \
 	$(srctexfiles:.tex=.dvi) \
+	$(srctexfiles:.tex=.svg) \
+	$(srctexfiles:.tex=.jpg) \
+	$(srctexfiles:.tex=.png) \
 	$(srcltxfiles:.ltx=.fmt) \
 	$(srcdtxfiles:.dtx=.cls) \
 	$(srcdtxfiles:.dtx=.sty) \
@@ -821,6 +840,12 @@ ps: $(target_basename:=.ps)
 
 eps: $(target_basename:=.eps)
 
+svg: $(target_basename:=.svg)
+
+jpg: $(target_basename:=.jpg)
+
+png: $(target_basename:=.png)
+
 pdf: $(target_basename:=.pdf)
 
 dist: $(target_basename:=.tar.gz)
@@ -830,6 +855,9 @@ fmt: $(target_basename:=.fmt)
 $(target_basename:=.dvi) \
 $(target_basename:=.ps) \
 $(target_basename:=.eps) \
+$(target_basename:=.svg) \
+$(target_basename:=.jpg) \
+$(target_basename:=.png) \
 $(target_basename:=.pdf): | prerequisite
 
 prerequisite: prerequisite_
@@ -950,7 +978,7 @@ upgrade = \
 
 FORCE:
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help lint mostlyclean pdf ps prerequisite upgrade watch FORCE
+.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png ps prerequisite svg upgrade watch FORCE
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
@@ -1259,6 +1287,18 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	else \
 		$(call exec,$(gs) -sDEVICE=eps2write -o $@ $*.tmp.pdf); \
 	fi
+
+.dvi.svg:
+	@$(init_toolchain)
+	@$(call exec,$(dvisvgm) $<)
+
+.pdf.jpg:
+	@$(init_toolchain)
+	@$(call exec,$(pdftoppm) $(PDFTOPPM_JPG_OPT) $< $*)
+
+.pdf.png:
+	@$(init_toolchain)
+	@$(call exec,$(pdftoppm) $(PDFTOPPM_PNG_OPT) $< $*)
 
 # Experimental (TeXLive)
 .ltx.fmt:
