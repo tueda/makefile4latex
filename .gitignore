@@ -326,6 +326,7 @@ TSWLatexianTemp*
 *.tmp*.*
 *_tmp.???
 
-## Directories created by the Makefile for LaTeX.
+## Files created by the Makefile for LaTeX.
+.Makefile.core
 .dep/
 .diff/
