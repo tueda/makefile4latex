@@ -1574,6 +1574,7 @@ latexdiff_insubdir = \
 	rm -f $1/$2; \
 	cp $(Makefile) $1/$(Makefile); \
 	[ -f .latex.mk ] && cp .latex.mk $1/; \
+	[ -f latex.mk ] && cp latex.mk $1/; \
 	$(if $(findstring --math-markup=,$(LATEXDIFF_OPT)), \
 		$(if $(findstring --allow-spaces,$(LATEXDIFF_OPT)), \
 			$(call latexdiff_insubdir_none,$1,$2,$3,$4,$5,$6,$7) \
@@ -1647,7 +1648,9 @@ endif
 
 -include $(DEPDIR)/*.d
 -include ~/.latex.mk
+-include ~/latex.mk
 -include .latex.mk
+-include latex.mk
 
 prerequisite_: $(PREREQUISITE)
 
