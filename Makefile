@@ -31,10 +31,10 @@
 define help_message
 Makefile for LaTeX
 
-Usage:
+Usage
   make [<targets...>]
 
-Targets:
+Targets
   all (default):
     Build all documents in the current directory.
 
@@ -62,7 +62,7 @@ Targets:
   upgrade:
     Upgrade the setup.
 
-See also:
+See also
   https://github.com/tueda/makefile4latex
 endef
 
@@ -863,7 +863,7 @@ $(target_basename:=.jpg) \
 $(target_basename:=.png) \
 $(target_basename:=.pdf): | prerequisite
 
-prerequisite: prerequisite_
+prerequisite: _prerequisite
 	@$(call make_for_each_subdir,$(PREREQUISITE_SUBDIRS))
 
 mostlyclean:
@@ -979,9 +979,9 @@ upgrade = \
 		:; \
 	}
 
-FORCE:
+_FORCE:
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png ps prerequisite svg upgrade watch FORCE
+.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png ps prerequisite svg upgrade watch _FORCE
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
@@ -1462,7 +1462,7 @@ ifneq ($(DIFF),)
 # working copy) given in the DIFF variable and typeset the resultant document.
 # Limitation: though DIFF=rev1..rev2 is supported, the original LaTeX source
 # file needs to exist as long as we want to use the rule *.tex -> *-diff.*.
-%-diff.$(default_target): %.tex FORCE
+%-diff.$(default_target): %.tex _FORCE
 	@$(call get_rev,$(DIFF),_rev1,_rev2); \
 	if [ -n "$$_rev1" ]; then \
 		if git cat-file -e "$$_rev1" 2>/dev/null; then :; else \
@@ -1652,6 +1652,6 @@ endif
 -include .latex.mk
 -include latex.mk
 
-prerequisite_: $(PREREQUISITE)
+_prerequisite: $(PREREQUISITE)
 
-.PHONY: prerequisite_
+.PHONY: _prerequisite
