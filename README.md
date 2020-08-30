@@ -14,7 +14,8 @@ documents.
 Features
 --------
 
-- Only a single file ([`Makefile`](https://github.com/tueda/makefile4latex/blob/master/Makefile)).
+- Only a single file ([`Makefile`](https://github.com/tueda/makefile4latex/blob/master/Makefile))
+  distributed under the MIT License. Just put it into your directory.
 - Automatic detection of LaTeX source files. Just type `make` and then
   the Makefile knows what to do.
 - Dependency tracking.
@@ -23,6 +24,7 @@ Features
   [glossaries](https://ctan.org/pkg/glossaries),
   [axodraw2](https://ctan.org/pkg/axodraw2) etc.
 - Colorized output.
+- [Latexdiff](https://www.ctan.org/pkg/latexdiff) between Git revisions (`DIFF` variable).
 - Can create tar-gzipped source files for [arXiv](https://arxiv.org/)
   submission (`make dist`).
 - Can watch sources and automatically typeset documents (`make watch`).
