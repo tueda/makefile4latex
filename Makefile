@@ -949,7 +949,7 @@ watch:
 # file, this target downloads that of the Makefile4LaTeX repository.
 upgrade:
 	@$(call make_for_each_subdir,upgrade)
-	@for file in * .*; do \
+	@for file in * .* $(_cached_Makefile); do \
 		case "$$file" in \
 			*.swp|*.tmp|*~) \
 				continue \
