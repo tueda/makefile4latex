@@ -49,16 +49,25 @@ ifeq ($(MAKEFILE4LATEX_REVISION),)
 MAKEFILE4LATEX_REVISION = master
 endif
 
+# Makefile to be downloaded/included.
 _Makefile_URL = https://raw.githubusercontent.com/tueda/makefile4latex/$(MAKEFILE4LATEX_REVISION)/Makefile
 
+# The MAKEFILE4LATEX_CACHE variable controls the cache location, which can be
+# set via
+# (1) command line,
+# (2) environment variable,
+# (3) the default cache location, which depends on the OS.
+ifeq ($(MAKEFILE4LATEX_CACHE),)
 _uname_s := $(shell uname -s)
-
 ifeq ($(_uname_s),Darwin)
-_cache_dir = $(HOME)/Library/Caches/makefile4latex/$(MAKEFILE4LATEX_REVISION)
+MAKEFILE4LATEX_CACHE = $(HOME)/Library/Caches/makefile4latex
 else
-_cache_dir = $(HOME)/.cache/makefile4latex/$(MAKEFILE4LATEX_REVISION)
+MAKEFILE4LATEX_CACHE = $(HOME)/.cache/makefile4latex
+endif
 endif
 
+# The file path for the downloaded Makefile.
+_cache_dir = $(MAKEFILE4LATEX_CACHE)/$(MAKEFILE4LATEX_REVISION)
 _cached_Makefile := $(_cache_dir)/Makefile
 
 include $(_cached_Makefile)
