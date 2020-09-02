@@ -29,7 +29,25 @@
 # SOFTWARE.
 #
 
+# The MAKEFILE4LATEX_REVISION variable controls the revision of Makefile for
+# LaTeX to be downloaded. It can be set in the following places (in descending
+# precedence):
+# (1) command line,
+# (2) configuration files: latex.mk, .latex.mk, ~/latex.mk, ~/.latex.mk,
+# (3) environment variable,
+# (4) the default value: "master".
+ifneq ($(origin MAKEFILE4LATEX_REVISION),command line)
+ifneq ($(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk),)
+# Extract lines "MAKEFILE4LATEX_REVISION = ..." in configuration files and then
+# evaluate the last one. The extraction should work unless the user writes
+# tricky stuff (for example, continuation lines).
+$(eval $(shell grep '^ *MAKEFILE4LATEX_REVISION *=' $(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk) | sed 's/^.*://' | tail -n 1))
+endif
+endif
+# Define the default value, if undefined.
+ifeq ($(MAKEFILE4LATEX_REVISION),)
 MAKEFILE4LATEX_REVISION = master
+endif
 
 _Makefile_URL = https://raw.githubusercontent.com/tueda/makefile4latex/$(MAKEFILE4LATEX_REVISION)/Makefile
 
@@ -41,7 +59,7 @@ else
 _cache_dir = $(HOME)/.cache/makefile4latex/$(MAKEFILE4LATEX_REVISION)
 endif
 
-_cached_Makefile = $(_cache_dir)/Makefile
+_cached_Makefile := $(_cache_dir)/Makefile
 
 include $(_cached_Makefile)
 
