@@ -92,6 +92,10 @@ check_tarball() {(
   MAKE_ARGS='DIFF=44aaae0..HEAD' NO_CLEAN=1 test_dir latexdiff 1
 }
 
+@test "fail" {
+  false
+}
+
 teardown() {
   find . -name make.out -exec rm {} \;
   find . -name '*-very-long-*' -exec rm {} \;
