@@ -93,6 +93,9 @@ TOOLCHAIN = pdflatex
 # Specify a commit range for latexdiff.
 DIFF =
 
+# Number of iterations for typesetting.
+MAXREPEAT = 5
+
 # (for debugging) Keep temporary directories if its value is non-empty.
 KEEP_TEMP =
 
@@ -1029,14 +1032,19 @@ typeset = \
 	else \
 		$(check_failed); \
 	fi; \
-	for i in 1 2 3 4 5; do \
+	i=1; \
+	while [ $$i -lt $(MAXREPEAT) ]; do \
 		$(do_bibtex); \
 		$(do_sortref); \
 		$(do_makeindex); \
 		$(do_makeglossaries); \
 		$(do_axohelp); \
 		$(call do_latex,$1); \
+		i=$$((i + 1)); \
 	done; \
+	if $$need_bibtex || $$need_sortref || $$need_makeindex || $$need_makeglossaries || $$need_axohelp || $$need_latex; then \
+		$(call warning_message,Typesetting did not finish after $(MAXREPEAT) iterations. The document may be incomplete.); \
+	fi; \
 	touch $@; \
 	rmfile=; \
 	$(call mk_fls_dep,$@,$*.fls); \
