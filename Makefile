@@ -329,6 +329,18 @@ get_rev = \
 		$2=$$(expr "$1" : '\(.*[^.]\)\.\.'); \
 	else \
 		$2="$1"; \
+	fi; \
+	if [ -n "$$$2" ]; then \
+		if git cat-file -e "$$$2" 2>/dev/null; then :; else \
+			$(call error_message,invalid Git revision: $$$2); \
+			exit 1; \
+		fi; \
+	fi; \
+	if [ -n "$$$3" ]; then \
+		if git cat-file -e "$$$3" 2>/dev/null; then :; else \
+			$(call error_message,invalid Git revision: $$$3); \
+			exit 1; \
+		fi; \
 	fi
 
 endif
@@ -1465,20 +1477,12 @@ ifneq ($(DIFF),)
 %-diff.$(default_target): %.tex _FORCE
 	@$(call get_rev,$(DIFF),_rev1,_rev2); \
 	if [ -n "$$_rev1" ]; then \
-		if git cat-file -e "$$_rev1" 2>/dev/null; then :; else \
-			$(call error_message,invalid revision: $$_rev1); \
-			exit 1; \
-		fi; \
 		if git show "$$_rev1:./$<" >/dev/null 2>&1; then :; else \
 			$(call error_message,$< not in $$_rev1); \
 			exit 1; \
 		fi; \
 	fi; \
 	if [ -n "$$_rev2" ]; then \
-		if git cat-file -e "$$_rev2" 2>/dev/null; then :; else \
-		$(call error_message,invalid revision: $$_rev2); \
-			exit 1; \
-		fi; \
 		if git show "$$_rev2:./$<" >/dev/null 2>&1; then :; else \
 			$(call error_message,$< not in $$_rev2); \
 			exit 1; \
