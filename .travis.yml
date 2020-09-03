@@ -22,7 +22,7 @@ before_install:
         ;;
     esac
   - |
-    if [ ! -e ./texlive/bin/$arch/tlmgr ]; then
+    if [ ! -e texlive/bin/$arch/tlmgr ]; then
       wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -O - | tar -x --gzip
       echo "
       selected_scheme scheme-minimal
@@ -47,6 +47,12 @@ before_install:
     fi
   - export PATH=$(pwd)/texlive/bin/$arch:$PATH
   - tlmgr update --self
+  # sortref
+  - |
+    if [ ! -e texlive/bin/$arch/sortref ]; then
+      wget -O texlive/bin/$arch/sortref https://web.physik.rwth-aachen.de/~harlander/software/sortref/sortref
+      chmod +x texlive/bin/$arch/sortref
+    fi
 
 script:
   - MAKE_COLORS=always ./tests/check.sh -T
