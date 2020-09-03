@@ -25,7 +25,8 @@
 
 # latest-raw-url: https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore
 
-# Based on https://raw.github.com/github/gitignore/7aec8fdf3287f253ddfd91b9fa18199f415eb87e/TeX.gitignore
+# Based on https://raw.githubusercontent.com/github/gitignore/6935207fef87dd7f0995b0260cdcdd38cf81e986/TeX.gitignore
+# (2020-05-19, CC0-1.0).
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
@@ -46,9 +47,9 @@
 *.xdv
 *-converted-to.*
 # these rules might exclude image files for figures etc.
-# *.ps
+*.ps
 # *.eps
-# *.pdf
+*.pdf
 
 ## Generated if empty string is given at "Please type another file name for output:"
 .pdf
@@ -138,9 +139,11 @@ acs-*.bib
 *.glo
 *.gls
 *.glsdefs
+*.lzo
+*.lzs
 
 # uncomment this for glossaries-extra (will ignore makeindex's style files!)
-# *.ist
+*.ist
 
 # gnuplottex
 *-gnuplottex-*
@@ -162,7 +165,7 @@ acs-*.bib
 
 # knitr
 *-concordance.tex
-# TODO Comment the next line if you want to keep your tikz graphics files
+# TODO Uncomment the next line if you use knitr and want to ignore its generated tikz files
 *.tikz
 *-tikzDictionary
 
@@ -280,8 +283,14 @@ TSWLatexianTemp*
 # Kile
 *.backup
 
+# gummi
+.*.swp
+
 # KBibTeX
 *~[0-9]*
+
+# TeXnicCenter
+*.tps
 
 # auto folder when using emacs and auctex
 ./auto/*
@@ -293,6 +302,16 @@ TSWLatexianTemp*
 # standalone packages
 *.sta
 
+# Makeindex log files
+*.lpz
+
+# xwatermark package
+*.xwm
+
+# REVTeX puts footnotes in the bibliography by default, unless the nofootinbib
+# option is specified. Footnotes are the stored in a file with suffix Notes.bib.
+# Uncomment the next line to have this generated file ignored.
+*Notes.bib
 ########
 
 # axodraw2
@@ -301,12 +320,6 @@ TSWLatexianTemp*
 
 # sortref
 *_ref.tex
-
-# makeindex's style files.
-*.ist
-
-# revtex
-*Notes.bib
 
 # convbkmk intermediate files.
 *-convbkmk.ps
@@ -319,9 +332,7 @@ TSWLatexianTemp*
 *.bb
 *.xbb
 
-# Output files. (These might exclude image files for figures etc.)
-*.pdf
-*.ps
+# arXiv tarballs.
 *.tar.gz
 
 # Temporary files.
