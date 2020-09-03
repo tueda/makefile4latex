@@ -1108,6 +1108,8 @@ do_bibtex = \
 	fi
 
 # $(do_sortref)
+# NOTE: though the sortref script doesn't require any restriction on 'ref-file',
+# we only support main-doc.tex + main-doc.ref -> main-doc_ref.tex.
 do_sortref = \
 	if $$need_sortref; then \
 		need_sortref=false; \

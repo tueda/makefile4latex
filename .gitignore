@@ -299,33 +299,36 @@ TSWLatexianTemp*
 *.ax1
 *.ax2
 
+# sortref
+*_ref.tex
+
 # makeindex's style files.
 *.ist
 
 # revtex
 *Notes.bib
 
-## convbkmk intermediate files.
+# convbkmk intermediate files.
 *-convbkmk.ps
 
-## dviout caches.
+# dviout caches.
 *.bmc
 *.pbm
 
-## Bounding boxes for dvipdfm/dvipdfmx.
+# Bounding boxes for dvipdfm/dvipdfmx.
 *.bb
 *.xbb
 
-## Output files. (These might exclude image files for figures etc.)
+# Output files. (These might exclude image files for figures etc.)
 *.pdf
 *.ps
 *.tar.gz
 
-## Temporary files.
+# Temporary files.
 *.tmp
 *.tmp*.*
 *_tmp.???
 
-## Directories created by the Makefile for LaTeX.
+# Directories created by the Makefile for LaTeX.
 .dep/
 .diff/
