@@ -46,4 +46,5 @@ before_install:
   - tlmgr update --self
 
 script:
+  - type make
   - MAKE_COLORS=always make -s check; status=$?; echo status=$status; exit $status
