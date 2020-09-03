@@ -22,11 +22,11 @@ test_dir() {(
   )
 
   if grep 'Rerun' $1/*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty'; then
-    echo "FAIL: documents incomplete"
+    echo "FAIL: documents incomplete" >&2
     exit 1
   fi
 
-  [ $# -le 1 ] && return
+  [ $# -le 1 ] && exit
 
   num=$(grep halt-on-error "$1/make.out" | wc -l)
   if [ $2 -ne $num ]; then
@@ -66,29 +66,50 @@ check_tarball() {(
 }
 
 @test "axohelp" {
+  if command -v axohelp >/dev/null; then :; else
+    skip "axohelp not available"
+  fi
   WITH_LONG_NAME=doc.tex test_dir axohelp 4
 }
 
 @test "platex_dvipdfmx" {
+  if command -v platex >/dev/null; then :; else
+    skip "platex not available"
+  fi
+  if command -v dvipdfmx >/dev/null; then :; else
+    skip "dvipdfmx not available"
+  fi
   test_dir platex_dvipdfmx 1
 }
 
 @test "dist" {
-  MAKE_ARGS='dist' test_dir bibtex && \
-  check_tarball bibtex/doc.tar.gz 2 && \
-  MAKE_ARGS='dist' test_dir makeindex && \
-  check_tarball makeindex/doc.tar.gz 2 && \
-  MAKE_ARGS='dist' test_dir makeglossaries && \
+  MAKE_ARGS='dist' test_dir bibtex
+  check_tarball bibtex/doc.tar.gz 2
+  MAKE_ARGS='dist' test_dir makeindex
+  check_tarball makeindex/doc.tar.gz 2
+  MAKE_ARGS='dist' test_dir makeglossaries
   check_tarball makeglossaries/doc.tar.gz 3
 }
 
 @test "latexdiff1" {
+  if command -v latexdiff >/dev/null; then :; else
+    skip "latexdiff not available"
+  fi
+  if command -v latexpand >/dev/null; then :; else
+    skip "latexpand not available"
+  fi
   MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
 }
 
 @test "latexdiff2" {
-  MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3 && \
-  MAKE_ARGS='DIFF=44aaae0' NO_CLEAN=1 test_dir latexdiff 2 && \
+  if command -v latexdiff >/dev/null; then :; else
+    skip "latexdiff not available"
+  fi
+  if command -v latexpand >/dev/null; then :; else
+    skip "latexpand not available"
+  fi
+  MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
+  MAKE_ARGS='DIFF=44aaae0' NO_CLEAN=1 test_dir latexdiff 2
   MAKE_ARGS='DIFF=44aaae0..HEAD' NO_CLEAN=1 test_dir latexdiff 1
 }
 
