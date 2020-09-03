@@ -3,6 +3,9 @@ os:
   - linux
   - osx
 
+git:
+  depth: 1000
+
 cache:
   directories:
     - texlive
