@@ -72,6 +72,13 @@ check_tarball() {(
   WITH_LONG_NAME=doc.tex test_dir axohelp 4
 }
 
+@test "sortref" {
+  if command -v sortref >/dev/null; then :; else
+    skip "sortref not available"
+  fi
+  test_dir sortref 3
+}
+
 @test "platex_dvipdfmx" {
   if command -v platex >/dev/null; then :; else
     skip "platex not available"
