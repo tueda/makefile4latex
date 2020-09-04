@@ -29,42 +29,53 @@
 # SOFTWARE.
 #
 
+# $(call _read_config,VARIABLE) reads the specified variable from the user
+# configuration. The variable should be defined in the following places
+# (in descending precedence):
+#   (1) command line (e.g., MAKE XX=YY),
+#   (2) configuration files:
+#     (a) latex.mk
+#     (b) .latex.mk
+#     (c) ~/latex.mk
+#     (d) ~/.latex.mk
+#   (3) environment variable.
+#
+# First, this macro checks if the variable is already defined by "command line".
+# If not, then the macro tries to extract lines that matches with "$1 = ..." in
+# configuration files and then evaluate the last one. The extraction should work
+# unless the user writes tricky stuff (for example, continuation lines).
+_read_config = \
+	$(eval $(strip \
+		$(if $(findstring command,$(origin $1)),, \
+			$(if $(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk), \
+				$(shell grep '^ *$1 *=' $(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk) \
+					| sed 's/^.*://' | tail -n 1) \
+			) \
+		) \
+	))
+
 # The MAKEFILE4LATEX_REVISION variable controls the revision of Makefile for
-# LaTeX to be downloaded. It can be set in the following places (in descending
-# precedence):
-# (1) command line,
-# (2) configuration files: latex.mk, .latex.mk, ~/latex.mk, ~/.latex.mk,
-# (3) environment variable,
-# (4) the default value: "master".
-ifneq ($(origin MAKEFILE4LATEX_REVISION),command line)
-ifneq ($(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk),)
-# Extract lines "MAKEFILE4LATEX_REVISION = ..." in configuration files and then
-# evaluate the last one. The extraction should work unless the user writes
-# tricky stuff (for example, continuation lines).
-$(eval $(shell grep '^ *MAKEFILE4LATEX_REVISION *=' $(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk) | sed 's/^.*://' | tail -n 1))
-endif
-endif
-# Define the default value, if undefined.
+# LaTeX to be downloaded.
+$(call _read_config,MAKEFILE4LATEX_REVISION)
+# The default value.
 ifeq ($(MAKEFILE4LATEX_REVISION),)
-MAKEFILE4LATEX_REVISION = master
+override MAKEFILE4LATEX_REVISION = master
 endif
 
-# Makefile to be downloaded/included.
-_Makefile_URL = https://raw.githubusercontent.com/tueda/makefile4latex/$(MAKEFILE4LATEX_REVISION)/Makefile
-
-# The MAKEFILE4LATEX_CACHE variable controls the cache location, which can be
-# set via
-# (1) command line,
-# (2) environment variable,
-# (3) the default cache location, which depends on the OS.
+# The MAKEFILE4LATEX_CACHE variable controls the cache location.
+$(call _read_config,MAKEFILE4LATEX_CACHE)
+# The default value depends on the OS.
 ifeq ($(MAKEFILE4LATEX_CACHE),)
 _uname_s := $(shell uname -s)
 ifeq ($(_uname_s),Darwin)
-MAKEFILE4LATEX_CACHE = $(HOME)/Library/Caches/makefile4latex
+override MAKEFILE4LATEX_CACHE = $(HOME)/Library/Caches/makefile4latex
 else
-MAKEFILE4LATEX_CACHE = $(HOME)/.cache/makefile4latex
+override MAKEFILE4LATEX_CACHE = $(HOME)/.cache/makefile4latex
 endif
 endif
+
+# Makefile to be included.
+_Makefile_URL := https://raw.githubusercontent.com/tueda/makefile4latex/$(MAKEFILE4LATEX_REVISION)/Makefile
 
 # The file path for the downloaded Makefile.
 _cache_dir = $(MAKEFILE4LATEX_CACHE)/$(MAKEFILE4LATEX_REVISION)
@@ -84,5 +95,11 @@ $(_cached_Makefile):
 		echo 'error: wget or curl required to download makefile4latex' >&2; \
 		exit 1; \
 	fi
+
+_show_cache_info:
+	@echo "MAKEFILE4LATEX_REVISION = $(MAKEFILE4LATEX_REVISION)"
+	@echo "MAKEFILE4LATEX_CACHE    = $(MAKEFILE4LATEX_CACHE)"
+	@echo "        downloaded from : $(_Makefile_URL)"
+	@echo "              cached to : $(_cached_Makefile)"
 
 # latest-raw-url: https://raw.githubusercontent.com/tueda/makefile4latex/master/get/Makefile
