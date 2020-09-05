@@ -79,6 +79,22 @@ check_tarball() {(
   test_dir sortref 3
 }
 
+@test "platex_dvips" {
+  if command -v platex >/dev/null; then :; else
+    skip "platex not available"
+  fi
+  if command -v dvips >/dev/null; then :; else
+    skip "dvips not available"
+  fi
+  if command -v convbkmk >/dev/null; then :; else
+    skip "convbkmk not available"
+  fi
+  if command -v ps2pdf >/dev/null; then :; else
+    skip "ps2pdf not available"
+  fi
+  test_dir platex_dvips 2
+}
+
 @test "platex_dvipdfmx" {
   if command -v platex >/dev/null; then :; else
     skip "platex not available"
