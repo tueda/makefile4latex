@@ -10,7 +10,17 @@ cache:
   directories:
     - texlive
 
+addons:
+  apt:
+    packages:
+      - ghostscript
+
 before_install:
+  # Ghostscript on macOS
+  - |
+    if [ $TRAVIS_OS_NAME = osx ]; then
+      brew install ghostscript
+    fi
   # TeX Live
   - |
     case $TRAVIS_OS_NAME in
