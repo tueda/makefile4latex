@@ -8,7 +8,7 @@ git:
 
 cache:
   directories:
-    - texlive
+    - $HOME/texlive
 
 addons:
   apt:
@@ -32,16 +32,17 @@ before_install:
         ;;
     esac
   - |
-    if [ ! -e texlive/bin/$arch/tlmgr ]; then
+    TEXLIVE_PATH=$HOME/texlive
+    if [ ! -e $TEXLIVE_PATH/bin/$arch/tlmgr ]; then
       wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -O - | tar -x --gzip
       echo "
       selected_scheme scheme-minimal
-      TEXDIR ./texlive
+      TEXDIR $TEXLIVE_PATH
       TEXMFCONFIG ~/.texlive/texmf-config
       TEXMFHOME ~/texmf
-      TEXMFLOCAL ./texlive/texmf-local
-      TEXMFSYSCONFIG ./texlive/texmf-config
-      TEXMFSYSVAR ./texlive/texmf-var
+      TEXMFLOCAL $TEXLIVE_PATH/texmf-local
+      TEXMFSYSCONFIG $TEXLIVE_PATH/texmf-config
+      TEXMFSYSVAR $TEXLIVE_PATH/texmf-var
       TEXMFVAR ~/.texlive/texmf-var
       collection-basic 1         # bibtex, dvipdfmx, makeindex, pdflatex
       collection-binextra 1      # latexdiff, latexpand
@@ -54,15 +55,18 @@ before_install:
       option_src 0
       " | sed -e 's/^ *//' | sed -e 's/ *#.*$//' >texlive.profile
       ./install-tl-20*/install-tl --profile texlive.profile
+      rm -rf texlive.profile install-tl-20*
     fi
-  - export PATH=$(pwd)/texlive/bin/$arch:$PATH
+  - export PATH=$TEXLIVE_PATH/bin/$arch:$PATH
   - tlmgr update --self
-  # sortref
+  # sortref: we also put it into the TeX Live directory.
   - |
-    if [ ! -e texlive/bin/$arch/sortref ]; then
-      wget -O texlive/bin/$arch/sortref https://web.physik.rwth-aachen.de/~harlander/software/sortref/sortref
-      chmod +x texlive/bin/$arch/sortref
+    if [ ! -e $TEXLIVE_PATH/bin/$arch/sortref ]; then
+      wget -O $TEXLIVE_PATH/bin/$arch/sortref https://web.physik.rwth-aachen.de/~harlander/software/sortref/sortref
+      chmod +x $TEXLIVE_PATH/bin/$arch/sortref
     fi
 
 script:
   - MAKE_COLORS=always ./tests/check.sh -T
+  # Check if the working directory is not dirty.
+  - git status && [ -z "$(git status --porcelain)" ]

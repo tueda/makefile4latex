@@ -1,18 +1,25 @@
 environment:
-    matrix:
-      - TARGET: cygwin64
+  matrix:
+    - TARGET: cygwin64
 
 install:
   - cmd: if [%TARGET%]==[cygwin64] (
-      C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P texlive-collection-binextra,texlive-collection-langjapanese,texlive-collection-latex,texlive-collection-latexextra,texlive-collection-plaingeneric,texlive-collection-mathscience )
+      C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup
+        -R c:\cygwin64 -s http://cygwin.mirror.constant.com
+        -P texlive-collection-binextra
+        -P texlive-collection-langjapanese
+        -P texlive-collection-latex
+        -P texlive-collection-latexextra
+        -P texlive-collection-plaingeneric
+        -P texlive-collection-mathscience )
+
+before_build:
+  - cmd: if [%TARGET%]==[cygwin64] (
+      C:\cygwin64\bin\bash -e -l -c "git clone $(cygpath $APPVEYOR_BUILD_FOLDER)" )
 
 build_script:
-  # latexdiff 1.2.1 doesn't work with perl 5.26.
-  # Workaround: install a newer version.
   - cmd: if [%TARGET%]==[cygwin64] (
-      git clone https://github.com/ftilmann/latexdiff.git &&
-      git -C latexdiff checkout fcfd944 &&
-      C:\cygwin64\bin\bash -e -l -c "cd `cygpath $APPVEYOR_BUILD_FOLDER`/latexdiff && make distribution && cp dist/latexdiff-fast latexdiff" )
+      C:\cygwin64\bin\bash -e -l -c "cd $APPVEYOR_PROJECT_NAME && MAKE_COLORS=always make -s check" )
+  # Check if the working directory is not dirty.
   - cmd: if [%TARGET%]==[cygwin64] (
-      C:\cygwin64\bin\bash -e -l -c "git clone `cygpath $APPVEYOR_BUILD_FOLDER`" &&
-      C:\cygwin64\bin\bash -e -l -c "PATH=`cygpath $APPVEYOR_BUILD_FOLDER`/latexdiff:$PATH MAKE_COLORS=always make -s -C $APPVEYOR_PROJECT_NAME check" )
+      C:\cygwin64\bin\bash -e -l -c "cd $APPVEYOR_PROJECT_NAME && make check-dirty" )
