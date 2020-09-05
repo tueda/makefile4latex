@@ -1242,7 +1242,7 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 		dvips, \
 		$(call typeset,$(latex)) && $(call exec,$(dvips) $*), \
 		dvips_convbkmk, \
-		$(call typeset,$(latex)) && $(call exec,$(dvips) $*) && $(call exec,$(convbkmk) $*.ps) && mv $*-convbkmk.ps, \
+		$(call typeset,$(latex)) && $(call exec,$(dvips) $*) && $(call exec,$(convbkmk) $*.ps) && mv $*-convbkmk.ps $*.ps, \
 		dvipdf, \
 		$(call typeset,$(latex)) && $(call exec,$(dvips) $*), \
 		pdflatex, \
@@ -1283,7 +1283,7 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 			dvips, \
 			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false), \
 			dvips_convbkmk, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false) && $(call exec,$(convbkmk) $*.ps,false) && mv $*-convbkmk.ps, \
+			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false) && $(call exec,$(convbkmk) $*.ps,false) && mv $*-convbkmk.ps $*.ps, \
 			dvipdf, \
 			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false), \
 			pdflatex, \
