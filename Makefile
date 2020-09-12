@@ -1227,39 +1227,52 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	@$(init_toolchain)
 	@$(call switch,$(typeset_mode), \
 		dvips, \
-		$(call typeset,$(latex)), \
+			$(call typeset,$(latex)), \
 		dvips_convbkmk, \
-		$(call typeset,$(latex)), \
+			$(call typeset,$(latex)), \
 		dvipdf, \
-		$(call typeset,$(latex)), \
+			$(call typeset,$(latex)), \
 		pdflatex, \
-		$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)), \
+			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)), \
 	)
 
 .tex.ps:
 	@$(init_toolchain)
 	@$(call switch,$(typeset_mode), \
 		dvips, \
-		$(call typeset,$(latex)) && $(call exec,$(dvips) $*), \
+			$(call typeset,$(latex)) && \
+			$(call exec,$(dvips) $*), \
 		dvips_convbkmk, \
-		$(call typeset,$(latex)) && $(call exec,$(dvips) $*) && $(call exec,$(convbkmk) $*.ps) && mv $*-convbkmk.ps $*.ps, \
+			$(call typeset,$(latex)) && \
+			$(call exec,$(dvips) $*) && \
+			$(call exec,$(convbkmk) $*.ps) && \
+			mv $*-convbkmk.ps $*.ps, \
 		dvipdf, \
-		$(call typeset,$(latex)) && $(call exec,$(dvips) $*), \
+			$(call typeset,$(latex)) && \
+			$(call exec,$(dvips) $*), \
 		pdflatex, \
-		$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)) && $(call exec,$(dvips) $*), \
+			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)) && \
+			$(call exec,$(dvips) $*), \
 	)
 
 .tex.pdf:
 	@$(init_toolchain)
 	@$(call switch,$(typeset_mode), \
 		dvips, \
-		$(call typeset,$(latex)) && $(call exec,$(dvips) $*) && $(call exec,$(ps2pdf) $*.ps $*.pdf), \
+			$(call typeset,$(latex)) && \
+			$(call exec,$(dvips) $*) && \
+			$(call exec,$(ps2pdf) $*.ps $*.pdf), \
 		dvips_convbkmk, \
-		$(call typeset,$(latex)) && $(call exec,$(dvips) $*) && $(call exec,$(convbkmk) $*.ps) && mv $*-convbkmk.ps $*.ps && $(call exec,$(ps2pdf) $*.ps $*.pdf), \
+			$(call typeset,$(latex)) && \
+			$(call exec,$(dvips) $*) && \
+			$(call exec,$(convbkmk) $*.ps) && \
+			mv $*-convbkmk.ps $*.ps && \
+			$(call exec,$(ps2pdf) $*.ps $*.pdf), \
 		dvipdf, \
-		$(call typeset,$(latex)) && $(call exec,$(dvipdf) $*), \
+			$(call typeset,$(latex)) && \
+			$(call exec,$(dvipdf) $*), \
 		pdflatex, \
-		$(call typeset,$(latex)), \
+			$(call typeset,$(latex)), \
 	)
 
 # This always updates the timestamp of the target (.log).
@@ -1270,35 +1283,48 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 		dvi, \
 		$(call switch,$(typeset_mode), \
 			dvips, \
-			$(call typeset,$(latex),false), \
+				$(call typeset,$(latex),false), \
 			dvips_convbkmk, \
-			$(call typeset,$(latex),false), \
+				$(call typeset,$(latex),false), \
 			dvipdf, \
-			$(call typeset,$(latex),false), \
+				$(call typeset,$(latex),false), \
 			pdflatex, \
-			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false), \
+				$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false), \
 		), \
 		ps, \
 		$(call switch,$(typeset_mode), \
 			dvips, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false), \
+				$(call typeset,$(latex),false) && \
+				$(call exec,$(dvips) $*,false), \
 			dvips_convbkmk, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false) && $(call exec,$(convbkmk) $*.ps,false) && mv $*-convbkmk.ps $*.ps, \
+				$(call typeset,$(latex),false) && \
+				$(call exec,$(dvips) $*,false) && \
+				$(call exec,$(convbkmk) $*.ps,false) && \
+				mv $*-convbkmk.ps $*.ps, \
 			dvipdf, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false), \
+				$(call typeset,$(latex),false) && \
+				$(call exec,$(dvips) $*,false), \
 			pdflatex, \
-			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false) && $(call exec,$(dvips) $*,false), \
+				$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false) && \
+				$(call exec,$(dvips) $*,false), \
 		), \
 		pdf, \
 		$(call switch,$(typeset_mode), \
 			dvips, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false) && $(call exec,$(ps2pdf) $*.ps $*.pdf,false), \
+				$(call typeset,$(latex),false) && \
+				$(call exec,$(dvips) $*,false) && \
+				$(call exec,$(ps2pdf) $*.ps $*.pdf,false), \
 			dvips_convbkmk, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvips) $*,false) && $(call exec,$(convbkmk) $*.ps,false) && mv $*-convbkmk.ps $*.ps && $(call exec,$(ps2pdf) $*.ps $*.pdf,false), \
+				$(call typeset,$(latex),false) && \
+				$(call exec,$(dvips) $*,false) && \
+				$(call exec,$(convbkmk) $*.ps,false) && \
+				mv $*-convbkmk.ps $*.ps && \
+				$(call exec,$(ps2pdf) $*.ps $*.pdf,false), \
 			dvipdf, \
-			$(call typeset,$(latex),false) && $(call exec,$(dvipdf) $*,false), \
+				$(call typeset,$(latex),false) && \
+				$(call exec,$(dvipdf) $*,false), \
 			pdflatex, \
-			$(call typeset,$(latex),false), \
+				$(call typeset,$(latex),false), \
 		) \
 	)
 
