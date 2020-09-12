@@ -884,12 +884,16 @@ prerequisite: _prerequisite
 mostlyclean:
 	@$(call make_for_each_subdir,mostlyclean)
 	@$(if $(mostlycleanfiles),$(call exec,rm -f $(mostlycleanfiles)))
-	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS)))
+	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS)), \
+		$(call exec,rm -rf $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS))) \
+	)
 
 clean:
 	@$(call make_for_each_subdir,clean)
 	@$(if $(cleanfiles),$(call exec,rm -f $(cleanfiles)))
-	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)),$(call exec,rm -rf $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)))
+	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)), \
+		$(call exec,rm -rf $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS))) \
+	)
 
 lint:
 	@$(builtin_lints) \
