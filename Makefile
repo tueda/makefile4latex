@@ -752,7 +752,7 @@ exec = \
 			printf "\033$(CL_NOTICE)$1\033$(CL_NORMAL)\n"; \
 			exec 3>&1; \
 			pipe_status=`{ { $1 3>&- 4>&-; echo $$? 1>&4; } | \
-					 $(colorize_output) >&3; } 4>&1`; \
+					$(colorize_output) >&3; } 4>&1`; \
 			exec 3>&-; \
 			[ "$$pipe_status" = 0 ] || failed=: \
 		, \
