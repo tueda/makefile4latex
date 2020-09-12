@@ -19,6 +19,7 @@ before_install:
   # Ghostscript on macOS
   - |
     if [ $TRAVIS_OS_NAME = osx ]; then
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
       brew install ghostscript
     fi
   # TeX Live
