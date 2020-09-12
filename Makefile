@@ -124,7 +124,7 @@ CLEANFILES =
 MOSTLYCLEANDIRS =
 
 # Additional directories to clean.
-CLEANDIRS =
+CLEANDIRS = .cache _cache cache
 
 # Prerequisite Make targets in the current directory.
 PREREQUISITE =

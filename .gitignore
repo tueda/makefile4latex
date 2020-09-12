@@ -343,3 +343,8 @@ TSWLatexianTemp*
 # Directories created by the Makefile for LaTeX.
 .dep/
 .diff/
+
+# cache directories.
+.cache
+_cache
+cache
