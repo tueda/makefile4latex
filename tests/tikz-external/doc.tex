@@ -1,0 +1,9 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{external}
+\tikzexternalize[prefix=tikzcache/]
+\begin{document}
+  \begin{tikzpicture}[domain=-3.14:3.14]
+    \draw[color=blue] plot (\x,{sin(\x r)});
+  \end{tikzpicture}
+\end{document}

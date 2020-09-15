@@ -79,6 +79,10 @@ check_tarball() {(
   test_dir sortref 3
 }
 
+@test "tikz-external" {
+  test_dir tikz-external 1
+}
+
 @test "platex_dvips" {
   if command -v platex >/dev/null; then :; else
     skip "platex not available"
