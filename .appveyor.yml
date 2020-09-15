@@ -20,6 +20,8 @@ before_build:
 build_script:
   - cmd: if [%TARGET%]==[cygwin64] (
       C:\cygwin64\bin\bash -e -l -c "cd $APPVEYOR_PROJECT_NAME && MAKE_COLORS=always make -s check" )
+  - cmd: if [%TARGET%]==[cygwin64] (
+      C:\cygwin64\bin\bash -e -l -c "cd $APPVEYOR_PROJECT_NAME && MAKE_COLORS=always make -s check BUILDDIR=build" )
   # Check if the working directory is not dirty.
   - cmd: if [%TARGET%]==[cygwin64] (
       C:\cygwin64\bin\bash -e -l -c "cd $APPVEYOR_PROJECT_NAME && make check-dirty" )

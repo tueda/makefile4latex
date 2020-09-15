@@ -96,6 +96,9 @@ DIFF =
 # Number of iterations for typesetting.
 MAXREPEAT = 5
 
+# Build directory.
+BUILDDIR =
+
 # (for debugging) Keep temporary directories if its value is non-empty.
 KEEP_TEMP =
 
@@ -459,7 +462,8 @@ latex_impl = $(strip \
 	$(if $(findstring -recorder,$(LATEX_OPT)),,-recorder) \
 )
 
-latex_noopt = $(call cache,latex_noopt_impl)
+# (latex_noopt) doesn't include $(LATEX_OPT).
+latex_noopt = $(call cache,latex_noopt_impl)$(if $(BUILDDIR), -output-directory=$(BUILDDIR))
 
 latex_noopt_impl = $(call pathsearch2,latex,LATEX,latex)
 
@@ -884,15 +888,15 @@ prerequisite: _prerequisite
 mostlyclean:
 	@$(call make_for_each_subdir,mostlyclean)
 	@$(if $(mostlycleanfiles),$(call exec,rm -f $(mostlycleanfiles)))
-	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS)), \
-		$(call exec,rm -rf $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS))) \
+	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(BUILDDIR) $(MOSTLYCLEANDIRS)), \
+		$(call exec,rm -rf $(wildcard $(DEPDIR) $(DIFFDIR) $(BUILDDIR) $(MOSTLYCLEANDIRS))) \
 	)
 
 clean:
 	@$(call make_for_each_subdir,clean)
 	@$(if $(cleanfiles),$(call exec,rm -f $(cleanfiles)))
-	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)), \
-		$(call exec,rm -rf $(wildcard $(DEPDIR) $(DIFFDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS))) \
+	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(BUILDDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)), \
+		$(call exec,rm -rf $(wildcard $(DEPDIR) $(DIFFDIR) $(BUILDDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS))) \
 	)
 
 lint:
@@ -929,8 +933,13 @@ check:
 		fi; \
 	done
 
-# The "watch" mode. Try .log instead of .pdf/.dvi files, otherwise make would
-# continuously try to typeset for sources previously failed.
+# The "watch" mode. Try to update .log files instead of .pdf/.dvi files,
+# otherwise make would continuously try to typeset for sources previously
+# failed.
+#
+# NOTE: making .log files requires BUILDDIR=$(BUILDDIR) because the pattern rule
+# needs the value when the rule is defined (before including user configuration
+# files).
 watch:
 	@$(init_toolchain)
 	@if $(if $(srctexfiles:.tex=.$(default_target)),:,false); then \
@@ -944,11 +953,15 @@ watch:
 				$(call set_title,failed); \
 			fi; \
 		fi; \
+		$(if $(BUILDDIR), \
+			mkdir -p $(BUILDDIR); \
+		) \
+		touch $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); \
 		while :; do \
 			sleep 1; \
-			if $(MAKE) -q -s $(srctexfiles:.tex=.log); then :; else \
+			if $(MAKE) -q -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); then :; else \
 				$(call set_title,running); \
-				if time $(MAKE) -s $(srctexfiles:.tex=.log); then \
+				if time $(MAKE) -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); then \
 					$(call set_title,watching); \
 				else \
 					$(call set_title,failed); \
@@ -1008,8 +1021,11 @@ typeset = \
 	rmfile=$@; \
 	rmauxfile=; \
 	$(if $2,rmfile=;dont_delete_on_failure=1;) \
+	$(if $(BUILDDIR), \
+		mkdir -p $(BUILDDIR); \
+	) \
 	oldfile_prefix=$*.tmp$$$$; \
-	trap 'rm -f $$rmfile $$rmauxfile $$oldfile_prefix*' 0 1 2 3 15; \
+	trap 'rm -f $$rmfile $$rmauxfile $(build_prefix)$$oldfile_prefix*' 0 1 2 3 15; \
 	failed=false; \
 	if [ -f '$@' ]; then \
 		need_latex=$(if $(filter-out %.ref %.bib %.bst %.idx %.glo,$?),:,false); \
@@ -1019,7 +1035,7 @@ typeset = \
 		need_makeglossaries=$(if $(filter %.glo,$?),:,false); \
 		need_axohelp=$(if $(filter %.ax2,$?),:,false); \
 		if $$need_sortref || $$need_bibtex; then \
-			[ ! -f '$*.aux' ] && need_latex=:; \
+			[ ! -f '$(build_prefix)$*.aux' ] && need_latex=:; \
 		fi; \
 	else \
 		need_latex=:; \
@@ -1049,21 +1065,27 @@ typeset = \
 	if $$need_bibtex || $$need_sortref || $$need_makeindex || $$need_makeglossaries || $$need_axohelp || $$need_latex; then \
 		$(call warning_message,Typesetting did not finish after $(MAXREPEAT) iterations. The document may be incomplete.); \
 	fi; \
-	touch $@; \
 	rmfile=; \
-	$(call mk_fls_dep,$@,$*.fls); \
-	$(call mk_blg_dep,$@,$*.blg); \
-	$(check_reffile) && $(call mk_ref_dep,$@,$(<:.tex=.ref)); \
+	$(call mk_fls_dep,$@,$(build_prefix)$*.fls); \
+	$(call mk_blg_dep,$@,$(build_prefix)$*.blg); \
+	$(check_reffile) && $(call mk_ref_dep,$@,$*.ref); \
 	:
 
-# $(call do_backup,FILE) creates a backup file.
-do_backup = \
-	[ -f '$1' ] && cp '$1' "$$oldfile_prefix$(suffix $1)"
+# $(build_prefix) is "$(BUILDDIR)/" if BUILDDIR is given, otherwise empty.
+build_prefix = $(if $(BUILDDIR),$(BUILDDIR)/,)
 
-# $(call check_modified,FILE) checks if the file was modified in comparison with
-# the backup file.
+# $(mv_target) moves the target file from BUILDDIR, if BUILDDIR is given,
+# otherwise does nothing.
+mv_target = $(if $(BUILDDIR),if [ -f $(BUILDDIR)/$@ ]; then mv $(BUILDDIR)/$@ $@; fi; [ -f $@ ],:)
+
+# $(call do_backup,FILE) creates a backup file for "$(build_prefix)/FILE".
+do_backup = \
+	[ -f '$(build_prefix)$1' ] && cp '$(build_prefix)$1' "$(build_prefix)$$oldfile_prefix$(suffix $1)"
+
+# $(call check_modified,FILE) checks if "$(build_prefix)/FILE" was modified
+# in comparison with the backup file.
 check_modified = \
-	$(call check_modified_impl,"$$oldfile_prefix$(suffix $1)",'$1')
+	$(call check_modified_impl,"$(build_prefix)$$oldfile_prefix$(suffix $1)",'$(build_prefix)$1')
 
 check_modified_impl = \
 	if [ -f $1 ] || [ -f $2 ]; then \
@@ -1113,8 +1135,8 @@ do_bibtex = \
 	if $$need_bibtex; then \
 		need_bibtex=false; \
 		$(call do_backup,$*.bbl); \
-		rmauxfile=$*.bbl; \
-		$(call exec,$(bibtex) $(<:.tex=)); \
+		rmauxfile=$(build_prefix)$*.bbl; \
+		$(call exec,$(bibtex) $(build_prefix)$*.aux); \
 		rmauxfile=; \
 		$(call check_modified,$*.bbl) && need_latex=:; \
 	fi
@@ -1126,7 +1148,12 @@ do_sortref = \
 	if $$need_sortref; then \
 		need_sortref=false; \
 		$(call do_backup,$*_ref.tex); \
-		$(call exec,$(sortref) $< $(<:.tex=.ref)); \
+		$(if $(BUILDDIR), \
+			$(call exec,$(sortref) $(BUILDDIR)/$* $*.ref); \
+			cp $(BUILDDIR)/$*_ref.tex .; \
+		, \
+			$(call exec,$(sortref) $* $*.ref); \
+		) \
 		$(call check_modified,$*_ref.tex) && need_latex=:; \
 	fi
 
@@ -1135,7 +1162,7 @@ do_makeindex = \
 	if $$need_makeindex; then \
 		need_makeindex=false; \
 		$(call do_backup,$*.ind); \
-		$(call exec,$(makeindex) $(<:.tex=)); \
+		$(call exec,$(makeindex) $(build_prefix)$*); \
 		$(call check_modified,$*.ind) && need_latex=:; \
 	fi
 
@@ -1144,7 +1171,11 @@ do_makeglossaries = \
 	if $$need_makeglossaries; then \
 		need_makeglossaries=false; \
 		$(call do_backup,$*.gls); \
-		$(call exec,$(makeglossaries) $(<:.tex=)); \
+		$(if $(BUILDDIR), \
+			$(call exec,$(makeglossaries) -d $(BUILDDIR) $*) \
+		, \
+			$(call exec,$(makeglossaries) $*) \
+		); \
 		$(call check_modified,$*.gls) && need_latex=:; \
 	fi
 
@@ -1153,7 +1184,7 @@ do_axohelp = \
 	if $$need_axohelp; then \
 		need_axohelp=false; \
 		$(call do_backup,$*.ax2); \
-		$(call exec,$(axohelp) $(<:.tex=)); \
+		$(call exec,$(axohelp) $(build_prefix)$*); \
 		$(call check_modified,$*.ax2) && need_latex=:; \
 	fi
 
@@ -1175,10 +1206,15 @@ mk_fls_dep = \
 				case $$f in \
 					*:*|/*) ;; \
 					*.fmt) ;; \
-					*) [ -f "$$f" ] && echo "$1 : \$$(wildcard $$f)";; \
+					*) \
+						if [ -f "$$f" ]; then \
+							echo "$1 : \$$(wildcard $$f)"; \
+							echo "$(build_prefix)$(basename $1).log : \$$(wildcard $$f)"; \
+						fi; \
+						;; \
 				esac; \
 			done; \
-		} >$(DEPDIR)/$1.fls.d; \
+		} | sort >$(DEPDIR)/$1.fls.d; \
 	fi
 
 # $(call mk_blg_dep,TARGET,BLG-FILE) saves dependencies from a .blg file.
@@ -1187,16 +1223,22 @@ mk_blg_dep = \
 		mkdir -p $(DEPDIR); \
 		{ \
 			for f in `{ grep 'Database file [^:]*:' '$2'; grep 'The style file:' '$2'; } | sed 's/[^:]*://'`; do \
-				[ -f "$$f" ] && echo "$1 : \$$(wildcard $$f)"; \
+				if [ -f "$$f" ]; then \
+					echo "$1 : \$$(wildcard $$f)"; \
+					echo "$(build_prefix)$(basename $1).log : \$$(wildcard $$f)"; \
+				fi; \
 			done; \
-		} >$(DEPDIR)/$1.blg.d; \
+		} | sort >$(DEPDIR)/$1.blg.d; \
 	fi
 
 # $(call mk_ref_dep,TARGET,REF-FILE) saves dependencies from a .ref file.
 mk_ref_dep = \
 	if [ -f '$2' ]; then \
 		mkdir -p $(DEPDIR); \
-		echo '$1: $2' >$(DEPDIR)/$1.ref.d; \
+		{ \
+			echo '$1 : $2'; \
+			echo '$(build_prefix)$(basename $1).log : $2'; \
+		} | sort >$(DEPDIR)/$1.ref.d; \
 	fi
 
 # $(call grep_lines,PATTERN,FILE) greps PATTERN and prints lines around matches
@@ -1205,25 +1247,25 @@ mk_ref_dep = \
 grep_lines = \
 	grep -B 3 $1 $2 | tr -d '\n'
 
-check_noreffile = $(call grep_lines,'_ref.tex','$*.log') | grep "File \`$*_ref.tex' not found" >/dev/null 2>&1
+check_noreffile = $(call grep_lines,'_ref.tex','$(build_prefix)$*.log') | grep "File \`$*_ref.tex' not found" >/dev/null 2>&1
 
-check_bblfile = $(call grep_lines,'.bbl','$*.log') | grep '$*.bbl' >/dev/null 2>&1
+check_bblfile = $(call grep_lines,'.bbl','$(build_prefix)$*.log') | grep '$*.bbl' >/dev/null 2>&1
 
-check_nobblfile = $(call grep_lines,'.bbl','$*.log') | grep 'No file $*.bbl' >/dev/null 2>&1
+check_nobblfile = $(call grep_lines,'.bbl','$(build_prefix)$*.log') | grep 'No file $*.bbl' >/dev/null 2>&1
 
-check_reffile = $(call grep_lines,'_ref.tex','$*.log') | grep '$*_ref.tex' >/dev/null 2>&1
+check_reffile = $(call grep_lines,'_ref.tex','$(build_prefix)$*.log') | grep '$*_ref.tex' >/dev/null 2>&1
 
-check_indfile = $(call grep_lines,'.ind','$*.log') | grep '$*.ind' >/dev/null 2>&1
+check_indfile = $(call grep_lines,'.ind','$(build_prefix)$*.log') | grep '$*.ind' >/dev/null 2>&1
 
-check_glsfile = $(call grep_lines,'.gls','$*.log') | grep '$*.gls' >/dev/null 2>&1
+check_glsfile = $(call grep_lines,'.gls','$(build_prefix)$*.log') | grep '$*.gls' >/dev/null 2>&1
 
 # axodraw2.sty uses primitive control sequences for reading .ax2 file, instead
 # of \input, without writing any jobname.ax2 in the log file. So we look for
 # jobname.ax1; if it is found in the log file, it means axodraw2.sty tries to
 # read jobname.ax2.
-check_ax2file = $(call grep_lines,'.ax1','$*.log') | grep '$*.ax1' >/dev/null 2>&1
+check_ax2file = $(call grep_lines,'.ax1','$(build_prefix)$*.log') | grep '$*.ax1' >/dev/null 2>&1
 
-check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty' >/dev/null 2>&1
+check_rerun = grep 'Rerun' '$(build_prefix)$*.log' | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty' >/dev/null 2>&1
 
 #NOTE: xelatex doesn't work with -output-format=dvi.
 
@@ -1231,13 +1273,17 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	@$(init_toolchain)
 	@$(call switch,$(typeset_mode), \
 		dvips, \
-			$(call typeset,$(latex)), \
+			$(call typeset,$(latex)) && \
+			$(mv_target), \
 		dvips_convbkmk, \
-			$(call typeset,$(latex)), \
+			$(call typeset,$(latex)) && \
+			$(mv_target), \
 		dvipdf, \
-			$(call typeset,$(latex)), \
+			$(call typeset,$(latex)) && \
+			$(mv_target), \
 		pdflatex, \
-			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)), \
+			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)) && \
+			$(mv_target), \
 	)
 
 .tex.ps:
@@ -1245,18 +1291,18 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	@$(call switch,$(typeset_mode), \
 		dvips, \
 			$(call typeset,$(latex)) && \
-			$(call exec,$(dvips) $*), \
+			$(call exec,$(dvips) $(build_prefix)$*.dvi), \
 		dvips_convbkmk, \
 			$(call typeset,$(latex)) && \
-			$(call exec,$(dvips) $*) && \
-			$(call exec,$(convbkmk) $*.ps) && \
-			mv $*-convbkmk.ps $*.ps, \
+			$(call exec,$(dvips) $(build_prefix)$*.dvi -o $(build_prefix)$*.ps) && \
+			$(call exec,$(convbkmk) $(build_prefix)$*.ps) && \
+			mv $(build_prefix)$*-convbkmk.ps $*.ps, \
 		dvipdf, \
 			$(call typeset,$(latex)) && \
-			$(call exec,$(dvips) $*), \
+			$(call exec,$(dvips) $(build_prefix)$*.dvi), \
 		pdflatex, \
 			$(call typeset,$(latex) $(PDFLATEX_DVI_OPT)) && \
-			$(call exec,$(dvips) $*), \
+			$(call exec,$(dvips) $(build_prefix)$*.dvi), \
 	)
 
 .tex.pdf:
@@ -1264,73 +1310,26 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	@$(call switch,$(typeset_mode), \
 		dvips, \
 			$(call typeset,$(latex)) && \
-			$(call exec,$(dvips) $*) && \
-			$(call exec,$(ps2pdf) $*.ps $*.pdf), \
+			$(call exec,$(dvips) $(build_prefix)$*.dvi -o $(build_prefix)$*.ps) && \
+			$(call exec,$(ps2pdf) $(build_prefix)$*.ps), \
 		dvips_convbkmk, \
 			$(call typeset,$(latex)) && \
-			$(call exec,$(dvips) $*) && \
-			$(call exec,$(convbkmk) $*.ps) && \
-			mv $*-convbkmk.ps $*.ps && \
-			$(call exec,$(ps2pdf) $*.ps $*.pdf), \
+			$(call exec,$(dvips) $(build_prefix)$*.dvi -o $(build_prefix)$*.ps) && \
+			$(call exec,$(convbkmk) $(build_prefix)$*.ps) && \
+			mv $(build_prefix)$*-convbkmk.ps $(build_prefix)$*.ps && \
+			$(call exec,$(ps2pdf) $(build_prefix)$*.ps), \
 		dvipdf, \
 			$(call typeset,$(latex)) && \
-			$(call exec,$(dvipdf) $*), \
+			$(call exec,$(dvipdf) $(build_prefix)$*.dvi), \
 		pdflatex, \
-			$(call typeset,$(latex)), \
+			$(call typeset,$(latex)) && \
+			$(mv_target), \
 	)
 
 # This always updates the timestamp of the target (.log).
-.tex.log:
-	@$(init_toolchain)
+$(build_prefix)%.log : %.tex
+	@$(MAKE) -s $*.$(default_target)
 	@touch $@
-	@$(call switch,$(default_target), \
-		dvi, \
-		$(call switch,$(typeset_mode), \
-			dvips, \
-				$(call typeset,$(latex),false), \
-			dvips_convbkmk, \
-				$(call typeset,$(latex),false), \
-			dvipdf, \
-				$(call typeset,$(latex),false), \
-			pdflatex, \
-				$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false), \
-		), \
-		ps, \
-		$(call switch,$(typeset_mode), \
-			dvips, \
-				$(call typeset,$(latex),false) && \
-				$(call exec,$(dvips) $*,false), \
-			dvips_convbkmk, \
-				$(call typeset,$(latex),false) && \
-				$(call exec,$(dvips) $*,false) && \
-				$(call exec,$(convbkmk) $*.ps,false) && \
-				mv $*-convbkmk.ps $*.ps, \
-			dvipdf, \
-				$(call typeset,$(latex),false) && \
-				$(call exec,$(dvips) $*,false), \
-			pdflatex, \
-				$(call typeset,$(latex) $(PDFLATEX_DVI_OPT),false) && \
-				$(call exec,$(dvips) $*,false), \
-		), \
-		pdf, \
-		$(call switch,$(typeset_mode), \
-			dvips, \
-				$(call typeset,$(latex),false) && \
-				$(call exec,$(dvips) $*,false) && \
-				$(call exec,$(ps2pdf) $*.ps $*.pdf,false), \
-			dvips_convbkmk, \
-				$(call typeset,$(latex),false) && \
-				$(call exec,$(dvips) $*,false) && \
-				$(call exec,$(convbkmk) $*.ps,false) && \
-				mv $*-convbkmk.ps $*.ps && \
-				$(call exec,$(ps2pdf) $*.ps $*.pdf,false), \
-			dvipdf, \
-				$(call typeset,$(latex),false) && \
-				$(call exec,$(dvipdf) $*,false), \
-			pdflatex, \
-				$(call typeset,$(latex),false), \
-		) \
-	)
 
 .dvi.eps:
 	@$(init_toolchain)
@@ -1358,7 +1357,11 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 # Experimental (TeXLive)
 .ltx.fmt:
 	@$(init_toolchain)
+	@$(if $(BUILDDIR), \
+		mkdir -p $(BUILDDIR) \
+	)
 	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(notdir $(basename $(latex_noopt))) $<\dump')
+	@$(mv_target)
 	@$(call exec,rm -f $*.pdf)
 
 # Experimental (TeXLive)
@@ -1383,14 +1386,26 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 #
 .tex.fmt:
 	@$(init_toolchain)
+	@$(if $(BUILDDIR), \
+		mkdir -p $(BUILDDIR) \
+	)
 	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(tex_format)' mylatexformat.ltx '$<')
+	@$(mv_target)
 	@$(call exec,rm -f $*.pdf)
 
 .dtx.cls:
+	@$(if $(BUILDDIR), \
+		mkdir -p $(BUILDDIR) \
+	)
 	@$(call exec,$(latex_noopt) $(basename $<).ins)
+	@$(mv_target)
 
 .dtx.sty:
+	@$(if $(BUILDDIR), \
+		mkdir -p $(BUILDDIR) \
+	)
 	@$(call exec,$(latex_noopt) $(basename $<).ins)
+	@$(mv_target)
 
 .odt.pdf:
 	@$(call exec,$(soffice) --headless --nologo --nofirststartwizard --convert-to pdf $<)
@@ -1420,7 +1435,9 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 #    - files created by LaTeX during typesetting, e.g., *.aux files,
 #    - *.ax2 file unless "\pdfoutput=1" is explicitly used.
 #    This default behaviour may be overwritten by EXTRADISTFILES and
-#    NODISTFILES.
+#    NODISTFILES. Note that .bbl, .ind, .gls files etc. should be included in
+#    the distribution.
+#    See https://arxiv.org/help/submit_tex#bibtex
 # 3. "PoSlogo.pdf" without "\pdfoutput=1" most likely indicates that
 #    "PoSLogo.ps" should be also included for the PoS class.
 # 4. 00README.XXX file if exists, and
@@ -1436,12 +1453,12 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	if head -5 "$*.tex" | sed 's/%.*//' | grep -q '\pdfoutput=1'; then \
 		pdfoutput=:; \
 	fi; \
-	if [ ! -f '$*.fls' ]; then \
-		$(call error_message,$*.fls not found. Delete $*.$(default_target) and then retry); \
+	if [ ! -f '$(build_prefix)$*.fls' ]; then \
+		$(call error_message,$(build_prefix)$*.fls not found. Delete $*.$(default_target) and then retry); \
 		exit 1; \
 	fi; \
 	dep_files=; \
-	for f in `grep INPUT '$*.fls' | sed 's/^INPUT *//' | sed '/^kpsewhich/d' | sed 's|^\.\/||' | sort | uniq`; do \
+	for f in `grep INPUT '$(build_prefix)$*.fls' | sed 's/^INPUT *//' | sed '/^kpsewhich/d' | sed 's|^\.\/||' | sort | uniq`; do \
 		case $$f in \
 			*:*|/*|*.aux|*.lof|*.lot|*.nav|*.out|*.spl|*.toc|*.vrb|*-eps-converted-to.pdf) ;; \
 			*) \
@@ -1490,7 +1507,8 @@ check_rerun = grep 'Rerun' $*.log | grep -v 'Package: rerunfilecheck\|rerunfilec
 	$(check_failed); \
 	mv $$tmpdir/$@ $@
 
-# $(call add_dist,FILE,TMPDIR,DEP_FILES_VAR)
+# $(call add_dist,FILE,TMPDIR,DEP_FILES_VAR) copies FILE to TMPDIR and add it to
+# DEP_FILES_VAR, if it is not in NODISTFILES.
 add_dist = { \
 		tmp_ok=:; \
 		for tmp_ff in $(NODISTFILES); do \
@@ -1501,6 +1519,11 @@ add_dist = { \
 		done; \
 		if $$tmp_ok; then \
 			tmp_d=`dirname "$1"`; \
+			$(if $(BUILDDIR), \
+				if [ "$$tmp_d" = "$(BUILDDIR)" ]; then \
+					tmp_d=.; \
+				fi; \
+			) \
 			mkdir -p "$2/$$tmp_d"; \
 			cp "$1" "$2/$$tmp_d" || exit 1; \
 			$3="$$$3 $1"; \
