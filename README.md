@@ -5,7 +5,7 @@ Makefile for LaTeX
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/fy41hbf7eijhyvx3/branch/master?svg=true)](https://ci.appveyor.com/project/tueda/makefile4latex)
 
 This is a GNU Makefile for typesetting LaTeX documents. Expected to work with
-[TeXLive](https://www.tug.org/texlive/) on Linux and similar systems, e.g., on
+[TeX Live](https://www.tug.org/texlive/) on Linux and similar systems, e.g., on
 macOS or Cygwin. Just download a single `Makefile` and put it in your directory
 containing LaTeX source files. Running `make` will generate PDF files for your
 documents.
@@ -24,10 +24,12 @@ Features
   [glossaries](https://ctan.org/pkg/glossaries),
   [axodraw2](https://ctan.org/pkg/axodraw2) etc.
 - Colorized output.
+- Highly customizable by optional user configuration files (`latex.mk` files).
+- Placing intermediate files into a directory (`BUILDDIR` variable).
 - [Latexdiff](https://www.ctan.org/pkg/latexdiff) between Git revisions (`DIFF` variable).
-- Can create tar-gzipped source files for [arXiv](https://arxiv.org/)
+- Creating tar-gzipped source files for [arXiv](https://arxiv.org/)
   submission (`make dist`).
-- Can watch sources and automatically typeset documents (`make watch`).
+- Watching source files to automatically typeset documents when they are modified (`make watch`).
 
 
 Getting started
@@ -47,6 +49,9 @@ Then just type:
 ```shell
 make
 ```
+
+See also the [Wiki page](https://github.com/tueda/makefile4latex/wiki) for
+other ways to start.
 
 
 Targets
@@ -83,6 +88,7 @@ Variables
 
 - `TOOLCHAIN`:
   Control how PDF files are generated from LaTeX files.
+  Given on the command line or in the user configuration files.
     - `latex`:
       Alias to `latex_dvips`.
     - `latex_dvips`:
@@ -110,8 +116,18 @@ Variables
     - `luajitlatex`:
       Use `luajitlatex`.
 
+- `BUILDDIR`:
+  Place intermediate files into `BUILDDIR`.
+  Given on the command line or in the user configuration files.
+  It is assumed that the `-output-directory=DIR` option is available in the
+  LaTeX distribution you are using (which is true in TeX Live.)
+  Note that some (La)TeX packages may not follow this option and may generate
+  some files in the working directory, or may not correctly work in the worst
+  case.
+
 - `DIFF`:
-  Enable the Git-latexdiff mode. Requires `latexdiff` and `latexpand`.
+  Enable the Git-latexdiff mode. Given on the command line only.
+  Requires `latexdiff` and `latexpand`.
   The `DIFF` variable specifies a Git revision for which
   a latexdiff with the working tree is performed, e.g., `make DIFF=HEAD^`.
   The resultant document has a postfix `-diff` like `foo-diff.pdf`.
