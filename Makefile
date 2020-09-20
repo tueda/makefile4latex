@@ -361,6 +361,13 @@ subdirs_impl = $(strip \
 	$(retval) \
 )
 
+# $(is_texlive) is "1" if TeX Live is used, otherwise empty.
+is_texlive = $(call cache,is_texlive_impl)
+
+is_texlive_impl = $(strip \
+	$(shell $(TEX) --version 2>/dev/null | grep -q 'TeX Live' && echo 1) \
+)
+
 # $(init_toolchain) initializes the toolchain.
 init_toolchain = $(call cache,init_toolchain_impl)
 

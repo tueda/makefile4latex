@@ -140,6 +140,10 @@ check_tarball() {(
   MAKE_ARGS='DIFF=44aaae0..HEAD' NO_CLEAN=1 test_dir latexdiff 1
 }
 
+@test "macro" {
+  make -C macro all-test
+}
+
 @test "get" {
   MAKEFILE4LATEX_CACHE=_cache test_dir get 5
 }
