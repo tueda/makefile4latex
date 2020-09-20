@@ -9,6 +9,10 @@ all-test:
 
 CLEANFILES += 1.tmp
 
+test_ensure_build_dir:
+	$(ensure_build_dir)
+	$(if $(BUILDDIR),[ -d $(BUILDDIR) ])
+
 test_is_texlive:
 	$(if $(is_texlive),:,false)
 

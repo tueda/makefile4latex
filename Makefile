@@ -963,9 +963,7 @@ watch:
 				$(call set_title,failed); \
 			fi; \
 		fi; \
-		$(if $(BUILDDIR), \
-			mkdir -p $(BUILDDIR); \
-		) \
+		$(ensure_build_dir); \
 		touch $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); \
 		while :; do \
 			sleep 1; \
@@ -1031,9 +1029,7 @@ typeset = \
 	rmfile=$@; \
 	rmauxfile=; \
 	$(if $2,rmfile=;dont_delete_on_failure=1;) \
-	$(if $(BUILDDIR), \
-		mkdir -p $(BUILDDIR); \
-	) \
+	$(ensure_build_dir); \
 	oldfile_prefix=$*.tmp$$$$; \
 	trap 'rm -f $$rmfile $$rmauxfile $(build_prefix)$$oldfile_prefix*' 0 1 2 3 15; \
 	failed=false; \
@@ -1080,6 +1076,9 @@ typeset = \
 	$(call mk_blg_dep,$@,$(build_prefix)$*.blg); \
 	$(check_reffile) && $(call mk_ref_dep,$@,$*.ref); \
 	:
+
+# $(ensure_build_dir) creates $(BUILDDIR) if necessary.
+ensure_build_dir = $(if $(BUILDDIR),mkdir -p $(BUILDDIR),:)
 
 # $(build_prefix) is "$(BUILDDIR)/" if BUILDDIR is given, otherwise empty.
 build_prefix = $(if $(BUILDDIR),$(BUILDDIR)/,)
@@ -1385,9 +1384,7 @@ $(build_prefix)%.log : %.tex
 # Experimental (TeXLive)
 .ltx.fmt:
 	@$(init_toolchain)
-	@$(if $(BUILDDIR), \
-		mkdir -p $(BUILDDIR) \
-	)
+	@$(ensure_build_dir)
 	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(notdir $(basename $(latex_noopt))) $<\dump')
 	@$(mv_target)
 	@$(call exec,rm -f $*.pdf)
@@ -1414,24 +1411,18 @@ $(build_prefix)%.log : %.tex
 #
 .tex.fmt:
 	@$(init_toolchain)
-	@$(if $(BUILDDIR), \
-		mkdir -p $(BUILDDIR) \
-	)
+	@$(ensure_build_dir)
 	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(tex_format)' mylatexformat.ltx '$<')
 	@$(mv_target)
 	@$(call exec,rm -f $*.pdf)
 
 .dtx.cls:
-	@$(if $(BUILDDIR), \
-		mkdir -p $(BUILDDIR) \
-	)
+	@$(ensure_build_dir)
 	@$(call exec,$(latex_noopt) $(basename $<).ins)
 	@$(mv_target)
 
 .dtx.sty:
-	@$(if $(BUILDDIR), \
-		mkdir -p $(BUILDDIR) \
-	)
+	@$(ensure_build_dir)
 	@$(call exec,$(latex_noopt) $(basename $<).ins)
 	@$(mv_target)
 
