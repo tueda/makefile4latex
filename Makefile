@@ -99,6 +99,9 @@ MAXREPEAT = 5
 # Build directory.
 BUILDDIR =
 
+# Use latex-dev if DEV is defined.
+DEV =
+
 # (for debugging) Keep temporary directories if its value is non-empty.
 KEEP_TEMP =
 
@@ -472,7 +475,7 @@ latex_impl = $(strip \
 # (latex_noopt) doesn't include $(LATEX_OPT).
 latex_noopt = $(call cache,latex_noopt_impl)$(if $(BUILDDIR), -output-directory=$(BUILDDIR))
 
-latex_noopt_impl = $(call pathsearch2,latex,LATEX,latex)
+latex_noopt_impl = $(init_toolchain)$(call pathsearch,latex$(if $(DEV),-dev),,$(LATEX)$(if $(DEV),-dev),latex$(if $(DEV),-dev))
 
 # $(dvips)
 dvips = $(call cache,dvips_impl) $(DVIPS_OPT)

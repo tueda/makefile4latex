@@ -65,9 +65,14 @@ before_install:
       wget -O $TEXLIVE_PATH/bin/$arch/sortref https://web.physik.rwth-aachen.de/~harlander/software/sortref/sortref
       chmod +x $TEXLIVE_PATH/bin/$arch/sortref
     fi
+  # Print LaTeX versions.
+  - pdflatex --version
+  - pdflatex-dev --version
 
 script:
-  - MAKE_COLORS=always ./tests/check.sh -T
+  - MAKE_COLORS=always MAKEFLAGS='' ./tests/check.sh -T
   - MAKE_COLORS=always MAKEFLAGS='BUILDDIR=build' ./tests/check.sh -T
+  - MAKE_COLORS=always MAKEFLAGS='DEV=1' ./tests/check.sh -T
+  - MAKE_COLORS=always MAKEFLAGS='DEV=1 BUILDDIR=build' ./tests/check.sh -T
   # Check if the working directory is not dirty.
   - git status && [ -z "$(git status --porcelain)" ]
