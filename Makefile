@@ -1081,9 +1081,27 @@ typeset = \
 # $(build_prefix) is "$(BUILDDIR)/" if BUILDDIR is given, otherwise empty.
 build_prefix = $(if $(BUILDDIR),$(BUILDDIR)/,)
 
-# $(mv_target) moves the target file from BUILDDIR, if BUILDDIR is given,
-# otherwise does nothing.
-mv_target = $(if $(BUILDDIR),if [ -f $(BUILDDIR)/$@ ]; then mv $(BUILDDIR)/$@ $@; fi; [ -f $@ ],:)
+# $(mv_target) moves the target file from BUILDDIR if BUILDDIR is defined.
+# It also ensures that the target file exists in the working directory.
+# $(call mv_target,FILE) moves FILE, instead of the target file.
+# $(call mv_target,FILE,false) doesn't ensure that the file exists in the
+# working directory.
+mv_target = $(strip \
+	$(if $1, \
+		$(if $(BUILDDIR), \
+			if [ -f $(BUILDDIR)/$1 ]; then mv $(BUILDDIR)/$1 $1; fi \
+			$(if $2,,; [ -f $1 ]) \
+		, \
+			$(if $2,:,[ -f $1 ]) \
+		) \
+	, \
+		$(if $@, \
+			$(call mv_target,$@,$2) \
+		, \
+			: \
+		) \
+	) \
+)
 
 # $(call do_backup,FILE) creates a backup file for "$(build_prefix)/FILE".
 do_backup = \
