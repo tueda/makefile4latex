@@ -953,7 +953,6 @@ check:
 watch:
 	@$(init_toolchain)
 	@if $(if $(srctexfiles:.tex=.$(default_target)),:,false); then \
-		echo "Watching for $(srctexfiles:.tex=.$(default_target)). Press Ctrl+C to quit"; \
 		$(call set_title,watching); \
 		if $(MAKE) -q -s $(srctexfiles:.tex=.$(default_target)); then :; else \
 			$(call set_title,running); \
@@ -965,6 +964,7 @@ watch:
 		fi; \
 		$(ensure_build_dir); \
 		touch $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); \
+		$(print_watching_message); \
 		while :; do \
 			sleep 1; \
 			if $(MAKE) -q -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); then :; else \
@@ -974,11 +974,18 @@ watch:
 				else \
 					$(call set_title,failed); \
 				fi; \
+				$(print_watching_message); \
 			fi; \
 		done \
 	else \
 		echo "No files to watch"; \
 	fi
+
+print_watching_message = $(call colorize, \
+	printf "Watching for $(srctexfiles:.tex=.$(default_target)). \033$(CL_NOTICE)Press Ctrl+C to quit\033$(CL_NORMAL)\n" \
+, \
+	echo "Watching for $(srctexfiles:.tex=.$(default_target)). Press Ctrl+C to quit" \
+)
 
 # Upgrade files in the setup. (Be careful!)
 # Files to be upgraded must have a tag like
