@@ -134,6 +134,21 @@ Variables
   It is also possible to make a latexdiff between two revisions, e.g.,
   `make DIFF=HEAD~3..HEAD` provided both revisions contain the source file.
 
+- `NODISTFILES`, `EXTRADISTFILES`, `ANCILLARYFILES`:
+  Control which files are included in tar-gzipped source files.
+  Given on the command line or in the user configuration files.
+  A tar-gzipped source file, `foo.tar.gz` for example, is created from the
+  corresponding source file, `foo.tex`, and the dependent files.
+  One can set `NODISTFILES` to exclude some of the dependent files from the
+  resultant file.
+  On the other hand, `EXTRADISTFILES` represents additional files to be
+  included.
+  The [`00README.XXX` file](https://arxiv.org/help/00README) is also examined to
+  determine additionally included files.
+  Moreover, files listed in `ANCILLARYFILES` are copied to
+  the [`anc` directory](https://arxiv.org/help/ancillary_files) inside
+  the resultant file.
+
 
 Customization
 -------------
