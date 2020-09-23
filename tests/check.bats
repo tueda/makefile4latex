@@ -83,6 +83,13 @@ check_tarball() {(
   test_dir tikz-external 1
 }
 
+@test "lualatex" {
+  if command -v lualatex >/dev/null; then :; else
+    skip "lualatex not available"
+  fi
+  test_dir lualatex 1
+}
+
 @test "platex_dvips" {
   if command -v platex >/dev/null; then :; else
     skip "platex not available"
