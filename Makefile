@@ -364,6 +364,18 @@ subdirs_impl = $(strip \
 	$(retval) \
 )
 
+# $(call run_testsuite,PREFIX) runs all rules for targets starting with PREFIX
+# in the current Makefile.
+# $(run_testsuite) is equivalent to $(call run_testsuite,test_).
+run_testsuite = \
+	for test in $(call all_testsuite,$(if $1,$1,test_)); do \
+		echo "Testing $$test..."; \
+		$(MAKE) --silent clean; \
+		$(MAKE) --always-make --no-print-directory $$test || exit 1; \
+	done
+
+all_testsuite = $(shell $(MAKE) -pq _FORCE | sed -n '/^$1/p' | sed 's/:.*//')
+
 # $(is_texlive) is "1" if TeX Live is used, otherwise empty.
 is_texlive = $(call cache,is_texlive_impl)
 
