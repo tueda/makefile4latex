@@ -28,8 +28,10 @@
 # SOFTWARE.
 #
 
+MAKEFILE4LATEX_VERSION = 0.3.2-dev
+
 define help_message
-Makefile for LaTeX
+Makefile for LaTeX ($(MAKEFILE4LATEX_VERSION))
 
 Usage
   make [<targets...>]
