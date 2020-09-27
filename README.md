@@ -4,7 +4,7 @@ Makefile for LaTeX
 [![Travis CI Build Status](https://travis-ci.org/tueda/makefile4latex.svg?branch=master)](https://travis-ci.org/tueda/makefile4latex)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/fy41hbf7eijhyvx3/branch/master?svg=true)](https://ci.appveyor.com/project/tueda/makefile4latex)
 
-This is a GNU Makefile for typesetting LaTeX documents. Expected to work with
+This is a GNU Makefile for typesetting LaTeX2e documents. Expected to work with
 [TeX Live](https://www.tug.org/texlive/) on Linux and similar systems, e.g., on
 macOS or Cygwin. Just download a single `Makefile` and put it in your directory
 containing LaTeX source files. Running `make` will generate PDF files for your
@@ -35,16 +35,13 @@ Features
 Getting started
 ---------------
 
-Download `Makefile` by using `wget`:
+Download `Makefile` via
+[this link](https://raw.githubusercontent.com/tueda/makefile4latex/v0.3.1/Makefile)
+in your browser or by using `curl`:
 ```shell
-wget https://raw.githubusercontent.com/tueda/makefile4latex/master/Makefile
+curl -O https://raw.githubusercontent.com/tueda/makefile4latex/v0.3.1/Makefile
 ```
-or `curl`:
-```shell
-curl -O https://raw.githubusercontent.com/tueda/makefile4latex/master/Makefile
-```
-or via [this link](https://raw.githubusercontent.com/tueda/makefile4latex/master/Makefile)
-in your browser. Put it into a directory that contains LaTeX files.
+and put it into a directory that contains LaTeX files. Then just type:
 Then just type:
 ```shell
 make
