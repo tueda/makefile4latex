@@ -1008,12 +1008,32 @@ print_watching_message = $(call colorize, \
 #
 # When the current directory is a Git repository and doesn't have the .gitignore
 # file, this target downloads that of the Makefile4LaTeX repository.
+#
+# If the Makefile with a fixed version is used, then we need to prevent the
+# upgrade from replacing the versioned Makefile. In the current implementation,
+# we stop upgrading files that have names ending with "Makefile", assuming they
+# all must not be upgraded. For now, we ignore the case with a commit hash
+# starting with "v", which usually means a version tag like "v0.3.2".
 upgrade:
 	@$(call make_for_each_subdir,upgrade)
 	@for file in * .* $(_cached_Makefile); do \
 		case "$$file" in \
 			*.swp|*.tmp|*~) \
 				continue \
+				;; \
+			*Makefile) \
+				case "$(MAKEFILE4LATEX_REVISION)" in \
+					v*) \
+						continue \
+						;; \
+				esac; \
+				case "$(MAKEFILE4LATEX_VERSION)" in \
+					*-dev) \
+						;; \
+					*) \
+						continue \
+						;; \
+				esac; \
 				;; \
 		esac; \
 		if [ -f "$$file" ] && [ ! -L "$$file" ]; then \
