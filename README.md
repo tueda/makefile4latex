@@ -42,7 +42,6 @@ in your browser or by using `curl`:
 curl -O https://raw.githubusercontent.com/tueda/makefile4latex/v0.3.3/Makefile
 ```
 and put it into a directory that contains LaTeX files. Then just type:
-Then just type:
 ```shell
 make
 ```
