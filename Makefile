@@ -1237,11 +1237,23 @@ do_sortref = \
 	fi
 
 # $(do_makeindex)
+# NOTE: when BUILDDIR is used, we run makeindex in the current directory with
+# the temporarily copied .idx file.
 do_makeindex = \
 	if $$need_makeindex; then \
 		need_makeindex=false; \
 		$(call do_backup,$*.ind); \
-		$(call exec,$(makeindex) $(build_prefix)$*); \
+		rmauxfile=$(build_prefix)$*.ind; \
+		$(if $(BUILDDIR), \
+			[ -f $(BUILDDIR)/$*.idx ] && cp $(BUILDDIR)/$*.idx .; \
+			rmauxfile="$rmauxfile $*.idx"; \
+			$(call exec,$(makeindex) $*); \
+			mv $*.ind $(BUILDDIR)/; \
+			rm -f $*.idx; \
+		, \
+			$(call exec,$(makeindex) $*); \
+		) \
+		rmauxfile=; \
 		$(call check_modified,$*.ind) && need_latex=:; \
 	fi
 
