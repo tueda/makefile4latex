@@ -71,8 +71,8 @@ before_install:
 
 script:
   - MAKE_COLORS=always MAKEFLAGS='' ./tests/check.sh -T
-  - MAKE_COLORS=always MAKEFLAGS='BUILDDIR=build' ./tests/check.sh -T
+  - MAKE_COLORS=always MAKEFLAGS='BUILDDIR=.build' ./tests/check.sh -T
   - MAKE_COLORS=always MAKEFLAGS='DEV=1' ./tests/check.sh -T
-  - MAKE_COLORS=always MAKEFLAGS='DEV=1 BUILDDIR=build' ./tests/check.sh -T
+  - MAKE_COLORS=always MAKEFLAGS='DEV=1 BUILDDIR=.build' ./tests/check.sh -T
   # Check if the working directory is not dirty.
   - git status && [ -z "$(git status --porcelain)" ]
