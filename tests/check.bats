@@ -79,6 +79,16 @@ check_tarball() {(
   test_dir sortref 3
 }
 
+@test "revtex4-1" {
+  if command -v kpsewhich >/dev/null; then :; else
+    skip "kpsewhich not available"
+  fi
+  if kpsewhich revtex4-1.cls >/dev/null; then :; else
+    skip "revtex4-1.cls not available"
+  fi
+  test_dir revtex4-1 3
+}
+
 @test "tikz-external" {
   test_dir tikz-external 1
 }
