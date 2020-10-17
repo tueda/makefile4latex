@@ -1199,12 +1199,23 @@ do_latex = \
 	fi
 
 # $(do_bibtex)
+# NOTE: when BUILDDIR is used, we run bibtex in the current directory with
+# temporarily copied .aux and Notes.bib files.
 do_bibtex = \
 	if $$need_bibtex; then \
 		need_bibtex=false; \
 		$(call do_backup,$*.bbl); \
 		rmauxfile=$(build_prefix)$*.bbl; \
-		$(call exec,$(bibtex) $(build_prefix)$*.aux); \
+		$(if $(BUILDDIR), \
+			[ -f $(BUILDDIR)/$*.aux ] && cp $(BUILDDIR)/$*.aux .; \
+			[ -f $(BUILDDIR)/$*Notes.bib ] && cp $(BUILDDIR)/$*Notes.bib .; \
+			rmauxfile="$rmauxfile $*.aux $*Notes.bib"; \
+			$(call exec,$(bibtex) $*.aux); \
+			mv $*.bbl $*.blg $(BUILDDIR)/; \
+			rm -f $*.aux $*Notes.bib; \
+		, \
+			$(call exec,$(bibtex) $*.aux); \
+		) \
 		rmauxfile=; \
 		$(call check_modified,$*.bbl) && need_latex=:; \
 	fi
