@@ -90,6 +90,12 @@ check_tarball() {(
 }
 
 @test "tikz-external" {
+  if command -v kpsewhich >/dev/null; then :; else
+    skip "kpsewhich not available"
+  fi
+  if kpsewhich tikz.sty >/dev/null; then :; else
+    skip "tikz.sty not available"
+  fi
   test_dir tikz-external 1
 }
 
