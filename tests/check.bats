@@ -49,6 +49,21 @@ check_tarball() {(
   fi
 )}
 
+# require_executable <file>
+require_executable() {
+  if command -v $1 >/dev/null; then :; else
+    skip "$1 not available"
+  fi
+}
+
+# require_package <file>
+require_package() {
+  require_executable kpsewhich
+  if kpsewhich $1 >/dev/null; then :; else
+    skip "$1 not available"
+  fi
+}
+
 @test "latex" {
   test_dir latex 5
 }
@@ -66,69 +81,42 @@ check_tarball() {(
 }
 
 @test "axohelp" {
-  if command -v axohelp >/dev/null; then :; else
-    skip "axohelp not available"
-  fi
+  require_package axodraw2.sty
+  require_executable axohelp
   WITH_LONG_NAME=doc.tex test_dir axohelp 4
 }
 
 @test "sortref" {
-  if command -v sortref >/dev/null; then :; else
-    skip "sortref not available"
-  fi
+  require_executable sortref
   test_dir sortref 3
 }
 
 @test "revtex4-1" {
-  if command -v kpsewhich >/dev/null; then :; else
-    skip "kpsewhich not available"
-  fi
-  if kpsewhich revtex4-1.cls >/dev/null; then :; else
-    skip "revtex4-1.cls not available"
-  fi
+  require_package revtex4-1.cls
   test_dir revtex4-1 3
 }
 
 @test "tikz-external" {
-  if command -v kpsewhich >/dev/null; then :; else
-    skip "kpsewhich not available"
-  fi
-  if kpsewhich tikz.sty >/dev/null; then :; else
-    skip "tikz.sty not available"
-  fi
+  require_package tikz.sty
   test_dir tikz-external 1
 }
 
 @test "lualatex" {
-  if command -v lualatex >/dev/null; then :; else
-    skip "lualatex not available"
-  fi
+  require_executable lualatex
   test_dir lualatex 1
 }
 
 @test "platex_dvips" {
-  if command -v platex >/dev/null; then :; else
-    skip "platex not available"
-  fi
-  if command -v dvips >/dev/null; then :; else
-    skip "dvips not available"
-  fi
-  if command -v convbkmk >/dev/null; then :; else
-    skip "convbkmk not available"
-  fi
-  if command -v ps2pdf >/dev/null; then :; else
-    skip "ps2pdf not available"
-  fi
+  require_executable platex
+  require_executable dvips
+  require_executable convbkmk
+  require_executable ps2pdf
   test_dir platex_dvips 2
 }
 
 @test "platex_dvipdfmx" {
-  if command -v platex >/dev/null; then :; else
-    skip "platex not available"
-  fi
-  if command -v dvipdfmx >/dev/null; then :; else
-    skip "dvipdfmx not available"
-  fi
+  require_executable platex
+  require_executable dvipdfmx
   test_dir platex_dvipdfmx 1
 }
 
@@ -142,22 +130,14 @@ check_tarball() {(
 }
 
 @test "latexdiff1" {
-  if command -v latexdiff >/dev/null; then :; else
-    skip "latexdiff not available"
-  fi
-  if command -v latexpand >/dev/null; then :; else
-    skip "latexpand not available"
-  fi
+  require_executable latexdiff
+  require_executable latexpand
   MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
 }
 
 @test "latexdiff2" {
-  if command -v latexdiff >/dev/null; then :; else
-    skip "latexdiff not available"
-  fi
-  if command -v latexpand >/dev/null; then :; else
-    skip "latexpand not available"
-  fi
+  require_executable latexdiff
+  require_executable latexpand
   MAKE_ARGS='DIFF=HEAD' test_dir latexdiff 3
   MAKE_ARGS='DIFF=44aaae0' NO_CLEAN=1 test_dir latexdiff 2
   MAKE_ARGS='DIFF=44aaae0..HEAD' NO_CLEAN=1 test_dir latexdiff 1
