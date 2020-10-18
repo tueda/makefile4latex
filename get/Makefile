@@ -32,7 +32,7 @@
 # $(call _read_config,VARIABLE) reads the specified variable from the user
 # configuration. The variable should be defined in the following places
 # (in descending precedence):
-#   (1) command line (e.g., MAKE XX=YY),
+#   (1) command line (e.g., make XX=YY),
 #   (2) configuration files:
 #     (a) latex.mk
 #     (b) .latex.mk
