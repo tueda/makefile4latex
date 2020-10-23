@@ -1070,10 +1070,11 @@ _FORCE:
 typeset = \
 	rmfile=$@; \
 	rmauxfile=; \
+	rmtmpfile=; \
 	$(if $2,rmfile=;dont_delete_on_failure=1;) \
 	$(ensure_build_dir); \
 	oldfile_prefix=$*.tmp$$$$; \
-	trap 'rm -f $$rmfile $$rmauxfile $(build_prefix)$$oldfile_prefix*' 0 1 2 3 15; \
+	trap 'rm -f $$rmfile $$rmauxfile $$rmtmpfile $(build_prefix)$$oldfile_prefix*' 0 1 2 3 15; \
 	failed=false; \
 	if [ -f '$@' ]; then \
 		need_latex=$(if $(filter-out %.ref %.bib %.bst %.idx %.glo,$?),:,false); \
@@ -1168,6 +1169,36 @@ check_modified_impl = \
 		false; \
 	fi
 
+# $(call set_aux_file,FILE) sets the current auxiliary file to
+# "$(build_prefix)$/FILE", which will be deleted if the current task fails.
+set_aux_file = \
+	rmauxfile=$(build_prefix)$1
+
+# $(reset_aux_file) resets the current auxiliary file.
+reset_aux_file = \
+	rmauxfile=
+
+# $(call copy_build_temp_file,FILE) copies $(build_prefix)$/FILE to the current
+# directory if exists.
+copy_build_temp_file = \
+	$(if $(BUILDDIR), \
+		if [ -f $(BUILDDIR)/$1 ]; then \
+			cp $(BUILDDIR)/$1 .; \
+			rmtmpfile="$$rmtmpfile $1"; \
+		fi \
+	, \
+		: \
+	)
+
+# $(clear_build_temp_files) deletes temporary files copied from BUILDDIR.
+clear_build_temp_files = \
+	$(if $(BUILDDIR), \
+		rm -f $$rmtmpfile; \
+		rmtmpfile= \
+	, \
+		: \
+	)
+
 # $(call do_latex,LATEX-COMMAND)
 # $(call do_latex,LATEX-COMMAND,false) skips the check.
 do_latex = \
@@ -1207,18 +1238,17 @@ do_bibtex = \
 	if $$need_bibtex; then \
 		need_bibtex=false; \
 		$(call do_backup,$*.bbl); \
-		rmauxfile=$(build_prefix)$*.bbl; \
+		$(call set_aux_file,$*.bbl); \
 		$(if $(BUILDDIR), \
-			[ -f $(BUILDDIR)/$*.aux ] && cp $(BUILDDIR)/$*.aux .; \
-			[ -f $(BUILDDIR)/$*Notes.bib ] && cp $(BUILDDIR)/$*Notes.bib .; \
-			rmauxfile="$rmauxfile $*.aux $*Notes.bib"; \
+			$(call copy_build_temp_file,$*.aux); \
+			$(call copy_build_temp_file,$*Notes.bib); \
 			$(call exec,$(bibtex) $*.aux); \
 			mv $*.bbl $*.blg $(BUILDDIR)/; \
-			rm -f $*.aux $*Notes.bib; \
+			$(clear_build_temp_files); \
 		, \
 			$(call exec,$(bibtex) $*.aux); \
 		) \
-		rmauxfile=; \
+		$(reset_aux_file); \
 		$(call check_modified,$*.bbl) && need_latex=:; \
 	fi
 
@@ -1245,17 +1275,16 @@ do_makeindex = \
 	if $$need_makeindex; then \
 		need_makeindex=false; \
 		$(call do_backup,$*.ind); \
-		rmauxfile=$(build_prefix)$*.ind; \
+		$(call set_aux_file,$*.ind); \
 		$(if $(BUILDDIR), \
-			[ -f $(BUILDDIR)/$*.idx ] && cp $(BUILDDIR)/$*.idx .; \
-			rmauxfile="$rmauxfile $*.idx"; \
+			$(call copy_build_temp_file,$*.idx); \
 			$(call exec,$(makeindex) $*); \
 			mv $*.ind $(BUILDDIR)/; \
-			rm -f $*.idx; \
+			$(clear_build_temp_files); \
 		, \
 			$(call exec,$(makeindex) $*); \
 		) \
-		rmauxfile=; \
+		$(reset_aux_file); \
 		$(call check_modified,$*.ind) && need_latex=:; \
 	fi
 
