@@ -1279,7 +1279,7 @@ do_makeindex = \
 		$(if $(BUILDDIR), \
 			$(call copy_build_temp_file,$*.idx); \
 			$(call exec,$(makeindex) $*); \
-			mv $*.ind $(BUILDDIR)/; \
+			mv $*.ind $*.ilg $(BUILDDIR)/; \
 			$(clear_build_temp_files); \
 		, \
 			$(call exec,$(makeindex) $*); \
