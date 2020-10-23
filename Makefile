@@ -1114,6 +1114,7 @@ typeset = \
 		$(call warning_message,Typesetting did not finish after $(MAXREPEAT) iterations. The document may be incomplete.); \
 	fi; \
 	rmfile=; \
+	touch $@; \
 	$(call mk_fls_dep,$@,$(build_prefix)$*.fls); \
 	$(call mk_blg_dep,$@,$(build_prefix)$*.blg); \
 	$(check_reffile) && $(call mk_ref_dep,$@,$*.ref); \

@@ -28,7 +28,11 @@ test_dir() {(
 
   [ $# -le 1 ] && exit
 
-  num=$(grep halt-on-error "$1/make.out" | wc -l)
+  if grep -q halt-on-error "$1/make.out"; then
+    num=$(grep halt-on-error "$1/make.out" | wc -l)
+  else
+    num=0
+  fi
   if [ $2 -ne $num ]; then
     echo "FAIL: wrong number of running LaTeX: $num (must be $2)" >&2
     exit 1
@@ -70,6 +74,9 @@ require_package() {
 
 @test "bibtex" {
   WITH_LONG_NAME=doc.tex test_dir bibtex 6
+  touch bibtex/ref.bib
+  NO_CLEAN=1 test_dir bibtex 0
+  NO_CLEAN=1 test_dir bibtex 0
 }
 
 @test "makeindex" {
