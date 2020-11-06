@@ -1737,6 +1737,11 @@ expand_latex_source = { \
 	if [ -f "$2" ]; then :; else \
 		_tmp_latexexpand_fbody="$1"; \
 		_tmp_latexexpand_fbody=$${_tmp_latexexpand_fbody%.*}; \
+		$(if $(BUILDDIR), \
+			if [ -f "$(BUILDDIR)/$$_tmp_latexexpand_fbody.bbl" ]; then \
+				_tmp_latexexpand_fbody="$(BUILDDIR)/$$_tmp_latexexpand_fbody"; \
+			fi; \
+		) \
 		if [ -f "$$_tmp_latexexpand_fbody.bbl" ]; then \
 			$(call exec,$(latexpand) --expand-bbl "$$_tmp_latexexpand_fbody.bbl" "$1" >"$2.tmp"); \
 		else \
