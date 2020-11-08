@@ -158,6 +158,7 @@ DVISVGM =
 PDFTOPPM =
 GS =
 BIBTEX =
+BIBER =
 SORTREF =
 MAKEINDEX =
 MAKEGLOSSARIES =
@@ -185,6 +186,7 @@ PDFTOPPM_JPG_OPT = -jpeg
 PDFTOPPM_PNG_OPT = -png
 GS_OPT =
 BIBTEX_OPT =
+BIBER_OPT =
 SORTREF_OPT =
 MAKEINDEX_OPT =
 MAKEGLOSSARIES_OPT =
@@ -526,6 +528,11 @@ bibtex = $(call cache,bibtex_impl) $(BIBTEX_OPT)
 
 bibtex_impl = $(call pathsearch2,bibtex,BIBTEX,bibtex)
 
+# $(biber)
+biber = $(call cache,biber_impl) $(BIBER_OPT)
+
+biber_impl = $(call pathsearch2,biber,BIBER,biber)
+
 # $(sortref)
 sortref = $(call cache,sortref_impl) $(SORTREF_OPT)
 
@@ -628,6 +635,7 @@ Makefile_impl = $(firstword $(MAKEFILE_LIST))
 #   .ax1 - axodraw2 auxiliary (axohelp input) file
 #   .ax2 - axohelp output file
 #   .bbl - BibTeX output file
+#   .bcf - by biblatex package
 #   .blg - BibTeX log file
 #   .end - ?
 #   .fls - LaTeX recorder file
@@ -645,12 +653,15 @@ Makefile_impl = $(firstword $(MAKEFILE_LIST))
 #   .lot - list of tables
 #   .nav - Beamer navigation items
 #   .out - Beamer outlines
+#   .run.xml - by logreq package
 #   .snm - Beamer page labels
 #   .spl - by elsarticle class
 #   .toc - table of contents
 #   .*.vrb - Beamer verbatim materials
 #   .xdy - by xindy
 #   Notes.bib - by revtex package
+#   *-blx.aux - by biblatex package
+#   -blx.bib - by biblatex package
 #   _ref.tex - by sortref
 #   .bmc - by dviout
 #   .pbm - by dviout
@@ -663,6 +674,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.ax1) \
 	$(srctexfiles:.tex=.ax2) \
 	$(srctexfiles:.tex=.bbl) \
+	$(srctexfiles:.tex=.bcf) \
 	$(srctexfiles:.tex=.blg) \
 	$(srctexfiles:.tex=.end) \
 	$(srctexfiles:.tex=.fls) \
@@ -680,6 +692,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.lot) \
 	$(srctexfiles:.tex=.nav) \
 	$(srctexfiles:.tex=.out) \
+	$(srctexfiles:.tex=.run.xml) \
 	$(srctexfiles:.tex=.snm) \
 	$(srctexfiles:.tex=.spl) \
 	$(srctexfiles:.tex=.synctex) \
@@ -688,6 +701,10 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.*.vrb) \
 	$(srctexfiles:.tex=.xdy) \
 	$(srctexfiles:.tex=Notes.bib) \
+	$(srctexfiles:.tex=*-blx.aux) \
+	$(srctexfiles:.tex=*-blx.bbl) \
+	$(srctexfiles:.tex=*-blx.blg) \
+	$(srctexfiles:.tex=-blx.bib) \
 	$(srctexfiles:.tex=_ref.tex) \
 	$(srcltxfiles:.ltx=.log) \
 	*.bmc \
@@ -1079,16 +1096,18 @@ typeset = \
 	if [ -f '$@' ]; then \
 		need_latex=$(if $(filter-out %.ref %.bib %.bst %.idx %.glo,$?),:,false); \
 		need_bibtex=$(if $(filter %.bib %.bst,$?),:,false); \
+		need_biber=$(if $(filter %.bcf,$?),:,false); \
 		need_sortref=$(if $(filter %.ref,$?),:,false); \
 		need_makeindex=$(if $(filter %.idx,$?),:,false); \
 		need_makeglossaries=$(if $(filter %.glo,$?),:,false); \
 		need_axohelp=$(if $(filter %.ax2,$?),:,false); \
-		if $$need_sortref || $$need_bibtex; then \
+		if $$need_bibtex || $$need_biber || $$need_sortref; then \
 			[ ! -f '$(build_prefix)$*.aux' ] && need_latex=:; \
 		fi; \
 	else \
 		need_latex=:; \
 		need_bibtex=false; \
+		need_biber=false; \
 		need_sortref=false; \
 		need_makeindex=false; \
 		need_makeglossaries=false; \
@@ -1104,6 +1123,7 @@ typeset = \
 	i=1; \
 	while [ $$i -lt $(MAXREPEAT) ]; do \
 		$(do_bibtex); \
+		$(do_biber); \
 		$(do_sortref); \
 		$(do_makeindex); \
 		$(do_makeglossaries); \
@@ -1111,7 +1131,7 @@ typeset = \
 		$(call do_latex,$1); \
 		i=$$((i + 1)); \
 	done; \
-	if $$need_bibtex || $$need_sortref || $$need_makeindex || $$need_makeglossaries || $$need_axohelp || $$need_latex; then \
+	if $$need_bibtex || $$need_biber || $$need_sortref || $$need_makeindex || $$need_makeglossaries || $$need_axohelp || $$need_latex; then \
 		$(call warning_message,Typesetting did not finish after $(MAXREPEAT) iterations. The document may be incomplete.); \
 	fi; \
 	rmfile=; \
@@ -1213,7 +1233,15 @@ do_latex = \
 		$(call do_backup,$*.ax1); \
 		$(call exec,$1 $<,$2); \
 		if $(call check_modified,$*.aux); then \
-			$(check_bblfile) && need_bibtex=:; \
+			if $(check_biblatex); then \
+				if $(check_biblatex_rerun_bibtex); then \
+					need_bibtex=:; \
+				elif $(check_biblatex_rerun_biber); then \
+					need_biber=:; \
+				fi; \
+			elif $(check_bblfile); then \
+				need_bibtex=:; \
+			fi; \
 			$(check_reffile) && need_sortref=:; \
 			$(check_glsfile) && need_makeglossaries=:; \
 		else \
@@ -1242,13 +1270,46 @@ do_bibtex = \
 		$(if $(BUILDDIR), \
 			$(call copy_build_temp_file,$*.aux); \
 			$(call copy_build_temp_file,$*Notes.bib); \
-			$(call exec,$(bibtex) $*.aux); \
+			$(call copy_build_temp_file,$*-blx.bib); \
+			for f in $(BUILDDIR)/$**-blx.aux; do \
+				ff=$$(basename $$f); \
+				$(call copy_build_temp_file,$$ff); \
+			done; \
+			$(call exec,$(bibtex) $*); \
 			mv $*.bbl $*.blg $(BUILDDIR)/; \
+			for f in $**-blx.aux; do \
+				if [ -f $$f ]; then \
+					ff=$$(basename $$f .aux); \
+					$(call exec,$(bibtex) $$ff); \
+					mv $$ff.bbl $$ff.blg $(BUILDDIR)/; \
+				fi; \
+			done; \
 			$(clear_build_temp_files); \
 		, \
-			$(call exec,$(bibtex) $*.aux); \
+			$(call exec,$(bibtex) $*); \
+			for f in $**-blx.aux; do \
+				if [ -f $$f ]; then \
+					ff=$$(basename $$f .aux); \
+					$(call exec,$(bibtex) $$ff); \
+				fi; \
+			done; \
 		) \
 		$(reset_aux_file); \
+		$(call check_modified,$*.bbl) && need_latex=:; \
+	fi
+
+# $(do_biber)
+do_biber = \
+	if $$need_biber; then \
+		need_biber=false; \
+		$(call do_backup,$*.bbl); \
+		rmauxfile=$(build_prefix)$*.bbl; \
+		$(if $(BUILDDIR), \
+			$(call exec,$(biber) --output-directory $(BUILDDIR) $*); \
+		, \
+			$(call exec,$(biber) $*); \
+		) \
+		rmauxfile=; \
 		$(call check_modified,$*.bbl) && need_latex=:; \
 	fi
 
@@ -1327,7 +1388,7 @@ mk_fls_dep = \
 			for f in `grep INPUT '$2' | sed 's/INPUT *\(\.\/\)\?//' | sort | uniq`; do \
 				case $$f in \
 					*:*|/*) ;; \
-					*.fmt) ;; \
+					*.fmt|*.run.xml) ;; \
 					*) \
 						if [ -f "$$f" ]; then \
 							echo "$1 : \$$(wildcard $$f)"; \
@@ -1369,7 +1430,14 @@ mk_ref_dep = \
 grep_lines = \
 	grep -B 3 $1 $2 | tr -d '\n'
 
+# NOTE: latex may fail due to a missing _ref.tex.
 check_noreffile = $(call grep_lines,'_ref.tex','$(build_prefix)$*.log') | grep "File \`$*_ref.tex' not found" >/dev/null 2>&1
+
+check_biblatex = grep 'Package: biblatex' '$(build_prefix)$*.log' >/dev/null 2>&1
+
+check_biblatex_rerun_biber = grep 'Please (re)run Biber' '$(build_prefix)$*.log' >/dev/null 2>&1
+
+check_biblatex_rerun_bibtex = grep 'Please (re)run BibTeX' '$(build_prefix)$*.log' >/dev/null 2>&1
 
 check_bblfile = $(call grep_lines,'.bbl','$(build_prefix)$*.log') | grep '$*.bbl' >/dev/null 2>&1
 
@@ -1387,7 +1455,7 @@ check_glsfile = $(call grep_lines,'.gls','$(build_prefix)$*.log') | grep '$*.gls
 # read jobname.ax2.
 check_ax2file = $(call grep_lines,'.ax1','$(build_prefix)$*.log') | grep '$*.ax1' >/dev/null 2>&1
 
-check_rerun = grep 'Rerun' '$(build_prefix)$*.log' | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty' >/dev/null 2>&1
+check_rerun = grep 'Rerun\|Please rerun LaTeX' '$(build_prefix)$*.log' | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty' >/dev/null 2>&1
 
 #NOTE: xelatex doesn't work with -output-format=dvi.
 
@@ -1574,7 +1642,7 @@ $(build_prefix)%.log : %.tex
 	dep_files=; \
 	for f in `grep INPUT '$(build_prefix)$*.fls' | sed 's/^INPUT *//' | sed '/^kpsewhich/d' | sed 's|^\.\/||' | sort | uniq`; do \
 		case $$f in \
-			*:*|/*|*.aux|*.lof|*.lot|*.nav|*.out|*.spl|*.toc|*.vrb|*-eps-converted-to.pdf) ;; \
+			*:*|/*|*.aux|*.lof|*.lot|*.nav|*.out|*.spl|*.toc|*.vrb|*-eps-converted-to.pdf|*.run.xml) ;; \
 			*) \
 				case $$f in \
 					*.ax2) \
@@ -1743,7 +1811,11 @@ expand_latex_source = { \
 			fi; \
 		) \
 		if [ -f "$$_tmp_latexexpand_fbody.bbl" ]; then \
-			$(call exec,$(latexpand) --expand-bbl "$$_tmp_latexexpand_fbody.bbl" "$1" >"$2.tmp"); \
+			if head "$$_tmp_latexexpand_fbody.bbl" | grep -q biber; then \
+				$(call exec,$(latexpand) --biber "$$_tmp_latexexpand_fbody.bbl" "$1" >"$2.tmp"); \
+			else \
+				$(call exec,$(latexpand) --expand-bbl "$$_tmp_latexexpand_fbody.bbl" "$1" >"$2.tmp"); \
+			fi; \
 		else \
 			$(call exec,$(latexpand) "$1" >"$2.tmp"); \
 		fi; \
