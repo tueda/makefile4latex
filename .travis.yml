@@ -59,7 +59,7 @@ before_install:
     fi
   - export PATH=$TEXLIVE_PATH/bin/$arch:$PATH
   - tlmgr update --self
-  - tlmgr install revtex4-1
+  - tlmgr install biber biblatex revtex4-1
   # sortref: we also put it into the TeX Live directory.
   - |
     if [ ! -e $TEXLIVE_PATH/bin/$arch/sortref ]; then
