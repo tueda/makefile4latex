@@ -21,7 +21,7 @@ test_dir() {(
     make $MAKE_ARGS | tee make.out
   )
 
-  if grep 'Rerun' $1/*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty'; then
+  if grep 'Rerun\|Please rerun LaTeX' $1/*.log $1/*/*.log $1/.build/*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty'; then
     echo "FAIL: documents incomplete" >&2
     exit 1
   fi
@@ -79,6 +79,19 @@ require_package() {
   NO_CLEAN=1 test_dir bibtex 0
 }
 
+@test "biblatex" {
+  if command -v biber >/dev/null; then :; else
+    skip "biber not available"
+  fi
+  if command -v kpsewhich >/dev/null; then :; else
+    skip "kpsewhich not available"
+  fi
+  if kpsewhich biblatex.sty >/dev/null; then :; else
+    skip "biblatex.sty not available"
+  fi
+  WITH_LONG_NAME=doc1.tex test_dir biblatex 15
+}
+
 @test "makeindex" {
   WITH_LONG_NAME=doc.tex test_dir makeindex 4
 }
@@ -134,6 +147,23 @@ require_package() {
   check_tarball makeindex/doc.tar.gz 2
   MAKE_ARGS='dist' test_dir makeglossaries
   check_tarball makeglossaries/doc.tar.gz 3
+}
+
+@test "dist_biblatex" {
+  if command -v biber >/dev/null; then :; else
+    skip "biber not available"
+  fi
+  if command -v kpsewhich >/dev/null; then :; else
+    skip "kpsewhich not available"
+  fi
+  if kpsewhich biblatex.sty >/dev/null; then :; else
+    skip "biblatex.sty not available"
+  fi
+  MAKE_ARGS='dist' test_dir biblatex
+  check_tarball biblatex/doc1.tar.gz 2
+  check_tarball biblatex/doc2.tar.gz 2
+  check_tarball biblatex/doc3.tar.gz 2
+  check_tarball biblatex/doc4.tar.gz 4
 }
 
 @test "latexdiff1" {
