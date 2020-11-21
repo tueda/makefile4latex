@@ -146,6 +146,14 @@ LINTS = check_periods
 # Test scripts.
 TESTS =
 
+# Options for test scripts. Called as $(call TESTS_OPT,test_name,test_param)
+# where test_name and test_param will be shell variables.
+TESTS_OPT =
+
+# Command line parameters for test scripts. If not empty, test scripts will be
+# executed for each parameter.
+TESTS_PARAMS =
+
 # The following variables will be guessed if empty.
 # XXX: in the current implementation, $(init_toolchain) overrides some of them.
 TARGET =
@@ -976,13 +984,25 @@ builtin_lints += \
 
 check:
 	@$(call make_for_each_subdir,check)
-	@for test in $(TESTS); do \
-		if [ -f "$$test" ]; then \
-			$(call exec,./$$test); \
-		else \
-			$(call exec,$$test); \
-		fi; \
-	done
+	@$(if $(TESTS_PARAMS), \
+		for test in $(TESTS); do \
+			for param in $(TESTS_PARAMS); do \
+				if [ -f "$$test" ]; then \
+						$(call exec,./$$test $(call TESTS_OPT,$$test,$$param) $$param); \
+				else \
+					$(call exec,$$test $(call TESTS_OPT,$$test,$$param) $$param); \
+				fi; \
+			done \
+		done \
+	, \
+		for test in $(TESTS); do \
+			if [ -f "$$test" ]; then \
+				$(call exec,./$$test $(call TESTS_OPT,$$test)); \
+			else \
+				$(call exec,$$test $(call TESTS_OPT,$$test)); \
+			fi; \
+		done \
+	)
 
 # The "watch" mode. Try to update .log files instead of .pdf/.dvi files,
 # otherwise make would continuously try to typeset for sources previously
