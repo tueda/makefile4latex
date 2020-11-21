@@ -21,8 +21,11 @@ Features
 - Dependency tracking.
 - Handling [BibTeX](https://ctan.org/pkg/bibtex),
   [MakeIndex](https://ctan.org/pkg/makeindex),
-  [glossaries](https://ctan.org/pkg/glossaries),
-  [axodraw2](https://ctan.org/pkg/axodraw2) etc.
+  [glossaries](https://ctan.org/pkg/glossaries) and
+  [axodraw2](https://ctan.org/pkg/axodraw2).
+- Partial support for [biber](https://www.ctan.org/pkg/biber),
+  [bib2gls](https://www.ctan.org/pkg/bib2gls) and
+  [sortref](https://web.physik.rwth-aachen.de/~harlander/software/sortref/sortref-h.php).
 - Colorized output.
 - Highly customizable by optional user configuration files (`latex.mk` files).
 - Placing intermediate files into a directory (`BUILDDIR` variable).
