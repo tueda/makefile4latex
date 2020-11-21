@@ -318,6 +318,9 @@ TSWLatexianTemp*
 *.ax1
 *.ax2
 
+# bib2gls
+*.glstex
+
 # sortref
 *_ref.tex
 

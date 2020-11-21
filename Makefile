@@ -162,6 +162,7 @@ BIBER =
 SORTREF =
 MAKEINDEX =
 MAKEGLOSSARIES =
+BIB2GLS =
 KPSEWHICH =
 AXOHELP =
 PDFCROP =
@@ -190,6 +191,7 @@ BIBER_OPT =
 SORTREF_OPT =
 MAKEINDEX_OPT =
 MAKEGLOSSARIES_OPT =
+BIB2GLS_OPT =
 KPSEWHICH_OPT =
 AXOHELP_OPT =
 PDFCROP_OPT =
@@ -548,6 +550,11 @@ makeglossaries = $(call cache,makeglossaries_impl) $(MAKEGLOSSARIES_OPT)
 
 makeglossaries_impl = $(call pathsearch2,makeglossaries,MAKEGLOSSARIES,makeglossaries)
 
+# $(bib2gls)
+bib2gls = $(call cache,bib2gls_impl) $(BIB2GLS_OPT)
+
+bib2gls_impl = $(call pathsearch2,bib2gls,BIB2GLS,bib2gls)
+
 # $(kpsewhich)
 kpsewhich = $(call cache,kpsewhich_impl) $(KPSEWHICH_OPT)
 
@@ -644,6 +651,7 @@ Makefile_impl = $(firstword $(MAKEFILE_LIST))
 #   .glo - glossary entries
 #   .gls - glossary output
 #   .glsdefs - glossary output
+#   .glstex - by bib2gls
 #   .idx - index entries
 #   .ilg - index log file
 #   .ind - index output
@@ -683,6 +691,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.glo) \
 	$(srctexfiles:.tex=.gls) \
 	$(srctexfiles:.tex=.glsdefs) \
+	$(srctexfiles:.tex=.glstex) \
 	$(srctexfiles:.tex=.idx) \
 	$(srctexfiles:.tex=.ilg) \
 	$(srctexfiles:.tex=.ind) \
@@ -1100,6 +1109,7 @@ typeset = \
 		need_sortref=$(if $(filter %.ref,$?),:,false); \
 		need_makeindex=$(if $(filter %.idx,$?),:,false); \
 		need_makeglossaries=$(if $(filter %.glo,$?),:,false); \
+		need_bib2gls=false; \
 		need_axohelp=$(if $(filter %.ax2,$?),:,false); \
 		if $$need_bibtex || $$need_biber || $$need_sortref; then \
 			[ ! -f '$(build_prefix)$*.aux' ] && need_latex=:; \
@@ -1111,6 +1121,7 @@ typeset = \
 		need_sortref=false; \
 		need_makeindex=false; \
 		need_makeglossaries=false; \
+		need_bib2gls=false; \
 		need_axohelp=false; \
 	fi; \
 	$(call do_latex,$1,false); \
@@ -1127,11 +1138,14 @@ typeset = \
 		$(do_sortref); \
 		$(do_makeindex); \
 		$(do_makeglossaries); \
+		$(do_bib2gls); \
 		$(do_axohelp); \
 		$(call do_latex,$1); \
 		i=$$((i + 1)); \
 	done; \
-	if $$need_bibtex || $$need_biber || $$need_sortref || $$need_makeindex || $$need_makeglossaries || $$need_axohelp || $$need_latex; then \
+	if $$need_latex || $$need_bibtex || $$need_biber || $$need_sortref \
+			|| $$need_makeindex || $$need_makeglossaries || $$need_bib2gls \
+			|| $$need_axohelp; then \
 		$(call warning_message,Typesetting did not finish after $(MAXREPEAT) iterations. The document may be incomplete.); \
 	fi; \
 	rmfile=; \
@@ -1230,6 +1244,7 @@ do_latex = \
 		$(call do_backup,$*.lot); \
 		$(call do_backup,$*.idx); \
 		$(call do_backup,$*.glo); \
+		$(call do_backup,$*.glstex); \
 		$(call do_backup,$*.ax1); \
 		$(call exec,$1 $<,$2); \
 		if $(call check_modified,$*.aux); then \
@@ -1243,7 +1258,11 @@ do_latex = \
 				need_bibtex=:; \
 			fi; \
 			$(check_reffile) && need_sortref=:; \
-			$(check_glsfile) && need_makeglossaries=:; \
+			if $(check_glstexfile); then \
+				need_bib2gls=:; \
+			else \
+				$(check_glsfile) && need_makeglossaries=:; \
+			fi; \
 		else \
 			$(check_nobblfile) && need_bibtex=:; \
 		fi; \
@@ -1362,6 +1381,24 @@ do_makeglossaries = \
 		$(call check_modified,$*.gls) && need_latex=:; \
 	fi
 
+# $(do_bib2gls)
+do_bib2gls = \
+	if $$need_bib2gls; then \
+		need_bib2gls=false; \
+		$(call do_backup,$*.glstex); \
+		$(call set_aux_file,$*.glstex); \
+		$(if $(BUILDDIR), \
+			$(call copy_build_temp_file,$*.aux); \
+			$(call exec,$(bib2gls) $*); \
+			mv $*.glg $*.glstex $(BUILDDIR)/; \
+			$(clear_build_temp_files); \
+		, \
+			$(call exec,$(bib2gls) $*); \
+		) \
+		$(reset_aux_file); \
+		$(call check_modified,$*.glstex) && need_latex=:; \
+	fi
+
 # $(do_axohelp)
 do_axohelp = \
 	if $$need_axohelp; then \
@@ -1414,6 +1451,23 @@ mk_blg_dep = \
 		} | sort >$(DEPDIR)/$1.blg.d; \
 	fi
 
+# $(call mk_glg_dep,TARGET,GLG-FILE) saves dependencies from a .glg file.
+# NOTE: currently not used. We need some trick to find which executable
+# (bibtex or bib2gls, maybe both?) should be run when a .bib dependency is
+# updated.
+mk_glg_dep = \
+	if [ -f '$2' ] && grep -q 'bib2gls' '$2'; then \
+		mkdir -p $(DEPDIR); \
+		{ \
+		for f in $$(grep 'Reading .*\.bib' '$2' | sed 's/Reading *//'); do \
+				if [ -f "$$f" ]; then \
+					echo "$1 : \$$(wildcard $$f)"; \
+					echo "$(build_prefix)$(basename $1).log : \$$(wildcard $$f)"; \
+				fi; \
+			done; \
+		} | sort >$(DEPDIR)/$1.glg.d; \
+	fi
+
 # $(call mk_ref_dep,TARGET,REF-FILE) saves dependencies from a .ref file.
 mk_ref_dep = \
 	if [ -f '$2' ]; then \
@@ -1447,7 +1501,9 @@ check_reffile = $(call grep_lines,'_ref.tex','$(build_prefix)$*.log') | grep '$*
 
 check_indfile = $(call grep_lines,'.ind','$(build_prefix)$*.log') | grep '$*.ind' >/dev/null 2>&1
 
-check_glsfile = $(call grep_lines,'.gls','$(build_prefix)$*.log') | grep '$*.gls' >/dev/null 2>&1
+check_glsfile = $(call grep_lines,'.gls','$(build_prefix)$*.log') | grep '$*.gls\.' >/dev/null 2>&1
+
+check_glstexfile = $(call grep_lines,'.glstex','$(build_prefix)$*.log') | grep '$*.glstex' >/dev/null 2>&1
 
 # axodraw2.sty uses primitive control sequences for reading .ax2 file, instead
 # of \input, without writing any jobname.ax2 in the log file. So we look for

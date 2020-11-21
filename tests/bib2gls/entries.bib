@@ -1,0 +1,13 @@
+Example taken from https://tex.stackexchange.com/a/343852/198327
+
+@preamble{"\providecommand{\strong}[1]{\textbf{\color{red}#1}}
+\providecommand{\swap}[2]{#2 (#1)}"}
+
+@index{example,
+  name={\strong{\swap{stuff}{example}}}
+}
+
+@index{sample}
+@index{test}
+@index{foo}
+@index{bar}

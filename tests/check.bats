@@ -100,6 +100,12 @@ require_package() {
   WITH_LONG_NAME=doc.tex test_dir makeglossaries 4
 }
 
+@test "bib2gls" {
+  require_package glossaries-extra.sty
+  require_executable bib2gls
+  WITH_LONG_NAME=doc.tex test_dir bib2gls 4
+}
+
 @test "axohelp" {
   require_package axodraw2.sty
   require_executable axohelp

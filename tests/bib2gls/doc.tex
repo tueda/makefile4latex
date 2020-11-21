@@ -1,0 +1,16 @@
+% Example taken from https://tex.stackexchange.com/a/343852/198327
+
+\documentclass{article}
+
+\usepackage{color}
+\usepackage[record,style=indexgroup]{glossaries-extra}
+
+\GlsXtrLoadResources[src={entries},selection=all]
+
+% adjust indexgroup style:
+\renewcommand{\glstreenamefmt}[1]{#1}
+\renewcommand{\glstreegroupheaderfmt}[1]{\textbf{#1}}
+
+\begin{document}
+\printunsrtglossaries
+\end{document}
