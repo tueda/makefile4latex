@@ -36,8 +36,13 @@
 #   (2) configuration files:
 #     (a) latex.mk
 #     (b) .latex.mk
-#     (c) ~/latex.mk
-#     (d) ~/.latex.mk
+#     (c) $(REAL_MAKEFILEDIR)/latex.mk
+#     (d) $(REAL_MAKEFILEDIR)/.latex.mk
+#     (e) ~/latex.mk
+#     (f) ~/.latex.mk
+#     where $(REAL_MAKEFILEDIR) is the directory that containing the "realpath"
+#     of the current Makefile (which may be different from the current
+#     directory).
 #   (3) environment variable.
 #
 # First, this macro checks if the variable is already defined by "command line".
@@ -47,12 +52,21 @@
 _read_config = \
 	$(eval $(strip \
 		$(if $(findstring command,$(origin $1)),, \
-			$(if $(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk), \
-				$(shell grep '^ *$1 *=' $(wildcard ~/.latex.mk ~/latex.mk .latex.mk latex.mk) \
+			$(if $(_conf_file_list), \
+				$(shell grep '^ *$1 *=' $(_conf_file_list) \
 					| sed 's/^.*://' | tail -n 1) \
 			) \
 		) \
 	))
+
+_real_makefile_dir := \
+	$(dir $(realpath $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))))
+
+_conf_file_list := \
+	$(wildcard \
+		~/.latex.mk ~/latex.mk \
+		$(_real_makefile_dir)/.latex.mk $(_real_makefile_dir)/latex.mk \
+		.latex.mk latex.mk)
 
 # The MAKEFILE4LATEX_REVISION variable controls the revision of Makefile for
 # LaTeX to be downloaded.
