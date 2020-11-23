@@ -28,7 +28,7 @@
 # SOFTWARE.
 #
 
-MAKEFILE4LATEX_VERSION = 0.4.1
+MAKEFILE4LATEX_VERSION = 0.4.2-dev
 
 define help_message
 Makefile for LaTeX ($(MAKEFILE4LATEX_VERSION))
