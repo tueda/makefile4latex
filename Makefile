@@ -1447,7 +1447,7 @@ mk_fls_dep = \
 					*:*|/*) ;; \
 					*.fmt|*.run.xml) ;; \
 					*) \
-						$(call dep_entry,$1,\$$(wildcard $$f)); \
+						$(call dep_entry,$1,$$f); \
 						;; \
 				esac; \
 			done; \
@@ -1460,7 +1460,7 @@ mk_blg_dep = \
 		mkdir -p $(DEPDIR); \
 		{ \
 			for f in `{ grep 'Database file [^:]*:' '$2'; grep 'The style file:' '$2'; } | sed 's/[^:]*://'`; do \
-				$(call dep_entry,$1,\$$(wildcard $$f)); \
+				$(call dep_entry,$1,$$f); \
 			done; \
 		} | sort >$(DEPDIR)/$1.blg.d; \
 	fi
@@ -1474,7 +1474,7 @@ mk_glg_dep = \
 		mkdir -p $(DEPDIR); \
 		{ \
 			for f in $$(grep 'Reading .*\.bib' '$2' | sed 's/Reading *//'); do \
-				$(call dep_entry,$1,\$$(wildcard $$f)); \
+				$(call dep_entry,$1,$$f); \
 			done; \
 		} | sort >$(DEPDIR)/$1.glg.d; \
 	fi
@@ -1487,10 +1487,11 @@ mk_ref_dep = \
 	fi
 
 # $(call dep_entry,TARGET,DEPENDENCY) prints a dependency entry.
+# NOTE: DEPENDENCY can be a shell variable.
 dep_entry = \
 	if [ -f "$2" ]; then \
-		echo "$1 : $2"; \
-		echo "$(build_prefix)$(basename $1).log : $2"; \
+		echo "$1 : \$$(wildcard $2)"; \
+		echo "$(build_prefix)$(basename $1).log : \$$(wildcard $2)"; \
 	fi
 
 # $(call grep_lines,PATTERN,FILE) greps PATTERN and prints lines around matches
