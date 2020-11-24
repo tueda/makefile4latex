@@ -397,6 +397,10 @@ is_texlive_impl = $(strip \
 	$(shell $(TEX) --version 2>/dev/null | grep -q 'TeX Live' && echo 1) \
 )
 
+# $(call rule_exists,RULE) is "1" if RULE exists, otherwise empty.
+rule_exists = \
+	$(shell $(MAKE) -n $1 >/dev/null 2>&1 && echo 1)
+
 # $(init_toolchain) initializes the toolchain.
 init_toolchain = $(call cache,init_toolchain_impl)
 
