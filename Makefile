@@ -140,7 +140,7 @@ PREREQUISITE =
 # Prerequisite Make targets in subdirectories.
 PREREQUISITE_SUBDIRS = NONE
 
-# Lint commands.
+# List of linter commands/rules, invoked by "make lint".
 LINTS = check_periods
 
 # List of test scripts/rules, invoked by "make check".
@@ -964,28 +964,56 @@ clean:
 	)
 
 lint:
-	@$(builtin_lints) \
-	for file in $(wildcard *.tex); do \
-		for lint in $(LINTS); do \
-			if [ -f "$$lint" ]; then \
-				$(call exec,./$$lint $$file); \
-			else \
-				$(call exec,$$lint $$file); \
-			fi; \
-		done; \
-	done
+	@lint_ok=:; \
+	$(foreach lint,$(LINTS), \
+		$(if $(wildcard $(lint)), \
+			$(call _lint_run,./$(lint)) \
+		,$(if $(and $(filter-out lint,$(lint)),$(call rule_exists,$(lint))), \
+			$(call _lint_rule,$(lint)) \
+		,$(if $(and $(filter-out lint,$(lint)),$(call rule_exists,_builtin_lint_$(lint))), \
+			$(call _lint_builtin_rule,$(lint)) \
+		, \
+			$(call _lint_run,$(lint)) \
+		))) \
+	) \
+	$$lint_ok
 
-builtin_lints =
+# $(call _lint_run,EXECUTABLE) runs EXECUTABLE.
+_lint_run = \
+	$(foreach texfile,$(wildcard *.tex), \
+		$(call exec,$1 $(texfile),false); \
+		$$failed && lint_ok=false; \
+	)
+
+# $(call _lint_rule,RULE) runs RULE.
+_lint_rule = \
+	$(foreach texfile,$(wildcard *.tex), \
+		$(call colorize, \
+			printf "\033$(CL_NOTICE)$(MAKE) $1 1=$(texfile)\033$(CL_NORMAL)\n" \
+		, \
+			echo "$(MAKE) $1 1=$(texfile) " \
+		); \
+		$(MAKE) --no-print-directory $1 1="$(texfile)" || lint_ok=false; \
+	)
+
+# $(call _lint_builtin_rule,RULE) runs the builtin RULE.
+_lint_builtin_rule = \
+	$(foreach texfile,$(wildcard *.tex), \
+		$(MAKE) --no-print-directory _builtin_lint_$1 1=$(texfile) || lint_ok=false; \
+	)
 
 # Check common mistakes about spacing after periods.
 # XXX: --color=always is not POSIX. We may reflect $(make_colors).
-builtin_lints += \
-	check_periods() { \
-		if grep -n --color=always '[A-Z][A-Z][A-Z]*)\?\.' "$$1"; then \
-			$(call error_message,most likely wrong spacing after periods. You may need to insert \\@); \
-			exit 1; \
-		fi; \
-	};
+_builtin_lint_check_periods:
+	@$(call colorize, \
+		printf "\033$(CL_NOTICE)check_periods $1\033$(CL_NORMAL)\n" \
+	, \
+		echo "check_periods $1" \
+	)
+	@if grep -n --color=always '[A-Z][A-Z][A-Z]*)\?\.' $1; then \
+		$(call error_message,most likely wrong spacing after periods. You may need to insert \\@); \
+		exit 1; \
+	fi
 
 check:
 	@$(call make_for_each_subdir,check)
