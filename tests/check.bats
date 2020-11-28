@@ -190,6 +190,12 @@ require_package() {
   make -C macro all-test
 }
 
+@test "check" {
+  make -C check/tests_opt check
+  make -C check/tests_opt_params check
+  make -C check/variable_opt check
+}
+
 @test "get" {
   MAKEFILE4LATEX_CACHE=_cache test_dir get 5
 }

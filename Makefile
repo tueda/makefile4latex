@@ -143,15 +143,14 @@ PREREQUISITE_SUBDIRS = NONE
 # Lint commands.
 LINTS = check_periods
 
-# Test scripts.
+# List of test scripts/rules, invoked by "make check".
 TESTS =
 
-# Options for test scripts. Called as $(call TESTS_OPT,test_name,test_param)
-# where test_name and test_param will be shell variables.
+# Options for test scripts. Called as $(call TESTS_OPT,test_name,test_param).
 TESTS_OPT =
 
-# Command line parameters for test scripts. If not empty, test scripts will be
-# executed for each parameter.
+# List of command line parameters for test scripts. If not empty, test scripts
+# will be executed for each parameter.
 TESTS_PARAMS =
 
 # The following variables will be guessed if empty.
@@ -988,24 +987,44 @@ builtin_lints += \
 
 check:
 	@$(call make_for_each_subdir,check)
-	@$(if $(TESTS_PARAMS), \
-		for test in $(TESTS); do \
-			for param in $(TESTS_PARAMS); do \
-				if [ -f "$$test" ]; then \
-						$(call exec,./$$test $(call TESTS_OPT,$$test,$$param) $$param); \
-				else \
-					$(call exec,$$test $(call TESTS_OPT,$$test,$$param) $$param); \
-				fi; \
-			done \
-		done \
+	@$(foreach test,$(TESTS), \
+		$(if $(wildcard $(test)), \
+			$(call _check_run,./$(test)) \
+		,$(if $(and $(filter-out check,$(test)),$(call rule_exists,$(test))), \
+			$(call _check_rule,$(test)) \
+		, \
+			$(call _check_run,$(test)) \
+		)) \
+	)
+
+# $(call _check_run,EXECUTABLE) runs EXECUTABLE.
+_check_run = \
+	$(if $(TESTS_PARAMS), \
+		$(foreach param,$(TESTS_PARAMS), \
+			$(call exec,$1 $(call TESTS_OPT,$1,$(param)) $(param)); \
+		) \
 	, \
-		for test in $(TESTS); do \
-			if [ -f "$$test" ]; then \
-				$(call exec,./$$test $(call TESTS_OPT,$$test)); \
-			else \
-				$(call exec,$$test $(call TESTS_OPT,$$test)); \
-			fi; \
-		done \
+		$(call exec,$1 $(call TESTS_OPT,$1)); \
+	)
+
+# $(call _check_rule,RULE) runs RULE.
+_check_rule = \
+	$(if $(TESTS_PARAMS), \
+		$(foreach param,$(TESTS_PARAMS), \
+			$(call colorize, \
+				printf "\033$(CL_NOTICE)$(MAKE) $1 1=\"$(call TESTS_OPT,$1,$(param)) $(param)\"\033$(CL_NORMAL)\n" \
+			, \
+				echo "$(MAKE) $1 1=\"$(call TESTS_OPT,$1,$(param)) $(param)\"" \
+			); \
+			$(MAKE) --no-print-directory $1 1="$(call TESTS_OPT,$1,$(param)) $(param)" || exit 1; \
+		) \
+	, \
+		$(call colorize, \
+			printf "\033$(CL_NOTICE)$(MAKE) $1 1=\"$(call TESTS_OPT,$1)\"\033$(CL_NORMAL)\n" \
+		, \
+			echo "$(MAKE) $1 1=\"$(call TESTS_OPT,$1)\"" \
+		); \
+		$(MAKE) --no-print-directory $1 1="$(call TESTS_OPT,$1)" || exit 1; \
 	)
 
 # The "watch" mode. Try to update .log files instead of .pdf/.dvi files,
