@@ -839,6 +839,7 @@ check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit
 #   "I found no \bibstyle command---while reading file ...": BibTeX
 #   "I found no \citation commands---while reading file ...": BibTeX
 #   "Repeated entry--- ...": BibTeX
+#   "Error ... in ... line ...:": ChkTeX
 # Warnings:
 #   "LaTeX Warning ...": \@latex@warning
 #   "Package Warning ...": \PackageWarning or \PackageWarningNoLine
@@ -851,7 +852,7 @@ check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit
 #   "Warning-- ...": BibTeX
 #   "Warning ... in ... line ...:": ChkTeX
 colorize_output = \
-	sed 's/^\(!.*\|I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	sed 's/^\(!.*\|I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\|Error .* in.* line.*:.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
 	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\|Warning--.*\|Warning .* in.* line.*:.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
 # $(call cmpver,VER1,OP,VER2) compares the given two version numbers.
