@@ -170,6 +170,7 @@ SORTREF =
 MAKEINDEX =
 MAKEGLOSSARIES =
 BIB2GLS =
+CHKTEX =
 KPSEWHICH =
 AXOHELP =
 PDFCROP =
@@ -199,6 +200,7 @@ SORTREF_OPT =
 MAKEINDEX_OPT =
 MAKEGLOSSARIES_OPT =
 BIB2GLS_OPT =
+CHKTEX_OPT =
 KPSEWHICH_OPT =
 AXOHELP_OPT =
 PDFCROP_OPT =
@@ -565,6 +567,11 @@ makeglossaries_impl = $(call pathsearch2,makeglossaries,MAKEGLOSSARIES,makegloss
 bib2gls = $(call cache,bib2gls_impl) $(BIB2GLS_OPT)
 
 bib2gls_impl = $(call pathsearch2,bib2gls,BIB2GLS,bib2gls)
+
+# $(chktex)
+chktex = $(call cache,chktex_impl) $(CHKTEX_OPT)
+
+chktex_impl = $(call pathsearch2,chktex,CHKTEX,chktex)
 
 # $(kpsewhich)
 kpsewhich = $(call cache,kpsewhich_impl) $(KPSEWHICH_OPT)
@@ -1014,6 +1021,9 @@ _builtin_lint_check_periods:
 		$(call error_message,most likely wrong spacing after periods. You may need to insert \\@); \
 		exit 1; \
 	fi
+
+_builtin_lint_chktex:
+	@$(call exec,$(chktex) $1)
 
 check:
 	@$(call make_for_each_subdir,check)
