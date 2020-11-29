@@ -16,6 +16,13 @@ foo-rule: _FORCE
 
 bar-rule: _FORCE
 
+test_color_enabled:
+	MAKE_COLORS=always $(MAKE) check_color_enabled
+	if { MAKE_COLORS=none $(MAKE) check_color_enabled; }; then false; else :; fi
+
+check_color_enabled:
+	$(color_enabled)
+
 test_ensure_build_dir:
 	$(ensure_build_dir)
 	$(if $(BUILDDIR),[ -d $(BUILDDIR) ])

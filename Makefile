@@ -778,6 +778,17 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(mostlycleanfiles) \
 ))
 
+# $(color_enabled) is a shell script snippet that returns the exit code 0 if
+# coloring is enabled, otherwise returns a non-zero value.
+color_enabled = \
+	$(if $(findstring $(strip $(make_colors)),always), \
+		: \
+	,$(if $(findstring $(strip $(make_colors)),none), \
+		false \
+	, \
+		[ -t 1 ] \
+	))
+
 # $(call colorize,COMMAND-WITH-COLOR,COMMAND-WITHOUT-COLOR) invokes the first
 # command when coloring is enabled, otherwise invokes the second command.
 colorize = \
