@@ -4,12 +4,12 @@ all-test:
 CLEANFILES += 1.tmp
 
 test_is_texlive:
-	$(if $(is_texlive),:,false)
+	$(call assert_true,$(is_texlive))
 
 test_rule_exists:
-	$(if $(call rule_exists,foo-rule),:,false)
-	$(if $(call rule_exists,bar-rule),:,false)
-	$(if $(call rule_exists,baz-rule),false,:)
+	$(call assert_true, $(call rule_exists,foo-rule))
+	$(call assert_true, $(call rule_exists,bar-rule))
+	$(call assert_false,$(call rule_exists,baz-rule))
 
 foo-rule: _FORCE
 	:
@@ -17,19 +17,19 @@ foo-rule: _FORCE
 bar-rule: _FORCE
 
 test_color_enabled:
-	MAKE_COLORS=always $(MAKE) check_color_enabled
-	if { MAKE_COLORS=none $(MAKE) check_color_enabled; }; then false; else :; fi
+	$(call assert_success,MAKE_COLORS=always $(MAKE) check_color_enabled)
+	$(call assert_fail,   MAKE_COLORS=none   $(MAKE) check_color_enabled)
 
 check_color_enabled:
 	$(color_enabled)
 
 test_ensure_build_dir:
-	$(ensure_build_dir)
+	$(call assert_success,$(ensure_build_dir))
 	$(if $(BUILDDIR),[ -d $(BUILDDIR) ])
 
 test_mv_target:
-	$(if $(BUILDDIR),mkdir -p $(BUILDDIR))
+	$(ensure_build_dir)
 	touch $(build_prefix)1.tmp
-	$(call mv_target,1.tmp)
-	if { $(call mv_target,2.tmp); }; then false; else :; fi
-	$(call mv_target,3.tmp,false)
+	$(call assert_success,$(call mv_target,1.tmp))
+	$(call assert_fail,   $(call mv_target,2.tmp))
+	$(call assert_success,$(call mv_target,3.tmp,false))

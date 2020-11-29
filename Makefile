@@ -393,6 +393,18 @@ run_testsuite = \
 
 all_testsuite = $(shell $(MAKE) -pq _FORCE | sed -n '/^$1/p' | sed 's/:.*//')
 
+assert_true = \
+	$(if $(strip $1),:,false)
+
+assert_false = \
+	$(if $(strip $1),false,:)
+
+assert_success = \
+	$(strip $1)
+
+assert_fail = \
+	if { $(strip $1); }; then false; else :; fi
+
 # $(is_texlive) is "1" if TeX Live is used, otherwise empty.
 is_texlive = $(call cache,is_texlive_impl)
 
