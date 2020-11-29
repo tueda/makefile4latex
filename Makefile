@@ -171,6 +171,7 @@ MAKEINDEX =
 MAKEGLOSSARIES =
 BIB2GLS =
 CHKTEX =
+TEXTLINT =
 KPSEWHICH =
 AXOHELP =
 PDFCROP =
@@ -201,6 +202,7 @@ MAKEINDEX_OPT =
 MAKEGLOSSARIES_OPT =
 BIB2GLS_OPT =
 CHKTEX_OPT =
+TEXTLINT_OPT = --cache
 KPSEWHICH_OPT =
 AXOHELP_OPT =
 PDFCROP_OPT =
@@ -572,6 +574,11 @@ bib2gls_impl = $(call pathsearch2,bib2gls,BIB2GLS,bib2gls)
 chktex = $(call cache,chktex_impl) $(CHKTEX_OPT)
 
 chktex_impl = $(call pathsearch2,chktex,CHKTEX,chktex)
+
+# $(textlint)
+textlint = $(call cache,textlint_impl) $(TEXTLINT_OPT)
+
+textlint_impl = $(call pathsearch2,textlint,TEXTLINT,node_modules/.bin/textlint,textlint)
 
 # $(kpsewhich)
 kpsewhich = $(call cache,kpsewhich_impl) $(KPSEWHICH_OPT)
@@ -1024,6 +1031,9 @@ _builtin_lint_check_periods:
 
 _builtin_lint_chktex:
 	@$(call exec,$(chktex) $1)
+
+_builtin_lint_textlint:
+	@$(call exec,$(textlint) $1)
 
 check:
 	@$(call make_for_each_subdir,check)

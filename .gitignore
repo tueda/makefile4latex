@@ -335,6 +335,12 @@ TSWLatexianTemp*
 *.bb
 *.xbb
 
+# textlint
+.textlintcache
+node_modules
+package-lock.json
+yarn.lock
+
 # arXiv tarballs.
 *.tar.gz
 
