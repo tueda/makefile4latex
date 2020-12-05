@@ -172,6 +172,7 @@ MAKEGLOSSARIES =
 BIB2GLS =
 CHKTEX =
 TEXTLINT =
+REDPEN =
 KPSEWHICH =
 AXOHELP =
 PDFCROP =
@@ -203,6 +204,7 @@ MAKEGLOSSARIES_OPT =
 BIB2GLS_OPT =
 CHKTEX_OPT =
 TEXTLINT_OPT = --cache
+REDPEN_OPT =
 KPSEWHICH_OPT =
 AXOHELP_OPT =
 PDFCROP_OPT =
@@ -604,6 +606,11 @@ $(shell git rev-parse --show-superproject-working-tree 2>/dev/null)/node_modules
 ../../node_modules/.bin/textlint,\
 textlint)
 
+# $(redpen)
+redpen = $(call cache,redpen_impl) $(REDPEN_OPT)
+
+redpen_impl = $(call pathsearch2,redpen,REDPEN,redpen)
+
 # $(kpsewhich)
 kpsewhich = $(call cache,kpsewhich_impl) $(KPSEWHICH_OPT)
 
@@ -893,6 +900,8 @@ set_title = :
 
 # $(call exec,COMMAND) invokes the command with checking the exit status.
 # $(call exec,COMMAND,false) invokes the command but skips the check.
+# $(call exec,COMMAND,,COLOR_FILTER) and $(call exec,COMMAND,false,COLOR_FILTER)
+# use COLOR_FILTER for the stdout.
 exec = \
 	$(if $(and $(findstring not found,$1),$(findstring exit 1,$1)), \
 		$1 \
@@ -902,7 +911,7 @@ exec = \
 			printf "\033$(CL_NOTICE)$1\033$(CL_NORMAL)\n"; \
 			exec 3>&1; \
 			pipe_status=`{ { $1 3>&- 4>&-; echo $$? 1>&4; } | \
-					$(colorize_output) >&3; } 4>&1`; \
+					$(call colorize_output,$3) >&3; } 4>&1`; \
 			exec 3>&-; \
 			[ "$$pipe_status" = 0 ] || failed=: \
 		, \
@@ -916,6 +925,9 @@ exec = \
 check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit 1; }; :
 
 # $(colorize_output) gives sed commands for colorful output.
+# $(colorize_output,COLOR_FILTER) gives an application specific filter.
+colorize_output = $(colorize_output_$1)
+
 # Errors:
 #   "! ...": TeX
 #   "I couldn't open database file ...": BibTeX
@@ -936,9 +948,14 @@ check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit
 #   "pdfTeX warning ...": pdfTeX
 #   "Warning-- ...": BibTeX
 #   "Warning ... in ... line ...:": ChkTeX
-colorize_output = \
+colorize_output_ = \
 	sed 's/^\(!.*\|I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\|Error .* in.* line.*:.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
 	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\|Warning--.*\|Warning .* in.* line.*:.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+
+# For RedPen:
+#   "...:...: ValidationError[...], ..."
+colorize_output_redpen = \
+	sed 's/^\(.*: ValidationError\[.*\]\)\(.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_WARN)\2\$\$\x1b$(CL_NORMAL)/'
 
 # $(call cmpver,VER1,OP,VER2) compares the given two version numbers.
 cmpver = { \
@@ -1115,6 +1132,9 @@ _builtin_lint_textlint:
 	else \
 		$(call exec,$(textlint) --no-color $1); \
 	fi
+
+_builtin_lint_redpen:
+	@$(call exec,$(redpen) $1,,redpen)
 
 check:
 	@$(call make_for_each_subdir,check)
