@@ -1105,7 +1105,11 @@ _builtin_lint_chktex:
 	@$(call exec,$(chktex) $1)
 
 _builtin_lint_textlint:
-	@$(call exec,$(textlint) $1)
+	@if $(color_enabled); then \
+		$(call exec,$(textlint) --color $1); \
+	else \
+		$(call exec,$(textlint) --no-color $1); \
+	fi
 
 check:
 	@$(call make_for_each_subdir,check)
