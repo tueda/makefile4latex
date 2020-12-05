@@ -928,9 +928,11 @@ check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit
 # $(colorize_output,COLOR_FILTER) gives an application specific filter.
 colorize_output = $(colorize_output_$1)
 
-# Errors:
+colorize_output_ = cat
+
+# Errors for LaTeX:
 #   "! ...": TeX
-# Warnings:
+# Warnings for LaTeX:
 #   "LaTeX Warning ...": \@latex@warning
 #   "Package Warning ...": \PackageWarning or \PackageWarningNoLine
 #   "Class Warning ...": \ClassWarning or \ClassWarningNoLine
@@ -939,7 +941,7 @@ colorize_output = $(colorize_output_$1)
 #   "Underfull ...": TeX
 #   "Overfull ...": TeX
 #   "pdfTeX warning ...": pdfTeX
-colorize_output_ = \
+colorize_output_latex = \
 	sed 's/^\(!.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
 	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
@@ -1452,7 +1454,7 @@ do_latex = \
 		$(call do_backup,$*.glo); \
 		$(call do_backup,$*.glstex); \
 		$(call do_backup,$*.ax1); \
-		$(call exec,$1 $<,$2); \
+		$(call exec,$1 $<,$2,latex); \
 		if $(call check_modified,$*.aux); then \
 			if $(check_biblatex); then \
 				if $(check_biblatex_rerun_bibtex); then \
@@ -1806,7 +1808,7 @@ $(build_prefix)%.log : %.tex
 .ltx.fmt:
 	@$(init_toolchain)
 	@$(ensure_build_dir)
-	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(notdir $(basename $(latex_noopt))) $<\dump')
+	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(notdir $(basename $(latex_noopt))) $<\dump',,latex)
 	@$(mv_target)
 	@$(call exec,rm -f $*.pdf)
 
@@ -1833,18 +1835,18 @@ $(build_prefix)%.log : %.tex
 .tex.fmt:
 	@$(init_toolchain)
 	@$(ensure_build_dir)
-	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(tex_format)' mylatexformat.ltx '$<')
+	@$(call exec,$(latex_noopt) -ini -jobname='$*' '&$(tex_format)' mylatexformat.ltx '$<',,latex)
 	@$(mv_target)
 	@$(call exec,rm -f $*.pdf)
 
 .dtx.cls:
 	@$(ensure_build_dir)
-	@$(call exec,$(latex_noopt) $(basename $<).ins)
+	@$(call exec,$(latex_noopt) $(basename $<).ins,,latex)
 	@$(mv_target)
 
 .dtx.sty:
 	@$(ensure_build_dir)
-	@$(call exec,$(latex_noopt) $(basename $<).ins)
+	@$(call exec,$(latex_noopt) $(basename $<).ins,,latex)
 	@$(mv_target)
 
 .odt.pdf:
