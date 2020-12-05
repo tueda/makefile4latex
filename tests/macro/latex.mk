@@ -17,6 +17,9 @@ foo-rule: _FORCE
 bar-rule: _FORCE
 
 test_color_enabled:
+	$(call assert_success,$(MAKE) COLOR=always check_color_enabled)
+	$(call assert_fail,   $(MAKE) COLOR=never  check_color_enabled)
+	# for compatibility with previous versions
 	$(call assert_success,MAKE_COLORS=always $(MAKE) check_color_enabled)
 	$(call assert_fail,   MAKE_COLORS=none   $(MAKE) check_color_enabled)
 

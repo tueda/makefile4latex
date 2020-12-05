@@ -107,11 +107,11 @@ DEV =
 # (for debugging) Keep temporary directories if its value is non-empty.
 KEEP_TEMP =
 
-# Specify if use colors for the output:
+# Specify the color mode in the output:
 # - always
-# - none
+# - never
 # - auto (default)
-make_colors = $(MAKE_COLORS)
+COLOR =
 
 # Files not to be included in a distribution.
 NODISTFILES =
@@ -790,12 +790,48 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(mostlycleanfiles) \
 ))
 
+# $(color) gives the color mode in the output:
+# - always
+# - never
+# - auto (default)
+#
+# Usually controlled via $(COLOR) given on the command line or
+# in the user configuration files.
+#
+# For compatibility with previous versions:
+# - fall back to $(MAKE_COLORS), if $(COLOR) is empty,
+# - allow "none", which is translated to "never".
+#
+# NOTE: use of MAKE_COLORS is deprecated. In future, MAKE_COLORS might be
+# used for customizing colorings, like LS_COLORS or GCC_COLORS.
+#
+color = $(call cache,color_impl)
+color_impl = $(strip \
+	$(if $(_get_color), \
+		$(if $(or \
+			$(findstring always,$(_get_color)), \
+			$(findstring never,$(_get_color)), \
+			$(findstring auto,$(_get_color)) \
+		), \
+			$(_get_color) \
+		,$(if $(findstring none,$(_get_color)), \
+			never \
+		, \
+			$(warning unrecognized COLOR=$(_get_color)) \
+			auto \
+		)) \
+	, \
+		auto \
+	) \
+)
+_get_color = $(if $(COLOR),$(COLOR),$(MAKE_COLORS))
+
 # $(color_enabled) is a shell script snippet that returns the exit code 0 if
 # coloring is enabled, otherwise returns a non-zero value.
 color_enabled = \
-	$(if $(findstring $(strip $(make_colors)),always), \
+	$(if $(findstring always,$(color)), \
 		: \
-	,$(if $(findstring $(strip $(make_colors)),none), \
+	,$(if $(findstring never,$(color)), \
 		false \
 	, \
 		[ -t 1 ] \
@@ -804,17 +840,17 @@ color_enabled = \
 # $(call colorize,COMMAND-WITH-COLOR,COMMAND-WITHOUT-COLOR) invokes the first
 # command when coloring is enabled, otherwise invokes the second command.
 colorize = \
-	if [ "$(make_colors)" = "always" ]; then \
-		$1; \
-	elif [ "$(make_colors)" = "none" ]; then \
-		$2; \
-	else \
+	$(if $(findstring always,$(color)), \
+		$1 \
+	,$(if $(findstring never,$(color)), \
+		$2 \
+	, \
 		if [ -t 1 ]; then \
 			$1; \
 		else \
 			$2; \
-		fi; \
-	fi
+		fi \
+	))
 
 # $(call notification_message,MESSAGE) prints a notification message.
 notification_message = \
