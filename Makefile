@@ -412,6 +412,13 @@ is_texlive_impl = $(strip \
 	$(shell $(TEX) --version 2>/dev/null | grep -q 'TeX Live' && echo 1) \
 )
 
+# $(has_gnu_grep) is "1" if GNU grep is available, otherwise empty.
+has_gnu_grep = $(call cache,has_gnu_grep_impl)
+
+has_gnu_grep_impl = $(strip \
+	$(shell grep --version 2>/dev/null | grep -q 'GNU' && echo 1) \
+)
+
 # $(call rule_exists,RULE) is "1" if RULE exists, otherwise empty.
 rule_exists = \
 	$(shell $(MAKE) -n $1 >/dev/null 2>&1 && echo 1)
@@ -1076,14 +1083,20 @@ _lint_builtin_rule = \
 	)
 
 # Check common mistakes about spacing after periods.
-# XXX: --color=always is not POSIX. We may reflect $(make_colors).
+# NOTE: --color=always is not POSIX.
 _builtin_lint_check_periods:
 	@$(call colorize, \
 		printf "\033$(CL_NOTICE)check_periods $1\033$(CL_NORMAL)\n" \
 	, \
 		echo "check_periods $1" \
 	)
-	@if grep -n --color=always '[A-Z][A-Z][A-Z]*)\?\.' $1; then \
+	@grep_opts=; \
+	$(if $(has_gnu_grep), \
+		if $(color_enabled); then \
+			grep_opts=--color=always; \
+		fi; \
+	) \
+	if grep -n $$grep_opts '[A-Z][A-Z][A-Z]*)\?\.' $1; then \
 		$(call error_message,most likely wrong spacing after periods. You may need to insert \\@); \
 		exit 1; \
 	fi
