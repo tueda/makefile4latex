@@ -936,7 +936,6 @@ colorize_output = $(colorize_output_$1)
 #   "I found no \bibstyle command---while reading file ...": BibTeX
 #   "I found no \citation commands---while reading file ...": BibTeX
 #   "Repeated entry--- ...": BibTeX
-#   "Error ... in ... line ...:": ChkTeX
 # Warnings:
 #   "LaTeX Warning ...": \@latex@warning
 #   "Package Warning ...": \PackageWarning or \PackageWarningNoLine
@@ -947,10 +946,17 @@ colorize_output = $(colorize_output_$1)
 #   "Overfull ...": TeX
 #   "pdfTeX warning ...": pdfTeX
 #   "Warning-- ...": BibTeX
-#   "Warning ... in ... line ...:": ChkTeX
 colorize_output_ = \
-	sed 's/^\(!.*\|I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\|Error .* in.* line.*:.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
-	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\|Warning--.*\|Warning .* in.* line.*:.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+	sed 's/^\(!.*\|I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\|Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+
+# Errors for ChkTeX:
+#   "Error ... in ... line ...:"
+# Warnings for ChkTeX:
+#   "Warning ... in ... line ...:"
+colorize_output_chktex = \
+	sed 's/^\(Error .* in.* line.*:.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	s/^\(Warning .* in.* line.*:.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
 # For RedPen:
 #   "...:...: ValidationError[...], ..."
@@ -1124,7 +1130,7 @@ _builtin_lint_check_periods:
 	fi
 
 _builtin_lint_chktex:
-	@$(call exec,$(chktex) $1)
+	@$(call exec,$(chktex) $1,,chktex)
 
 _builtin_lint_textlint:
 	@if $(color_enabled); then \
