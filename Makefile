@@ -930,12 +930,6 @@ colorize_output = $(colorize_output_$1)
 
 # Errors:
 #   "! ...": TeX
-#   "I couldn't open database file ...": BibTeX
-#   "I couldn't open file name ...": BibTeX
-#   "I found no database files---while reading file ...": BibTeX
-#   "I found no \bibstyle command---while reading file ...": BibTeX
-#   "I found no \citation commands---while reading file ...": BibTeX
-#   "Repeated entry--- ...": BibTeX
 # Warnings:
 #   "LaTeX Warning ...": \@latex@warning
 #   "Package Warning ...": \PackageWarning or \PackageWarningNoLine
@@ -945,10 +939,22 @@ colorize_output = $(colorize_output_$1)
 #   "Underfull ...": TeX
 #   "Overfull ...": TeX
 #   "pdfTeX warning ...": pdfTeX
-#   "Warning-- ...": BibTeX
 colorize_output_ = \
-	sed 's/^\(!.*\|I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
-	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\|Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+	sed 's/^\(!.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+
+# Errors for BibTeX:
+#   "I couldn't open database file ..."
+#   "I couldn't open file name ..."
+#   "I found no database files---while reading file ..."
+#   "I found no \bibstyle command---while reading file ..."
+#   "I found no \citation commands---while reading file ..."
+#   "Repeated entry--- ..."
+# Warnings for BibTeX:
+#   "Warning-- ..."
+colorize_output_bibtex = \
+	sed 's/^\(I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	s/^\(Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
 # Errors for ChkTeX:
 #   "Error ... in ... line ...:"
@@ -1494,22 +1500,22 @@ do_bibtex = \
 				ff=$$(basename $$f); \
 				$(call copy_build_temp_file,$$ff); \
 			done; \
-			$(call exec,$(bibtex) $*); \
+			$(call exec,$(bibtex) $*,,bibtex); \
 			mv $*.bbl $*.blg $(BUILDDIR)/; \
 			for f in $**-blx.aux; do \
 				if [ -f $$f ]; then \
 					ff=$$(basename $$f .aux); \
-					$(call exec,$(bibtex) $$ff); \
+					$(call exec,$(bibtex) $$ff,,bibtex); \
 					mv $$ff.bbl $$ff.blg $(BUILDDIR)/; \
 				fi; \
 			done; \
 			$(clear_build_temp_files); \
 		, \
-			$(call exec,$(bibtex) $*); \
+			$(call exec,$(bibtex) $*,,bibtex); \
 			for f in $**-blx.aux; do \
 				if [ -f $$f ]; then \
 					ff=$$(basename $$f .aux); \
-					$(call exec,$(bibtex) $$ff); \
+					$(call exec,$(bibtex) $$ff,,bibtex); \
 				fi; \
 			done; \
 		) \
