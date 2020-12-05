@@ -597,7 +597,12 @@ chktex_impl = $(call pathsearch2,chktex,CHKTEX,chktex)
 # $(textlint)
 textlint = $(call cache,textlint_impl) $(TEXTLINT_OPT)
 
-textlint_impl = $(call pathsearch2,textlint,TEXTLINT,node_modules/.bin/textlint,textlint)
+textlint_impl = $(call pathsearch2,textlint,TEXTLINT,node_modules/.bin/textlint,\
+$(shell git rev-parse --show-toplevel 2>/dev/null)/node_modules/.bin/textlint,\
+$(shell git rev-parse --show-superproject-working-tree 2>/dev/null)/node_modules/.bin/textlint,\
+../node_modules/.bin/textlint,\
+../../node_modules/.bin/textlint,\
+textlint)
 
 # $(kpsewhich)
 kpsewhich = $(call cache,kpsewhich_impl) $(KPSEWHICH_OPT)
