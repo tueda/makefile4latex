@@ -35,7 +35,6 @@ Features
   [GNU Aspell](http://aspell.net/),
   [textlint](https://textlint.github.io/) and
   [RedPen](https://redpen.cc/) have built-in support.
-
 - Creating tar-gzipped source files for [arXiv](https://arxiv.org/)
   submission (`make dist`).
 - Watching source files to automatically typeset documents when they are modified (`make watch`).
@@ -154,7 +153,7 @@ Variables
 - `LINTS`:
   List linters to be used by `make lint`.
   Given on the command line or in the user configuration files.
-  The default value is: `LINTS = chktex`, thus it runs
+  The default value is `LINTS = chktex`, so it runs
   [ChkTeX](https://www.ctan.org/pkg/chktex).
   One can add or overwrite the list, for example,
   `LINTS += aspell` or `LINTS = textlint redpen`.
