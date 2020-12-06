@@ -171,6 +171,7 @@ MAKEINDEX =
 MAKEGLOSSARIES =
 BIB2GLS =
 CHKTEX =
+ASPELL =
 TEXTLINT =
 REDPEN =
 KPSEWHICH =
@@ -203,6 +204,7 @@ MAKEINDEX_OPT =
 MAKEGLOSSARIES_OPT =
 BIB2GLS_OPT =
 CHKTEX_OPT =
+ASPELL_OPT =
 TEXTLINT_OPT = --cache
 REDPEN_OPT =
 KPSEWHICH_OPT =
@@ -595,6 +597,11 @@ bib2gls_impl = $(call pathsearch2,bib2gls,BIB2GLS,bib2gls)
 chktex = $(call cache,chktex_impl) $(CHKTEX_OPT)
 
 chktex_impl = $(call pathsearch2,chktex,CHKTEX,chktex)
+
+# $(aspell)
+aspell = $(call cache,aspell_impl) $(ASPELL_OPT)
+
+aspell_impl = $(call pathsearch2,aspell,ASPELL,aspell)
 
 # $(textlint)
 textlint = $(call cache,textlint_impl) $(TEXTLINT_OPT)
@@ -1139,6 +1146,24 @@ _builtin_lint_check_periods:
 
 _builtin_lint_chktex:
 	@$(call exec,$(chktex) $1,,chktex)
+
+_builtin_lint_aspell:
+	@$(call colorize, \
+		printf "\033$(CL_NOTICE)$(aspell) -a -t <$1\033$(CL_NORMAL)\n" \
+	, \
+		echo "$(aspell) -a -t <$1" \
+	)
+	@grep_expr=$$($(aspell) -a -t <"$1" | tail -n +2 | cut -d ' ' -f 2 | grep -v '*' | sed '/^$$/d' | sort | uniq | awk '{printf "-e %s ",$$0}'); \
+	if [ -n "$$grep_expr" ]; then \
+		grep_opts=; \
+		$(if $(has_gnu_grep), \
+			if $(color_enabled); then \
+				grep_opts=--color=always; \
+			fi; \
+		) \
+		grep -n $$grep_opts $$grep_expr "$1"; \
+		exit 1; \
+	fi
 
 _builtin_lint_textlint:
 	@if $(color_enabled); then \
