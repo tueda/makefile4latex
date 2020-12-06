@@ -30,6 +30,12 @@ Features
 - Highly customizable by optional user configuration files (`latex.mk` files).
 - Placing intermediate files into a directory (`BUILDDIR` variable).
 - [Latexdiff](https://www.ctan.org/pkg/latexdiff) between Git revisions (`DIFF` variable).
+- Linting (`make lint`).
+  [ChkTeX](https://www.ctan.org/pkg/chktex),
+  [GNU Aspell](http://aspell.net/),
+  [textlint](https://textlint.github.io/) and
+  [RedPen](https://redpen.cc/) have built-in support.
+
 - Creating tar-gzipped source files for [arXiv](https://arxiv.org/)
   submission (`make dist`).
 - Watching source files to automatically typeset documents when they are modified (`make watch`).
@@ -68,6 +74,8 @@ Targets
   Delete all files created by running `make`.
 - `mostlyclean`:
   Delete only intermediate files created by running `make`.
+- `lint`:
+  Run linters for source files in the current directory.
 - `dist`:
   Create tar-gzipped archives for [arXiv](https://arxiv.org/) submission.
 - `watch`:
@@ -132,6 +140,24 @@ Variables
   The resultant document has a postfix `-diff` like `foo-diff.pdf`.
   It is also possible to make a latexdiff between two revisions, e.g.,
   `make DIFF=HEAD~3..HEAD` provided both revisions contain the source file.
+
+- `COLOR`:
+  Control how colors are used in the output.
+  Given on the command line or in the user configuration files.
+    - `always`:
+      Use colors.
+    - `never`:
+      Do not use colors.
+    - `auto` (default):
+      Use colors unless the output is piped.
+
+- `LINTS`:
+  List linters to be used by `make lint`.
+  Given on the command line or in the user configuration files.
+  The default value is: `LINTS = chktex`, thus it runs
+  [ChkTeX](https://www.ctan.org/pkg/chktex).
+  One can add or overwrite the list, for example,
+  `LINTS += aspell` or `LINTS = textlint redpen`.
 
 - `NODISTFILES`, `EXTRADISTFILES`, `ANCILLARYFILES`:
   Control which files are included in tar-gzipped source files.

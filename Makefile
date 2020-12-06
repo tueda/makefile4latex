@@ -55,6 +55,9 @@ Targets
   mostlyclean:
     Delete only intermediate files created by this Makefile.
 
+  lint:
+    Run linters for source files in the current directory.
+
   dist:
     Create tar-gzipped archives for arXiv submission.
 
@@ -1125,7 +1128,7 @@ _lint_builtin_rule = \
 		$(MAKE) --no-print-directory _builtin_lint_$1 1=$(texfile) || lint_ok=false; \
 	)
 
-# Check common mistakes about spacing after periods.
+# Check common mistakes about spacing after periods (deprecated).
 # NOTE: --color=always is not POSIX.
 _builtin_lint_check_periods:
 	@$(call colorize, \
