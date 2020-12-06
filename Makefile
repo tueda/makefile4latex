@@ -141,7 +141,7 @@ PREREQUISITE =
 PREREQUISITE_SUBDIRS = NONE
 
 # List of linter commands/rules, invoked by "make lint".
-LINTS = check_periods
+LINTS = chktex
 
 # List of test scripts/rules, invoked by "make check".
 TESTS =
