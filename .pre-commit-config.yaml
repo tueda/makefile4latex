@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.3.0
+    rev: v3.4.0
     hooks:
     -   id: check-case-conflict
     -   id: check-merge-conflict
@@ -8,6 +8,18 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+-   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 151d143e4a1a06f9f829eadc7c3d35188fee1ad0
+    hooks:
+    -   id: editorconfig-checker
+        exclude: Makefile
+-   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 151d143e4a1a06f9f829eadc7c3d35188fee1ad0
+    hooks:
+    -   id: editorconfig-checker
+        name: editorconfig-checker (Makefile)
+        files: Makefile
+        args: [-disable-indentation]
 -   repo: https://github.com/jorisroovers/gitlint
     rev: v0.15.0
     hooks:
