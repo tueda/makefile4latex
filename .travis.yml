@@ -28,7 +28,7 @@ before_install:
         arch=x86_64-linux
         ;;
       osx)
-        arch=x86_64-darwin
+        arch=x86_64-darwinlegacy
         ;;
     esac
   - |
