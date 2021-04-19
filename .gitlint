@@ -8,5 +8,8 @@ line-length=80
 [body-max-line-length]
 line-length=80
 
+[ignore-by-title]
+regex=^Merge(.*)into(.*)
+
 [contrib-title-conventional-commits]
 types = build,chore,ci,docs,feat,fix,perf,refactor,revert,style,test

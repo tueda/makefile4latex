@@ -9,18 +9,18 @@ repos:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 151d143e4a1a06f9f829eadc7c3d35188fee1ad0
+    rev: 2.3.5
     hooks:
     -   id: editorconfig-checker
         exclude: Makefile
 -   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 151d143e4a1a06f9f829eadc7c3d35188fee1ad0
+    rev: 2.3.5
     hooks:
     -   id: editorconfig-checker
         name: editorconfig-checker (Makefile)
         files: Makefile
         args: [-disable-indentation]
 -   repo: https://github.com/jorisroovers/gitlint
-    rev: v0.15.0
+    rev: v0.15.1
     hooks:
     -   id: gitlint
