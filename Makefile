@@ -1151,6 +1151,7 @@ _builtin_lint_chktex:
 	@$(call exec,$(chktex) $1,,chktex)
 
 _builtin_lint_aspell:
+	@$(aspell) -v >/dev/null 2>&1
 	@$(call colorize, \
 		printf "\033$(CL_NOTICE)$(aspell) -a -t <$1\033$(CL_NORMAL)\n" \
 	, \
