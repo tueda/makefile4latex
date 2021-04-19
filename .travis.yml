@@ -58,6 +58,7 @@ before_install:
       rm -rf texlive.profile install-tl-20*
     fi
   - export PATH=$TEXLIVE_PATH/bin/$arch:$PATH
+  - tlmgr option autobackup 0
   - tlmgr update --self
   - tlmgr install bib2gls biber biblatex glossaries-extra revtex4-1
   # sortref: we also put it into the TeX Live directory.
