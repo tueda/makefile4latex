@@ -8,7 +8,7 @@ This is a GNU Makefile for typesetting LaTeX2e documents. Expected to work with
 [TeX Live](https://www.tug.org/texlive/) on Linux and similar systems, e.g., on
 macOS or Cygwin. Just download a single `Makefile` and put it in your directory
 containing LaTeX source files. Running `make` will generate PDF files for your
-documents.
+documents..
 
 
 Features
