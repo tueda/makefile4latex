@@ -11,6 +11,7 @@ install:
         -P texlive-collection-langjapanese
         -P texlive-collection-latex
         -P texlive-collection-latexextra
+        -P texlive-collection-latexrecommended
         -P texlive-collection-plaingeneric
         -P texlive-collection-mathscience )
 
