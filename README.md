@@ -33,6 +33,7 @@ Features
 - Linting (`make lint`).
   [ChkTeX](https://www.ctan.org/pkg/chktex),
   [GNU Aspell](http://aspell.net/),
+  [Hunspell](https://hunspell.github.io/),
   [textlint](https://textlint.github.io/) and
   [RedPen](https://redpen.cc/) have built-in support.
 - Creating tar-gzipped source files for [arXiv](https://arxiv.org/)
@@ -156,7 +157,7 @@ Variables
   The default value is `LINTS = chktex`, so it runs
   [ChkTeX](https://www.ctan.org/pkg/chktex).
   One can add or overwrite the list, for example,
-  `LINTS += aspell` or `LINTS = textlint redpen`.
+  `LINTS += aspell` or `LINTS = hunspell textlint redpen`.
 
 - `NODISTFILES`, `EXTRADISTFILES`, `ANCILLARYFILES`:
   Control which files are included in tar-gzipped source files.

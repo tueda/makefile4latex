@@ -175,6 +175,7 @@ MAKEGLOSSARIES =
 BIB2GLS =
 CHKTEX =
 ASPELL =
+HUNSPELL =
 TEXTLINT =
 REDPEN =
 KPSEWHICH =
@@ -208,6 +209,7 @@ MAKEGLOSSARIES_OPT =
 BIB2GLS_OPT =
 CHKTEX_OPT =
 ASPELL_OPT =
+HUNSPELL_OPT =
 TEXTLINT_OPT = --cache
 REDPEN_OPT =
 KPSEWHICH_OPT =
@@ -605,6 +607,11 @@ chktex_impl = $(call pathsearch2,chktex,CHKTEX,chktex)
 aspell = $(call cache,aspell_impl) $(ASPELL_OPT)
 
 aspell_impl = $(call pathsearch2,aspell,ASPELL,aspell)
+
+# $(hunspell)
+hunspell = $(call cache,hunspell_impl) $(HUNSPELL_OPT)
+
+hunspell_impl = $(call pathsearch2,hunspell,HUNSPELL,hunspell)
 
 # $(textlint)
 textlint = $(call cache,textlint_impl) $(TEXTLINT_OPT)
@@ -1158,6 +1165,26 @@ _builtin_lint_aspell:
 		echo "$(aspell) -a -t <$1" \
 	)
 	@grep_expr=$$($(aspell) -a -t <"$1" | tail -n +2 | cut -d ' ' -f 2 | grep -v '*' | sed '/^$$/d' | sort | uniq | awk '{printf "-e %s ",$$0}'); \
+	if [ -n "$$grep_expr" ]; then \
+		grep_opts=; \
+		$(if $(has_gnu_grep), \
+			grep_opts=-w; \
+			if $(color_enabled); then \
+				grep_opts="$$grep_opts --color=always"; \
+			fi; \
+		) \
+		grep -n $$grep_opts $$grep_expr "$1"; \
+		exit 1; \
+	fi
+
+_builtin_lint_hunspell:
+	@$(hunspell) -v >/dev/null 2>&1
+	@$(call colorize, \
+		printf "\033$(CL_NOTICE)$(hunspell) -l -t $1\033$(CL_NORMAL)\n" \
+	, \
+		echo "$(hunspell) -l -t $1" \
+	)
+	@grep_expr=$$($(hunspell) -l -t "$1" | sort | uniq | awk '{printf "-e %s ",$$0}'); \
 	if [ -n "$$grep_expr" ]; then \
 		grep_opts=; \
 		$(if $(has_gnu_grep), \
