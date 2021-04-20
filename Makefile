@@ -1136,7 +1136,6 @@ _lint_builtin_rule = \
 	)
 
 # Check common mistakes about spacing after periods (deprecated).
-# NOTE: --color=always is not POSIX.
 _builtin_lint_check_periods:
 	@$(call colorize, \
 		printf "\033$(CL_NOTICE)check_periods $1\033$(CL_NORMAL)\n" \
@@ -1164,16 +1163,21 @@ _builtin_lint_aspell:
 	, \
 		echo "$(aspell) -a -t <$1" \
 	)
-	@grep_expr=$$($(aspell) -a -t <"$1" | tail -n +2 | cut -d ' ' -f 2 | grep -v '*' | sed '/^$$/d' | sort | uniq | awk '{printf "-e %s ",$$0}'); \
-	if [ -n "$$grep_expr" ]; then \
-		grep_opts=; \
+	@$(call _grep_misspellings,$1,$(aspell) -a -t <"$1" | tail -n +2 | cut -d ' ' -f 2 | grep -v '*' | sed '/^$$/d')
+
+# $(call _grep_misspellings,FILE,CHECKER) searches for misspelled words listed
+# by the CHECKER command in FILE, and aborts if there are misspelled words.
+_grep_misspellings = \
+	_grep_expr=$$($2 | sort | uniq | awk '{printf "-e %s ",$$0}'); \
+	if [ -n "$$_grep_expr" ]; then \
+		_grep_opts=; \
 		$(if $(has_gnu_grep), \
-			grep_opts=-w; \
+			_grep_opts=-w; \
 			if $(color_enabled); then \
-				grep_opts="$$grep_opts --color=always"; \
+				_grep_opts="$$_grep_opts --color=always"; \
 			fi; \
 		) \
-		grep -n $$grep_opts $$grep_expr "$1"; \
+		grep -n $$_grep_opts $$_grep_expr "$1"; \
 		exit 1; \
 	fi
 
@@ -1184,18 +1188,7 @@ _builtin_lint_hunspell:
 	, \
 		echo "$(hunspell) -l -t $1" \
 	)
-	@grep_expr=$$($(hunspell) -l -t "$1" | sort | uniq | awk '{printf "-e %s ",$$0}'); \
-	if [ -n "$$grep_expr" ]; then \
-		grep_opts=; \
-		$(if $(has_gnu_grep), \
-			grep_opts=-w; \
-			if $(color_enabled); then \
-				grep_opts="$$grep_opts --color=always"; \
-			fi; \
-		) \
-		grep -n $$grep_opts $$grep_expr "$1"; \
-		exit 1; \
-	fi
+	@$(call _grep_misspellings,$1,$(hunspell) -l -t "$1")
 
 _builtin_lint_textlint:
 	@if $(color_enabled); then \
