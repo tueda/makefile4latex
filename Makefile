@@ -1161,8 +1161,9 @@ _builtin_lint_aspell:
 	if [ -n "$$grep_expr" ]; then \
 		grep_opts=; \
 		$(if $(has_gnu_grep), \
+			grep_opts=-w; \
 			if $(color_enabled); then \
-				grep_opts=--color=always; \
+				grep_opts="$$grep_opts --color=always"; \
 			fi; \
 		) \
 		grep -n $$grep_opts $$grep_expr "$1"; \
