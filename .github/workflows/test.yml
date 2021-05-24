@@ -1,0 +1,32 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: 0 0 1 * * # monthly
+
+jobs:
+  texlive-action:
+    strategy:
+      fail-fast: false
+      matrix:
+        check-target:
+          - ci-test
+          - ci-test-builddir
+          - ci-test-dev
+          - ci-test-dev-builddir
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Test on Docker
+        uses: xu-cheng/texlive-action/full@v1
+        with:
+          run: |
+            apk add git make ruby
+            make ${{ matrix.check-target }}
