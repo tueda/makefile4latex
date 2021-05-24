@@ -1,8 +1,9 @@
 Makefile for LaTeX
 ==================
 
-[![Travis CI Build Status](https://travis-ci.org/tueda/makefile4latex.svg?branch=master)](https://travis-ci.org/tueda/makefile4latex)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/fy41hbf7eijhyvx3/branch/master?svg=true)](https://ci.appveyor.com/project/tueda/makefile4latex)
+[![GitHub Actions Status](https://github.com/tueda/makefile4latex/workflows/Test/badge.svg?branch=master)](https://github.com/tueda/makefile4latex/actions?query=branch:master)
+[![Travis CI Status](https://travis-ci.org/tueda/makefile4latex.svg?branch=master)](https://travis-ci.org/tueda/makefile4latex)
+[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/fy41hbf7eijhyvx3/branch/master?svg=true)](https://ci.appveyor.com/project/tueda/makefile4latex)
 
 This is a GNU Makefile for typesetting LaTeX2e documents. Expected to work with
 [TeX Live](https://www.tug.org/texlive/) on Linux and similar systems, e.g., on
