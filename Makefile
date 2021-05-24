@@ -421,6 +421,13 @@ is_texlive_impl = $(strip \
 	$(shell $(TEX) --version 2>/dev/null | grep -q 'TeX Live' && echo 1) \
 )
 
+# $(is_miktex) is "1" if MiKTeX is used, otherwise empty.
+is_miktex = $(call cache,is_miktex_impl)
+
+is_miktex_impl = $(strip \
+	$(shell $(TEX) --version 2>/dev/null | grep -q 'MiKTeX' && echo 1) \
+)
+
 # $(has_gnu_grep) is "1" if GNU grep is available, otherwise empty.
 has_gnu_grep = $(call cache,has_gnu_grep_impl)
 
