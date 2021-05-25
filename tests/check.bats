@@ -146,6 +146,11 @@ require_package() {
   test_dir platex_dvipdfmx 1
 }
 
+@test "epstopdf" {
+  require_executable epstopdf
+  test_dir epstopdf 1
+}
+
 @test "dist" {
   MAKE_ARGS='dist' test_dir bibtex
   check_tarball bibtex/doc.tar.gz 2

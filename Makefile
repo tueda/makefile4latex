@@ -116,6 +116,12 @@ KEEP_TEMP =
 # - auto (default)
 COLOR =
 
+# Specify whether *-eps-converted-to.pdf files are moved to BUILDDIR.
+# - always
+# - never
+# - auto (default)
+USE_BUILDDIR_FOR_EPSTOPDF =
+
 # Files not to be included in a distribution.
 NODISTFILES =
 
@@ -1448,6 +1454,52 @@ mv_target = $(strip \
 	) \
 )
 
+# $(_use_builddir_for_epstopdf) gives the canonicalized value of $(USE_BUILDDIR_FOR_EPSTOPDF) as:
+# - 1
+# - (empty)
+_use_builddir_for_epstopdf = $(call cache,_use_builddir_for_epstopdf_impl)
+
+_use_builddir_for_epstopdf_impl = $(strip \
+	$(if $(BUILDDIR), \
+		$(if $(findstring always,$(USE_BUILDDIR_FOR_EPSTOPDF)), \
+			1 \
+		,$(if $(findstring never,$(USE_BUILDDIR_FOR_EPSTOPDF)), \
+			\
+		, \
+			$(if $(USE_BUILDDIR_FOR_EPSTOPDF), \
+				$(if $(findstring auto,$(USE_BUILDDIR_FOR_EPSTOPDF)),, \
+					$(warning unrecognized USE_BUILDDIR_FOR_EPSTOPDF=$(USE_BUILDDIR_FOR_EPSTOPDF)) \
+				) \
+			) \
+			$(if $(is_texlive), \
+				1 \
+			, \
+				\
+			) \
+		)) \
+	, \
+		\
+	) \
+)
+
+# $(set_texinputs_for_epstopdf) sets TEXIPUTS, if adequate.
+set_texinputs_for_epstopdf = $(strip \
+	$(if $(_use_builddir_for_epstopdf), \
+		TEXINPUTS=.:$(BUILDDIR):$$TEXINPUTS: && export TEXINPUTS \
+	, \
+		: \
+	) \
+)
+
+# $(mv_epstopdf) moves *-eps-converted-to.pdf files to BUILDDIR, if adequate.
+mv_epstopdf = $(strip \
+	$(if $(_use_builddir_for_epstopdf), \
+		{ mv *-eps-converted-to.pdf $(BUILDDIR) >/dev/null 2>&1 || :; } \
+	, \
+		: \
+	) \
+)
+
 # $(call do_backup,FILE) creates a backup file for "$(build_prefix)/FILE".
 do_backup = \
 	[ -f '$(build_prefix)$1' ] && cp '$(build_prefix)$1' "$(build_prefix)$$oldfile_prefix$(suffix $1)"
@@ -1829,8 +1881,10 @@ check_rerun = grep 'Rerun\|Please rerun LaTeX' '$(build_prefix)$*.log' | grep -v
 			$(call typeset,$(latex)) && \
 			$(call exec,$(dvipdf) $(build_prefix)$*.dvi), \
 		pdflatex, \
+			$(set_texinputs_for_epstopdf) && \
 			$(call typeset,$(latex)) && \
-			$(mv_target), \
+			$(mv_target) && \
+			$(mv_epstopdf), \
 	)
 
 # This always updates the timestamp of the target (.log).
