@@ -46,10 +46,10 @@ Getting started
 ---------------
 
 Download `Makefile` via
-[this link](https://raw.githubusercontent.com/tueda/makefile4latex/v0.7.0/Makefile)
+[this link](https://raw.githubusercontent.com/tueda/makefile4latex/v0.8.0/Makefile)
 in your browser or by using `curl`:
 ```shell
-curl -O https://raw.githubusercontent.com/tueda/makefile4latex/v0.7.0/Makefile
+curl -O https://raw.githubusercontent.com/tueda/makefile4latex/v0.8.0/Makefile
 ```
 and put it into a directory that contains LaTeX files. Then just type:
 ```shell
