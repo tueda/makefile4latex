@@ -1277,8 +1277,9 @@ watch:
 		$(ensure_build_dir); \
 		touch $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); \
 		$(print_watching_message); \
+		$(define_wait_command); \
 		while :; do \
-			sleep 1; \
+			$$MAKEFILE4LATEX_WAIT_COMMAND; \
 			if $(MAKE) -q -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); then :; else \
 				$(call set_title,running); \
 				if time $(MAKE) -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); then \
@@ -1298,6 +1299,23 @@ print_watching_message = $(call colorize, \
 , \
 	echo "Watching for $(srctexfiles:.tex=.$(default_target)). Press Ctrl+C to quit" \
 )
+
+# $(call define_wait_command) defines $MAKEFILE4LATEX_WAIT_COMMAND in
+# the current shell as follows:
+# (1) If $(MAKEFILE4LATEX_WAIT_COMMAND) is defined at the level of
+#     Makefile (from the configuration files or command line options),
+#     then use it.
+# (2) If $MAKEFILE4LATEX_WAIT_COMMAND is defined at the level of
+#     the shell (i.e., as the environment variable), then use it.
+# (3) Otherwise, provide the default command "sleep 1".
+define_wait_command = \
+	$(if $(MAKEFILE4LATEX_WAIT_COMMAND), \
+		MAKEFILE4LATEX_WAIT_COMMAND="$(MAKEFILE4LATEX_WAIT_COMMAND)" \
+	, \
+		if [ -z "$$MAKEFILE4LATEX_WAIT_COMMAND" ]; then \
+			MAKEFILE4LATEX_WAIT_COMMAND="sleep 1"; \
+		fi \
+	)
 
 # Upgrade files in the setup. (Be careful!)
 # Files to be upgraded must have a tag like
