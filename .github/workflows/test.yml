@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           submodules: true
@@ -29,4 +29,5 @@ jobs:
         with:
           run: |
             apk add git make ruby
+            git config --global --add safe.directory "$GITHUB_WORKSPACE"
             make ${{ matrix.check-target }}
