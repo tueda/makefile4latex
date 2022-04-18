@@ -28,6 +28,7 @@ jobs:
           git status
           git log -1
           git checkout HEAD
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Test on Docker
         uses: xu-cheng/texlive-action/full@v1
