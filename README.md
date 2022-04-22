@@ -174,6 +174,21 @@ Variables
   the [`anc` directory](https://arxiv.org/help/ancillary_files) inside
   the resultant file.
 
+- `MOSTLYCLEANFILES`, `CLEANFILES`:
+  Specify files to be deleted for `make mostlyclean` and `make clean`, respectively.
+  Given on the command line or in the user configuration files.
+
+- `PREREQUISITE`, `PREREQUISITE_SUBDIRS`, `POSTPROCESS`:
+  Specify prerequisite and postprocessing tasks for documents
+  in the current directory.
+  Given on the command line or in the user configuration files.
+  `PREREQUISITE` is a list of targets to be built before building
+  documents in the current directory.
+  `PREREQUISITE_SUBDIRS` is a list of targets in all the *subdirectories*
+  required to build documents in the current directory.
+  `POSTPROCESS` is a list of targets to be built after the completion of
+  the building documents in the current directory.
+
 
 Customization
 -------------
