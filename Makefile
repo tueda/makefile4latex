@@ -149,6 +149,9 @@ PREREQUISITE =
 # Prerequisite Make targets in subdirectories.
 PREREQUISITE_SUBDIRS = NONE
 
+# Postprocessing Make targets.
+POSTPROCESS =
+
 # List of linter commands/rules, invoked by "make lint".
 LINTS = chktex
 
@@ -1051,6 +1054,7 @@ endif
 ifeq ($(DIFF),)
 
 all: $(target)
+	@$(MAKE) --no-print-directory postprocess
 
 else
 
@@ -1094,6 +1098,8 @@ $(target_basename:=.pdf): | prerequisite
 
 prerequisite: _prerequisite
 	@$(call make_for_each_subdir,$(PREREQUISITE_SUBDIRS))
+
+postprocess: _postprocess
 
 mostlyclean:
 	@$(call make_for_each_subdir,mostlyclean)
@@ -1268,7 +1274,7 @@ watch:
 		$(call set_title,watching); \
 		if $(MAKE) -q -s $(srctexfiles:.tex=.$(default_target)); then :; else \
 			$(call set_title,running); \
-			if time $(MAKE) -s $(srctexfiles:.tex=.$(default_target)); then \
+			if time $(SHELL) -c "$(MAKE) -s $(srctexfiles:.tex=.$(default_target)) && $(MAKE) -s postprocess"; then \
 				$(call set_title,watching); \
 			else \
 				$(call set_title,failed); \
@@ -1282,7 +1288,7 @@ watch:
 			$$MAKEFILE4LATEX_WAIT_COMMAND; \
 			if $(MAKE) -q -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); then :; else \
 				$(call set_title,running); \
-				if time $(MAKE) -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)); then \
+				if time $(SHELL) -c "$(MAKE) -s BUILDDIR=$(BUILDDIR) $(addprefix $(build_prefix),$(srctexfiles:.tex=.log)) && $(MAKE) -s postprocess"; then \
 					$(call set_title,watching); \
 				else \
 					$(call set_title,failed); \
@@ -1378,7 +1384,7 @@ upgrade = \
 
 _FORCE:
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png ps prerequisite svg upgrade watch _FORCE
+.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png ps prerequisite postprocess svg upgrade watch _FORCE
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
@@ -2301,4 +2307,6 @@ endif
 
 _prerequisite: $(PREREQUISITE)
 
-.PHONY: _prerequisite
+_postprocess: $(POSTPROCESS)
+
+.PHONY: _prerequisite _postprocess
