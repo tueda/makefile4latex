@@ -1054,7 +1054,7 @@ endif
 ifeq ($(DIFF),)
 
 all: $(target)
-	@$(MAKE) --no-print-directory postprocess
+	@$(if $(POSTPROCESS),$(MAKE) --no-print-directory postprocess,:)
 
 else
 
