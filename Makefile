@@ -943,7 +943,7 @@ exec = \
 		$(call colorize, \
 			printf "\033$(CL_NOTICE)$1\033$(CL_NORMAL)\n"; \
 			exec 3>&1; \
-			pipe_status=`{ { $1 3>&- 4>&-; echo $$? 1>&4; } | \
+			pipe_status=`{ { $1 3>&- 4>&-; echo $$? 1>&4; } $(call colorize_output_join,$3) | \
 					$(call colorize_output,$3) >&3; } 4>&1`; \
 			exec 3>&-; \
 			[ "$$pipe_status" = 0 ] || failed=: \
@@ -962,6 +962,9 @@ check_failed = $$failed && { [ -n "$$dont_delete_on_failure" ] || rm -f $@; exit
 colorize_output = $(colorize_output_$1)
 
 colorize_output_ = cat
+
+# $(colorize_output,COLOR_FILTER) gives "2>&1" to combine the stderr into the stdout, if needed for the COLOR_FILTER.
+colorize_output_join = $(if $(colorize_output_$1_join),2>&1,)
 
 # Errors for LaTeX:
 #   "! ...": TeX
@@ -990,6 +993,13 @@ colorize_output_latex = \
 colorize_output_bibtex = \
 	sed 's/^\(I couldn.t open database file.*\|I couldn.t open file name.*\|I found no database files---while reading file.*\|I found no .bibstyle command---while reading file.*\|I found no .citation commands---while reading file.*\|Repeated entry---.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
 	s/^\(Warning--.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+
+# Warnings for dvipdfmx:
+#   "dvipdfmx:warning: ..." (stderr)
+colorize_output_dvipdf = \
+	sed 's/^\(dvipdfmx:warning: .*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
+
+colorize_output_dvipdf_join = 1
 
 # Errors for ChkTeX:
 #   "Error ... in ... line ...:"
@@ -1903,7 +1913,7 @@ check_rerun = grep 'Rerun\|Please rerun LaTeX' '$(build_prefix)$*.log' | grep -v
 			$(call exec,$(ps2pdf) $(build_prefix)$*.ps), \
 		dvipdf, \
 			$(call typeset,$(latex)) && \
-			$(call exec,$(dvipdf) $(build_prefix)$*.dvi), \
+			$(call exec,$(dvipdf) $(build_prefix)$*.dvi,,dvipdf), \
 		pdflatex, \
 			$(set_texinputs_for_epstopdf) && \
 			$(call typeset,$(latex)) && \
