@@ -1,5 +1,11 @@
 # Changelog
 
+<a name="0.10.0"></a>
+## [0.10.0] (2023-07-23)
+### Added
+- Colorize `dvipdfmx` warnings ([#42](https://github.com/tueda/makefile4latex/issues/42)).
+
+
 <a name="0.9.1"></a>
 ## [0.9.1] (2022-09-23)
 ### Fixed
@@ -186,6 +192,7 @@
   ```
 
 
+[0.10.0]: https://github.com/tueda/makefile4latex/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/tueda/makefile4latex/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/tueda/makefile4latex/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/tueda/makefile4latex/compare/v0.7.0...v0.8.0
