@@ -1214,7 +1214,7 @@ lint:
 			$(call _lint_run,./$(lint)) \
 		,$(if $(and $(filter-out lint,$(lint)),$(call rule_exists,$(lint))), \
 			$(call _lint_rule,$(lint)) \
-		,$(if $(and $(filter-out lint,$(lint)),$(call rule_exists,_builtin_lint_$(lint))), \
+		,$(if $(call rule_exists,_builtin_lint_$(lint)), \
 			$(call _lint_builtin_rule,$(lint)) \
 		, \
 			$(call _lint_run,$(lint)) \
@@ -1224,14 +1224,14 @@ lint:
 
 # $(call _lint_run,EXECUTABLE) runs EXECUTABLE.
 _lint_run = \
-	$(foreach texfile,$(wildcard *.tex), \
+	$(foreach texfile,$(call _rule_wildcard,$1), \
 		$(call exec,$1 $(texfile),false); \
 		$$failed && lint_ok=false; \
 	)
 
 # $(call _lint_rule,RULE) runs RULE.
 _lint_rule = \
-	$(foreach texfile,$(wildcard *.tex), \
+	$(foreach texfile,$(call _rule_wildcard,$1), \
 		$(call colorize, \
 			printf "\033$(CL_NOTICE)$(MAKE) $1 1=$(texfile)\033$(CL_NORMAL)\n" \
 		, \
@@ -1242,7 +1242,7 @@ _lint_rule = \
 
 # $(call _lint_builtin_rule,RULE) runs the builtin RULE.
 _lint_builtin_rule = \
-	$(foreach texfile,$(wildcard *.tex), \
+	$(foreach texfile,$(call _rule_wildcard,$1), \
 		$(MAKE) --no-print-directory _builtin_lint_$1 1=$(texfile) || lint_ok=false; \
 	)
 
