@@ -1,10 +1,11 @@
 name: Test
 
 on:
-  push:
   pull_request:
+  push:
   schedule:
-    - cron: 0 0 1 * * # monthly
+    - cron: '0 0 1 * *' # monthly
+  workflow_dispatch:
 
 jobs:
   texlive-action:
@@ -19,14 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
 
       - name: Test on Docker
-        uses: xu-cheng/texlive-action/full@v1
+        uses: xu-cheng/texlive-action@v2
         with:
+          scheme: full
           run: |
             apk add git make ruby
             git config --global --add safe.directory "$GITHUB_WORKSPACE"
