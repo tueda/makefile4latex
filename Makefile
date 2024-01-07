@@ -55,6 +55,9 @@ Targets
   mostlyclean:
     Delete only intermediate files created by this Makefile.
 
+  pretty:
+    Run code prettifiers for source files in the current directory.
+
   lint:
     Run linters for source files in the current directory.
 
@@ -152,6 +155,9 @@ PREREQUISITE_SUBDIRS = NONE
 # Postprocessing Make targets.
 POSTPROCESS =
 
+# List of prettifier commands/rules, invoked by "make pretty".
+PRETTIFIERS = latexindent
+
 # List of linter commands/rules, invoked by "make lint".
 LINTS = chktex
 
@@ -182,6 +188,7 @@ SORTREF =
 MAKEINDEX =
 MAKEGLOSSARIES =
 BIB2GLS =
+LATEXINDENT =
 CHKTEX =
 ASPELL =
 HUNSPELL =
@@ -216,6 +223,7 @@ SORTREF_OPT =
 MAKEINDEX_OPT =
 MAKEGLOSSARIES_OPT =
 BIB2GLS_OPT =
+LATEXINDENT_OPT = -l -wd -s
 CHKTEX_OPT =
 ASPELL_OPT =
 HUNSPELL_OPT =
@@ -629,6 +637,11 @@ bib2gls = $(call cache,bib2gls_impl) $(BIB2GLS_OPT)
 
 bib2gls_impl = $(call pathsearch2,bib2gls,BIB2GLS,bib2gls)
 
+# $(latexindent)
+latexindent = $(call cache,latexindent_impl) $(LATEXINDENT_OPT)
+
+latexindent_impl = $(call pathsearch2,latexindent,LATEXINDENT,latexindent)
+
 # $(chktex)
 chktex = $(call cache,chktex_impl) $(CHKTEX_OPT)
 
@@ -745,6 +758,7 @@ Makefile_impl = $(firstword $(MAKEFILE_LIST))
 #   .auxlock - TikZ externalization aux file lock
 #   .ax1 - axodraw2 auxiliary (axohelp input) file
 #   .ax2 - axohelp output file
+#   .bak[0-9]* - latexindent backup file
 #   .bbl - BibTeX output file
 #   .bcf - by biblatex package
 #   .blg - BibTeX log file
@@ -778,6 +792,7 @@ Makefile_impl = $(firstword $(MAKEFILE_LIST))
 #   .bmc - by dviout
 #   .pbm - by dviout
 #   -eps-converted-to.pdf - by epstopdf
+#   -indent.log - by latexindent+makefile4latex
 mostlycleanfiles = $(call cache,mostlycleanfiles_impl)
 
 mostlycleanfiles_impl = $(wildcard $(strip \
@@ -785,6 +800,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.auxlock) \
 	$(srctexfiles:.tex=.ax1) \
 	$(srctexfiles:.tex=.ax2) \
+	$(srctexfiles:.tex=.bak[0-9]*) \
 	$(srctexfiles:.tex=.bbl) \
 	$(srctexfiles:.tex=.bcf) \
 	$(srctexfiles:.tex=.blg) \
@@ -827,6 +843,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	*.bb \
 	*.xbb \
 	*_tmp.??? \
+	*-indent.log \
 	*/*-eps-converted-to.pdf \
 	$(srctexfiles:.tex=-figure*.dpth) \
 	$(srctexfiles:.tex=-figure*.log) \
@@ -1139,6 +1156,56 @@ clean:
 	@$(if $(wildcard $(DEPDIR) $(DIFFDIR) $(BUILDDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS)), \
 		$(call exec,rm -rf $(wildcard $(DEPDIR) $(DIFFDIR) $(BUILDDIR) $(MOSTLYCLEANDIRS) $(CLEANDIRS))) \
 	)
+
+pretty:
+	@pretty_ok=:; \
+	$(foreach prettifier,$(PRETTIFIERS), \
+		$(if $(wildcard $(prettifier)), \
+			$(call _pretty_run,./$(prettifier)) \
+		,$(if $(and $(filter-out pretty,$(prettifier)),$(call rule_exists,$(prettifier))), \
+			$(call _pretty_rule,$(prettifier)) \
+		,$(if $(call rule_exists,_builtin_pretty_$(prettifier)), \
+			$(call _pretty_builtin_rule,$(prettifier)) \
+		, \
+			$(call _pretty_run,$(prettifier)) \
+		))) \
+	) \
+	$$pretty_ok
+
+# $(call _pretty_run,EXECUTABLE) runs EXECUTABLE.
+_pretty_run = \
+	$(foreach texfile,$(call _rule_wildcard,$1), \
+		$(call exec,$1 $(texfile),false); \
+		$$failed && pretty_ok=false; \
+	)
+
+# $(call _pretty_rule,RULE) runs RULE.
+_pretty_rule = \
+	$(foreach texfile,$(call _rule_wildcard,$1), \
+		$(call colorize, \
+			printf "\033$(CL_NOTICE)$(MAKE) $1 1=$(texfile)\033$(CL_NORMAL)\n" \
+		, \
+			echo "$(MAKE) $1 1=$(texfile) " \
+		); \
+		$(MAKE) --no-print-directory $1 1="$(texfile)" || pretty_ok=false; \
+	)
+
+# $(call _pretty_builtin_rule,RULE) runs the builtin RULE.
+_pretty_builtin_rule = \
+	$(foreach texfile,$(call _rule_wildcard,$1), \
+		$(MAKE) --no-print-directory _builtin_pretty_$1 1=$(texfile) || pretty_ok=false; \
+	)
+
+# $(call _rule_wildcard,RULE,DEFAULT_PATTERN) gives target files for RULE.
+# $(call _rule_wildcard,RULE) is the same but with DEFAULT_PATTERN=*.tex.
+_rule_wildcard = \
+	$(wildcard $(or $($(call uppercase,$(call sanitize,$1))_TARGET),$2,*.tex))
+
+# NOTE: $(ensure_build_dir) needed for old versions, latexindent < 3.22.2.
+#       See https://github.com/cmhughes/latexindent.pl/issues/452.
+_builtin_pretty_latexindent:
+	@$(ensure_build_dir)
+	@$(call exec,$(latexindent)$(if $(BUILDDIR), -c $(BUILDDIR)) -g "$1-indent.log" $1)
 
 lint:
 	@lint_ok=:; \

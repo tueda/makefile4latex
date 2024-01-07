@@ -357,6 +357,9 @@ TSWLatexianTemp*
 *.bb
 *.xbb
 
+# latexindent
+*.bak[0-9]*
+
 # textlint
 .textlintcache
 node_modules

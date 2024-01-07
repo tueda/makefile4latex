@@ -30,6 +30,8 @@ Features
 - Highly customizable by optional user configuration files (`latex.mk` files).
 - Placing intermediate files into a directory (`BUILDDIR` variable).
 - [Latexdiff](https://www.ctan.org/pkg/latexdiff) between Git revisions (`DIFF` variable).
+- Running code prettifiers (`make pretty`).
+  [latexindent](https://www.ctan.org/pkg/latexindent) has built-in support.
 - Linting (`make lint`).
   [ChkTeX](https://www.ctan.org/pkg/chktex),
   [GNU Aspell](http://aspell.net/),
@@ -74,6 +76,8 @@ Targets
   Delete all files created by running `make`.
 - `mostlyclean`:
   Delete only intermediate files created by running `make`.
+- `pretty`:
+  Run code prettifiers for source files in the current directory.
 - `lint`:
   Run linters for source files in the current directory.
 - `dist`:
@@ -150,6 +154,12 @@ Variables
       Do not use colors.
     - `auto` (default):
       Use colors unless the output is piped.
+
+- `PRETTIFIERS`:
+  List prettifiers to be used by `make pretty`.
+  Given on the command line or in the user configuration files.
+  The default value is `PRETTIFIERS = latexindent`, so it runs
+  [latexindent](https://www.ctan.org/pkg/latexindent).
 
 - `LINTS`:
   List linters to be used by `make lint`.

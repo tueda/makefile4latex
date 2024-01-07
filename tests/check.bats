@@ -201,6 +201,12 @@ require_package() {
   make -C check/variable_opt check
 }
 
+@test "pretty" {
+  require_executable diff
+  require_executable latexindent
+  make -C pretty check
+}
+
 @test "get" {
   MAKEFILE4LATEX_CACHE=_cache test_dir get 5
 }
