@@ -1,5 +1,30 @@
 # Changelog
 
+<a name="0.11.0"></a>
+## [0.11.0] (2024-01-07)
+### Added
+- New target `pretty` to run code prettifiers on the source files in
+  the current directory.
+  Currently, only
+  [`latexindent`](https://www.ctan.org/pkg/latexindent)
+  has built-in support.
+  By default, `make pretty` runs
+  `latexindent -l -wd -s` for each `.tex` file.
+  Target files of the prettifier can be configurable by setting
+  `LATEXINDENT_TARGET`, for example,
+  `LATEXINDENT_TARGET = *.tex *.sty`.
+  Note that probably the user wants to customize `latexindent`
+  local settings (in `localSettings.yaml` or `latexindent.yaml`),
+  like `defaultIndent` and `onlyOneBackUp`.
+  ([#22](https://github.com/tueda/makefile4latex/issues/22))
+- Configurable target files for linters, by `CHKTEX_TARGET` etc.
+  ([20f7bc9](https://github.com/tueda/makefile4latex/commit/20f7bc928c9ab67e2b73f7ce880752f9ff3a7f3f))
+### Changed
+- Updated `.gitignore`, which is now based on
+  [`TeX.gitignore` (2021-12-11)](https://github.com/github/gitignore/blob/362abacebe59448407e47a014e09288d8cddb7a7/TeX.gitignore).
+  ([a3e4eae](https://github.com/tueda/makefile4latex/commit/a3e4eae2e2528745a97ee141d6ba3afc4b33988f))
+
+
 <a name="0.10.0"></a>
 ## [0.10.0] (2023-07-23)
 ### Added
@@ -192,6 +217,7 @@
   ```
 
 
+[0.11.0]: https://github.com/tueda/makefile4latex/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/tueda/makefile4latex/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/tueda/makefile4latex/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/tueda/makefile4latex/compare/v0.8.0...v0.9.0
