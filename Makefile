@@ -417,6 +417,9 @@ assert_true = \
 assert_false = \
 	$(if $(strip $1),false,:)
 
+assert_eq = \
+	$(if $(and $(findstring $1,$2),$(findstring $2,$1)),echo '$1==$2';:,echo '$1!=$2';false)
+
 assert_success = \
 	$(strip $1)
 
@@ -447,6 +450,18 @@ has_gnu_grep_impl = $(strip \
 # $(call rule_exists,RULE) is "1" if RULE exists, otherwise empty.
 rule_exists = \
 	$(shell $(MAKE) -n $1 >/dev/null 2>&1 && echo 1)
+
+# $(call uppercase,STR) converts STR to uppercase.
+uppercase = \
+	$(shell echo '$1' | tr a-z A-Z)
+
+# $(call lowercase,STR) converts STR to lowercase.
+lowercase = \
+	$(shell echo '$1' | tr A-Z a-z)
+
+# $(call sanitize,STR) replaces special characters in STR with underscores.
+sanitize = \
+	$(shell echo '$1' | sed 's/[^a-zA-Z0-9]/_/g')
 
 # $(init_toolchain) initializes the toolchain.
 init_toolchain = $(call cache,init_toolchain_impl)

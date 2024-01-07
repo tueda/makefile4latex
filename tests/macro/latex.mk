@@ -36,3 +36,12 @@ test_mv_target:
 	$(call assert_success,$(call mv_target,1.tmp))
 	$(call assert_fail,   $(call mv_target,2.tmp))
 	$(call assert_success,$(call mv_target,3.tmp,false))
+
+test_uppercase:
+	$(call assert_eq,$(call uppercase,abcxyzABCXYZ0189  !"#%&*+-./x:;<=>?@x[]^_`x{|}~x  y),ABCXYZABCXYZ0189  !"#%&*+-./X:;<=>?@X[]^_`X{|}~X  Y)
+
+test_lowercase:
+	$(call assert_eq,$(call lowercase,abcxyzABCXYZ0189  !"#%&*+-./X:;<=>?@X[]^_`X{|}~X  Y),abcxyzabcxyz0189  !"#%&*+-./x:;<=>?@x[]^_`x{|}~x  y)
+
+test_sanitize:
+	$(call assert_eq,$(call sanitize,abcxyzABCXYZ0189  !"#%&*+-./x:;<=>?@x[]^_`x{|}~x  y),abcxyzABCXYZ0189____________x_______x_____x____x__y)
