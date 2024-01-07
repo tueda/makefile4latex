@@ -25,7 +25,7 @@ Features
   [axodraw2](https://ctan.org/pkg/axodraw2).
 - Partial support for [biber](https://www.ctan.org/pkg/biber),
   [bib2gls](https://www.ctan.org/pkg/bib2gls) and
-  [sortref](https://web.physik.rwth-aachen.de/~harlander/software/sortref/sortref-h.php).
+  [sortref](https://web.physik.rwth-aachen.de/user/harlander/software/index.php).
 - Colorized output.
 - Highly customizable by optional user configuration files (`latex.mk` files).
 - Placing intermediate files into a directory (`BUILDDIR` variable).
