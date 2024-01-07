@@ -1476,7 +1476,10 @@ upgrade = \
 
 _FORCE:
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png pretty ps prerequisite postprocess svg upgrade watch _FORCE
+_run_testsuite:
+	@$(run_testsuite)
+
+.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png pretty ps prerequisite postprocess svg upgrade watch _FORCE _run_testsuite
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.

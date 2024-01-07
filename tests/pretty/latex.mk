@@ -1,4 +1,4 @@
-TESTS = test-latexindent
+TESTS = _run_testsuite
 CLEANFILES += doc.tex
 
 test-latexindent:

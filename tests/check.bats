@@ -192,7 +192,7 @@ require_package() {
 }
 
 @test "macro" {
-  make -C macro all-test
+  make -C macro check
 }
 
 @test "check" {

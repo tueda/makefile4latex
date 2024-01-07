@@ -1,5 +1,4 @@
-all-test:
-	@$(run_testsuite)
+TESTS = _run_testsuite
 
 CLEANFILES += 1.tmp
 
