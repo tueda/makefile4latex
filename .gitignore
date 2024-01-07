@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2020 Takahiro Ueda
+# Copyright (c) 2018-2024 Takahiro Ueda
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,8 @@
 
 # latest-raw-url: https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore
 
-# Based on https://raw.githubusercontent.com/github/gitignore/6935207fef87dd7f0995b0260cdcdd38cf81e986/TeX.gitignore
-# (2020-05-19, CC0-1.0).
+# Based on https://raw.githubusercontent.com/github/gitignore/362abacebe59448407e47a014e09288d8cddb7a7/TeX.gitignore
+# (2021-12-11, CC0-1.0).
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
@@ -47,6 +47,7 @@
 *.xdv
 *-converted-to.*
 # these rules might exclude image files for figures etc.
+# makefile4latex: ignore *.ps *.pdf
 *.ps
 # *.eps
 *.pdf
@@ -141,15 +142,24 @@ acs-*.bib
 *.glsdefs
 *.lzo
 *.lzs
+*.slg
+*.slo
+*.sls
 
 # uncomment this for glossaries-extra (will ignore makeindex's style files!)
+# makefile4latex: ignore *.ist
 *.ist
+
+# gnuplot
+*.gnuplot
+*.table
 
 # gnuplottex
 *-gnuplottex-*
 
 # gregoriotex
 *.gaux
+*.glog
 *.gtex
 
 # htlatex
@@ -166,6 +176,7 @@ acs-*.bib
 # knitr
 *-concordance.tex
 # TODO Uncomment the next line if you use knitr and want to ignore its generated tikz files
+# makefile4latex: ignore *.tikz
 *.tikz
 *-tikzDictionary
 
@@ -196,6 +207,9 @@ _minted*
 # morewrites
 *.mw
 
+# newpax
+*.newpax
+
 # nomencl
 *.nlg
 *.nlo
@@ -214,6 +228,9 @@ _minted*
 
 # scrwfile
 *.wrt
+
+# svg
+svg-inkscape/
 
 # sympy
 *.sout
@@ -238,6 +255,9 @@ pythontex-files-*/
 *.dpth
 *.md5
 *.auxlock
+
+# titletoc
+*.ptc
 
 # todonotes
 *.tdo
@@ -311,8 +331,10 @@ TSWLatexianTemp*
 # REVTeX puts footnotes in the bibliography by default, unless the nofootinbib
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
+# makefile4latex: ignore *Notes.bib
 *Notes.bib
 ########
+# makefile4latex additional rules
 
 # axodraw2
 *.ax1
