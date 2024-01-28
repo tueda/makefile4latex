@@ -177,6 +177,22 @@ require_package() {
   check_tarball biblatex/doc4.tar.gz 4
 }
 
+@test "dist_platex_dvips" {
+  require_executable platex
+  require_executable dvips
+  require_executable convbkmk
+  require_executable ps2pdf
+  MAKE_ARGS='dist' test_dir platex_dvips
+  check_tarball platex_dvips/doc.tar.gz 1
+}
+
+@test "dist_platex_dvipdfmx" {
+  require_executable platex
+  require_executable dvipdfmx
+  MAKE_ARGS='dist' test_dir platex_dvipdfmx
+  check_tarball platex_dvipdfmx/doc.tar.gz 1
+}
+
 @test "latexdiff1" {
   require_executable latexdiff
   require_executable latexpand
