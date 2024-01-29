@@ -1,5 +1,12 @@
 # Changelog
 
+<a name="0.11.1"></a>
+## [0.11.1] (2024-01-29)
+### Fixed
+- `make dist` failure due to `extractbb --version` with TeXLive 2021.
+  ([#45](https://github.com/tueda/makefile4latex/issues/45))
+
+
 <a name="0.11.0"></a>
 ## [0.11.0] (2024-01-07)
 ### Added
@@ -217,6 +224,7 @@
   ```
 
 
+[0.11.1]: https://github.com/tueda/makefile4latex/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/tueda/makefile4latex/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/tueda/makefile4latex/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/tueda/makefile4latex/compare/v0.9.0...v0.9.1
