@@ -2130,7 +2130,7 @@ $(build_prefix)%.log : %.tex
 		exit 1; \
 	fi; \
 	dep_files=; \
-	for f in `grep INPUT '$(build_prefix)$*.fls' | sed 's/^INPUT *//' | sed '/^kpsewhich/d' | sed 's|^\.\/||' | sort | uniq`; do \
+	for f in `grep INPUT '$(build_prefix)$*.fls' | sed 's/^INPUT *//' | sed '/^\(extractbb\|kpsewhich\)/d' | sed 's|^\.\/||' | sort | uniq`; do \
 		case $$f in \
 			*:*|/*|*.aux|*.lof|*.lot|*.nav|*.out|*.spl|*.toc|*.vrb|*-eps-converted-to.pdf|*.run.xml) ;; \
 			*) \
