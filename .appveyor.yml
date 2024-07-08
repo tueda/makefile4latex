@@ -19,6 +19,8 @@ install:
 
 before_build:
   - cmd: if [%TARGET%]==[cygwin64] (
+      C:\cygwin64\bin\bash -e -l -c "git config --system --add safe.directory '*'" )
+  - cmd: if [%TARGET%]==[cygwin64] (
       C:\cygwin64\bin\bash -e -l -c "git clone $(cygpath $APPVEYOR_BUILD_FOLDER)" )
 
 build_script:
