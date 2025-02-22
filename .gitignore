@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2024 Takahiro Ueda
+# Copyright (c) 2018-2025 Takahiro Ueda
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,8 @@
 
 # latest-raw-url: https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore
 
-# Based on https://raw.githubusercontent.com/github/gitignore/362abacebe59448407e47a014e09288d8cddb7a7/TeX.gitignore
-# (2021-12-11, CC0-1.0).
+# Based on https://raw.githubusercontent.com/github/gitignore/f52d43edda64576954e5f60f28f17142f17636d5/TeX.gitignore
+# (2025-01-15, CC0-1.0).
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
@@ -57,7 +57,9 @@
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
+*.bbl-SAVE-ERROR
 *.bcf
+*.bcf-SAVE-ERROR
 *.blg
 *-blx.aux
 *-blx.bib
@@ -70,6 +72,8 @@
 *.synctex.gz
 *.synctex.gz(busy)
 *.pdfsync
+*.rubbercache
+rubber.cache
 
 ## Build tool directories for auxiliary files
 # latexrun
@@ -169,6 +173,9 @@ acs-*.bib
 *.lg
 *.trc
 *.xref
+
+# hypdoc
+*.hd
 
 # hyperref
 *.brf
@@ -333,6 +340,7 @@ TSWLatexianTemp*
 # Uncomment the next line to have this generated file ignored.
 # makefile4latex: ignore *Notes.bib
 *Notes.bib
+
 ########
 # makefile4latex additional rules
 
