@@ -43,7 +43,7 @@ Targets
   all-recursive:
     Build all documents in the source tree.
 
-  dvi, eps, jpg, pdf, png, ps, svg:
+  dvi, eps, html, jpg, pdf, png, ps, svg:
     Build all documents with the specified file format in the current directory.
 
   help:
@@ -179,6 +179,7 @@ LATEX =
 DVIPS =
 DVIPDF =
 PS2PDF =
+LATEXMLC =
 DVISVGM =
 PDFTOPPM =
 GS =
@@ -212,6 +213,7 @@ PDFLATEX_DVI_OPT = -output-format=dvi
 DVIPS_OPT = -Ppdf -z
 DVIPDF_OPT =
 PS2PDF_OPT = -dPDFSETTINGS=/prepress -dEmbedAllFonts=true
+LATEXMLC_OPT =
 DVISVGM_OPT = -n
 PDFTOPPM_OPT = -singlefile
 PDFTOPPM_JPG_OPT = -jpeg
@@ -248,7 +250,7 @@ CL_WARN   = [35m
 CL_ERROR  = [31m
 
 .SUFFIXES:
-.SUFFIXES: .log .bb .xbb .jpg .png .pdf .odt .eps .ps .svg .dvi .fmt .cls .sty .tex .dtx .ltx
+.SUFFIXES: .log .bb .xbb .jpg .png .pdf .odt .eps .html .ps .svg .dvi .fmt .cls .sty .tex .dtx .ltx
 
 DEPDIR = .dep
 DIFFDIR = .diff
@@ -592,6 +594,11 @@ ps2pdf = $(call cache,ps2pdf_impl) $(PS2PDF_OPT)
 
 ps2pdf_impl = $(call pathsearch2,ps2pdf,PS2PDF,ps2pdf)
 
+# $(latexmlc)
+latexmlc = $(call cache,latexmlc_impl) $(LATEXMLC_OPT)
+
+latexmlc_impl = $(call pathsearch2,latexmlc,LATEXMLC,latexmlc)
+
 # $(dvisvgm)
 dvisvgm = $(call cache,dvisvgm_impl) $(DVISVGM_OPT)
 
@@ -864,6 +871,7 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(srcltxfiles:.ltx=.fmt) \
 	$(srctexfiles:.tex=.dvi) \
 	$(srctexfiles:.tex=.eps) \
+	$(srctexfiles:.tex=.html) \
 	$(srctexfiles:.tex=.jpg) \
 	$(srctexfiles:.tex=.pdf) \
 	$(srctexfiles:.tex=.png) \
@@ -1115,6 +1123,8 @@ help:
 dvi: $(target_basename:=.dvi)
 
 eps: $(target_basename:=.eps)
+
+html: $(target_basename:=.html)
 
 jpg: $(target_basename:=.jpg)
 
@@ -2006,6 +2016,10 @@ check_rerun = grep 'Rerun\|Please rerun LaTeX' '$(build_prefix)$*.log' | grep -v
 			$(mv_target) && \
 			$(mv_epstopdf), \
 	)
+
+.tex.html:
+	@$(init_toolchain)
+	@$(call exec,$(latexmlc) --destination=$*.html $<)
 
 # This always updates the timestamp of the target (.log).
 $(build_prefix)%.log : %.tex
