@@ -68,7 +68,7 @@ Targets
   Build all documents in the current directory.
 - `all-recursive`:
   Build all documents in the source tree.
-- `dvi`, `ps`, `pdf`, `eps`, `svg`, `jpg`, `png`:
+- `dvi`, `eps`, `jpg`, `pdf`, `png`, `ps`, `svg`:
   Build all documents with the specified file format in the current directory.
 - `help`:
   Show help message.

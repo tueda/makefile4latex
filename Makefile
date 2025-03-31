@@ -7,7 +7,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2024 Takahiro Ueda
+# Copyright (c) 2018-2025 Takahiro Ueda
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ Targets
   all-recursive:
     Build all documents in the source tree.
 
-  dvi, ps, pdf, eps, svg, jpg, png:
+  dvi, eps, jpg, pdf, png, ps, svg:
     Build all documents with the specified file format in the current directory.
 
   help:
@@ -77,8 +77,8 @@ endef
 # The default target of this Makefile tries to create this type of files from
 # all *.tex:
 # - dvi
-# - ps
 # - pdf (default)
+# - ps
 default_target = pdf
 
 # The toolchain for typesetting:
@@ -248,7 +248,7 @@ CL_WARN   = [35m
 CL_ERROR  = [31m
 
 .SUFFIXES:
-.SUFFIXES: .log .bb .xbb .pdf .odt .eps .ps .jpg .png .svg .dvi .fmt .tex .cls .sty .ltx .dtx
+.SUFFIXES: .log .bb .xbb .jpg .png .pdf .odt .eps .ps .svg .dvi .fmt .cls .sty .tex .dtx .ltx
 
 DEPDIR = .dep
 DIFFDIR = .diff
@@ -850,8 +850,8 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=-figure*.md5) \
 	$(srctexfiles:.tex=-figure*.pdf) \
 	$(srctexfiles:.tex=-diff.dvi) \
-	$(srctexfiles:.tex=-diff.ps) \
 	$(srctexfiles:.tex=-diff.pdf) \
+	$(srctexfiles:.tex=-diff.ps) \
 	$(MOSTLYCLEANFILES) \
 ))
 
@@ -859,17 +859,17 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 cleanfiles = $(call cache,cleanfiles_impl)
 
 cleanfiles_impl = $(wildcard $(strip \
-	$(srctexfiles:.tex=.tar.gz) \
-	$(srctexfiles:.tex=.pdf) \
-	$(srctexfiles:.tex=.ps) \
-	$(srctexfiles:.tex=.eps) \
-	$(srctexfiles:.tex=.dvi) \
-	$(srctexfiles:.tex=.svg) \
-	$(srctexfiles:.tex=.jpg) \
-	$(srctexfiles:.tex=.png) \
-	$(srcltxfiles:.ltx=.fmt) \
 	$(srcdtxfiles:.dtx=.cls) \
 	$(srcdtxfiles:.dtx=.sty) \
+	$(srcltxfiles:.ltx=.fmt) \
+	$(srctexfiles:.tex=.dvi) \
+	$(srctexfiles:.tex=.eps) \
+	$(srctexfiles:.tex=.jpg) \
+	$(srctexfiles:.tex=.pdf) \
+	$(srctexfiles:.tex=.png) \
+	$(srctexfiles:.tex=.ps) \
+	$(srctexfiles:.tex=.svg) \
+	$(srctexfiles:.tex=.tar.gz) \
 	$(CLEANFILES) \
 	$(mostlycleanfiles) \
 ))
@@ -1114,29 +1114,30 @@ help:
 
 dvi: $(target_basename:=.dvi)
 
-ps: $(target_basename:=.ps)
-
 eps: $(target_basename:=.eps)
-
-svg: $(target_basename:=.svg)
 
 jpg: $(target_basename:=.jpg)
 
+pdf: $(target_basename:=.pdf)
+
 png: $(target_basename:=.png)
 
-pdf: $(target_basename:=.pdf)
+ps: $(target_basename:=.ps)
+
+svg: $(target_basename:=.svg)
 
 dist: $(target_basename:=.tar.gz)
 
 fmt: $(target_basename:=.fmt)
 
 $(target_basename:=.dvi) \
-$(target_basename:=.ps) \
 $(target_basename:=.eps) \
-$(target_basename:=.svg) \
 $(target_basename:=.jpg) \
+$(target_basename:=.pdf) \
 $(target_basename:=.png) \
-$(target_basename:=.pdf): | prerequisite
+$(target_basename:=.ps) \
+$(target_basename:=.svg) \
+	: | prerequisite
 
 prerequisite: _prerequisite
 	@$(call make_for_each_subdir,$(PREREQUISITE_SUBDIRS))
@@ -1479,7 +1480,7 @@ _FORCE:
 _run_testsuite:
 	@$(run_testsuite)
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png pretty ps prerequisite postprocess svg upgrade watch _FORCE _run_testsuite
+.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png postprocess prerequisite pretty ps svg upgrade watch _FORCE _run_testsuite
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
