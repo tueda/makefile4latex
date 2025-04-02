@@ -781,6 +781,7 @@ Makefile_impl = $(firstword $(MAKEFILE_LIST))
 #   .ilg - index log file
 #   .ind - index output
 #   .ist - index style file
+#   .latexml.log - LaTeXML
 #   .lof - list of figures
 #   .log - (La)TeX log file
 #   .lot - list of tables
@@ -823,6 +824,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.ilg) \
 	$(srctexfiles:.tex=.ind) \
 	$(srctexfiles:.tex=.ist) \
+	$(srctexfiles:.tex=.latexml.log) \
 	$(srctexfiles:.tex=.lof) \
 	$(srctexfiles:.tex=.log) \
 	$(srctexfiles:.tex=.lot) \
@@ -852,6 +854,7 @@ mostlycleanfiles_impl = $(wildcard $(strip \
 	*_tmp.??? \
 	*-indent.log \
 	*/*-eps-converted-to.pdf \
+	LaTeXML.cache \
 	$(srctexfiles:.tex=-figure*.dpth) \
 	$(srctexfiles:.tex=-figure*.log) \
 	$(srctexfiles:.tex=-figure*.md5) \
@@ -878,6 +881,8 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.ps) \
 	$(srctexfiles:.tex=.svg) \
 	$(srctexfiles:.tex=.tar.gz) \
+	LaTeXML.css \
+	ltx-article.css \
 	$(CLEANFILES) \
 	$(mostlycleanfiles) \
 ))
@@ -1142,6 +1147,7 @@ fmt: $(target_basename:=.fmt)
 
 $(target_basename:=.dvi) \
 $(target_basename:=.eps) \
+$(target_basename:=.html) \
 $(target_basename:=.jpg) \
 $(target_basename:=.pdf) \
 $(target_basename:=.png) \
@@ -1490,7 +1496,7 @@ _FORCE:
 _run_testsuite:
 	@$(run_testsuite)
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png postprocess prerequisite pretty ps svg upgrade watch _FORCE _run_testsuite
+.PHONY : all all-recursive check clean dist dvi eps fmt help html jpg lint mostlyclean pdf png postprocess prerequisite pretty ps svg upgrade watch _FORCE _run_testsuite
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.

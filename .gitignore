@@ -377,6 +377,12 @@ yarn.lock
 # arXiv tarballs.
 *.tar.gz
 
+# LaTeXML
+*.html
+LaTeXML.cache
+LaTeXML.css
+ltx-article.css
+
 # Temporary files.
 *.tmp
 *.tmp*.*
