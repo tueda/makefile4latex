@@ -380,8 +380,8 @@ yarn.lock
 # LaTeXML
 *.html
 LaTeXML.cache
-LaTeXML.css
-ltx-article.css
+LaTeXML*.css
+ltx-*.css
 
 # Temporary files.
 *.tmp

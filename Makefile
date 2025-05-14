@@ -881,8 +881,8 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(srctexfiles:.tex=.ps) \
 	$(srctexfiles:.tex=.svg) \
 	$(srctexfiles:.tex=.tar.gz) \
-	LaTeXML.css \
-	ltx-article.css \
+	LaTeXML*.css \
+	ltx-*.css \
 	$(CLEANFILES) \
 	$(mostlycleanfiles) \
 ))
