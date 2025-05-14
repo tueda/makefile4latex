@@ -2,7 +2,6 @@ Makefile for LaTeX
 ==================
 
 [![GitHub Actions Status](https://github.com/tueda/makefile4latex/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/tueda/makefile4latex/actions?query=branch:master)
-[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/fy41hbf7eijhyvx3/branch/master?svg=true)](https://ci.appveyor.com/project/tueda/makefile4latex)
 
 This is a GNU Makefile for typesetting LaTeX2e documents. Expected to work with
 [TeX Live](https://www.tug.org/texlive/) on Linux and similar systems, e.g., on

@@ -33,3 +33,57 @@ jobs:
             apk add git make ruby
             git config --system --add safe.directory '*'
             make ${{ matrix.check-target }}
+
+  cygwin:
+    strategy:
+      fail-fast: false
+      matrix:
+        check-target:
+          - ci-test
+          - ci-test-builddir
+    runs-on: windows-latest
+    steps:
+      - name: Configure Git line endings
+        run: git config --global core.autocrlf input
+
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Set up Cygwin
+        uses: cygwin/cygwin-install-action@v5
+        with:
+          packages: >-
+            make
+            texlive-collection-bibtexextra
+            texlive-collection-binextra
+            texlive-collection-fontutils
+            texlive-collection-langjapanese
+            texlive-collection-latexextra
+            texlive-collection-mathscience
+            texlive-collection-plaingeneric
+            texlive-collection-publishers
+
+      - name: Restore cached sortref
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: cache
+          key: sortref
+
+      - name: Cache sortref
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          New-Item -ItemType Directory -Path cache
+          Set-Location -Path cache
+          Invoke-WebRequest -Uri https://web.physik.rwth-aachen.de/user/harlander/software/sortref/sortref -OutFile sortref
+
+      - name: Install sortref
+        shell: C:\\cygwin\\bin\\bash.exe --noprofile --norc -eo pipefail {0}
+        run: cp cache/sortref /usr/bin
+
+      - name: Test
+        shell: C:\\cygwin\\bin\\bash.exe --noprofile --norc -eo pipefail {0}
+        run: make ${{ matrix.check-target }}
