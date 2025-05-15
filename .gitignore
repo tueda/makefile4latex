@@ -387,6 +387,4 @@ yarn.lock
 .diff/
 
 # cache directories.
-.cache
-_cache
-cache
+*cache/

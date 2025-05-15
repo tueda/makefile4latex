@@ -67,22 +67,22 @@ jobs:
             texlive-collection-publishers
 
       - name: Restore cached sortref
-        id: cache
+        id: sortref-cache
         uses: actions/cache@v4
         with:
-          path: cache
+          path: sortref_cache
           key: sortref
 
       - name: Cache sortref
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.sortref-cache.outputs.cache-hit != 'true'
         run: |
-          New-Item -ItemType Directory -Path cache
-          Set-Location -Path cache
+          New-Item -ItemType Directory -Path sortref_cache
+          Set-Location -Path sortref_cache
           Invoke-WebRequest -Uri https://web.physik.rwth-aachen.de/user/harlander/software/sortref/sortref -OutFile sortref
 
       - name: Install sortref
         shell: C:\\cygwin\\bin\\bash.exe --noprofile --norc -eo pipefail {0}
-        run: cp cache/sortref /usr/bin
+        run: cp sortref_cache/sortref /usr/bin
 
       - name: Test
         shell: C:\\cygwin\\bin\\bash.exe --noprofile --norc -eo pipefail {0}
