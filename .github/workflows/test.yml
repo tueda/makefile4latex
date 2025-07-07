@@ -53,7 +53,7 @@ jobs:
           submodules: true
 
       - name: Set up Cygwin
-        uses: cygwin/cygwin-install-action@v5
+        uses: cygwin/cygwin-install-action@v6
         with:
           packages: >-
             make
