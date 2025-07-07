@@ -26,7 +26,7 @@ jobs:
           submodules: true
 
       - name: Test on Docker
-        uses: xu-cheng/texlive-action@v2
+        uses: xu-cheng/texlive-action@v3
         with:
           scheme: full
           run: |
