@@ -119,6 +119,11 @@ KEEP_TEMP =
 # - auto (default)
 COLOR =
 
+# Specify whether the user is using LaTeX Workshop.
+# - true
+# - false (default)
+USE_LATEX_WORKSHOP =
+
 # Specify whether *-eps-converted-to.pdf files are moved to BUILDDIR.
 # - always
 # - never
@@ -1684,11 +1689,23 @@ clear_build_temp_files = \
 		: \
 	)
 
+# $(_print_latex_workshop_marker) prints a special marker line to help
+# LaTeX Workshop parse build logs correctly, if needed.
+_print_latex_workshop_marker = $(call cache,_print_latex_workshop_marker_impl)
+
+_print_latex_workshop_marker_impl = \
+	$(if $(filter $(call to_bool,$(USE_LATEX_WORKSHOP)),true), \
+		echo "Latexmk: applying rule 'latex'" \
+	, \
+		: \
+	)
+
 # $(call do_latex,LATEX-COMMAND)
 # $(call do_latex,LATEX-COMMAND,false) skips the check.
 do_latex = \
 	if $$need_latex; then \
 		need_latex=false; \
+		$(_print_latex_workshop_marker); \
 		$(call do_backup,$*.aux); \
 		$(call do_backup,$*.toc); \
 		$(call do_backup,$*.lof); \
