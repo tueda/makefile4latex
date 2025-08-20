@@ -7,7 +7,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2024 Takahiro Ueda
+# Copyright (c) 2018-2025 Takahiro Ueda
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -1000,6 +1000,7 @@ colorize_output_join = $(if $(colorize_output_$1_join),2>&1,)
 
 # Errors for LaTeX:
 #   "! ...": TeX
+#   "<FILE>:<LINE>: ...": TeX (-file-line-error)
 # Warnings for LaTeX:
 #   "LaTeX Warning ...": \@latex@warning
 #   "Package Warning ...": \PackageWarning or \PackageWarningNoLine
@@ -1010,7 +1011,7 @@ colorize_output_join = $(if $(colorize_output_$1_join),2>&1,)
 #   "Overfull ...": TeX
 #   "pdfTeX warning ...": pdfTeX
 colorize_output_latex = \
-	sed 's/^\(!.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
+	sed 's/^\(!.*\|[^:][^:]*:[0-9][0-9]*:.*\)/\$\$\x1b$(CL_ERROR)\1\$\$\x1b$(CL_NORMAL)/; \
 	s/^\(LaTeX[^W]*Warning.*\|Package[^W]*Warning.*\|Class[^W]*Warning.*\|No file.*\|No pages of output.*\|Underfull.*\|Overfull.*\|.*pdfTeX warning.*\)/\$\$\x1b$(CL_WARN)\1\$\$\x1b$(CL_NORMAL)/'
 
 # Errors for BibTeX:
