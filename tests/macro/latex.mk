@@ -44,3 +44,34 @@ test_lowercase:
 
 test_sanitize:
 	$(call assert_eq,$(call sanitize,abcxyzABCXYZ0189  !"#%&*+-./x:;<=>?@x[]^_`x{|}~x  y),abcxyzABCXYZ0189____________x_______x_____x____x__y)
+
+test_to_bool:
+	$(call assert_eq,$(call to_bool,true),true)
+	$(call assert_eq,$(call to_bool,false),false)
+	$(call assert_eq,$(call to_bool,True),true)
+	$(call assert_eq,$(call to_bool,False),false)
+	$(call assert_eq,$(call to_bool,TRUE),true)
+	$(call assert_eq,$(call to_bool,FALSE),false)
+	$(call assert_eq,$(call to_bool,T),true)
+	$(call assert_eq,$(call to_bool,F),false)
+	$(call assert_eq,$(call to_bool,yes),true)
+	$(call assert_eq,$(call to_bool,no),false)
+	$(call assert_eq,$(call to_bool,Yes),true)
+	$(call assert_eq,$(call to_bool,No),false)
+	$(call assert_eq,$(call to_bool,YES),true)
+	$(call assert_eq,$(call to_bool,NO),false)
+	$(call assert_eq,$(call to_bool,on),true)
+	$(call assert_eq,$(call to_bool,off),false)
+	$(call assert_eq,$(call to_bool,On),true)
+	$(call assert_eq,$(call to_bool,Off),false)
+	$(call assert_eq,$(call to_bool,ON),true)
+	$(call assert_eq,$(call to_bool,OFF),false)
+	$(call assert_eq,$(call to_bool,1),true)
+	$(call assert_eq,$(call to_bool,0),false)
+	$(call assert_eq,$(call to_bool,),false)
+	$(call assert_eq,$(call to_bool,,true),true)
+	$(call assert_eq,$(call to_bool,,1),true)
+	$(call assert_fail,$(MAKE) check_to_bool_2)
+
+check_to_bool_2:
+	echo $(call to_bool,2)

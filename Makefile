@@ -471,6 +471,20 @@ lowercase = \
 sanitize = \
 	$(shell echo '$1' | sed 's/[^a-zA-Z0-9]/_/g')
 
+# $(call to_bool,STR,DEFAULT) canonicaizes STR to "true" or "false".
+# If STR is empty, DEFAULT is used.
+# If both STR and DEFAULT are empty, returns "false".
+# $(call to_bool,STR) is equivalent to $(call to_bool,STR,false).
+to_bool = $(strip \
+	$(if $(filter $(strip $1),true True TRUE T yes Yes YES y Y on On ON 1),true, \
+		$(if $(filter $(strip $1),false False FALSE F no No NO n N off Off OFF 0),false, \
+			$(if $(strip $1),$(error failed to parse boolean: "$1"), \
+				$(if $(strip $2),$(call to_bool,$(strip $2)),false) \
+			) \
+		) \
+	) \
+)
+
 # $(init_toolchain) initializes the toolchain.
 init_toolchain = $(call cache,init_toolchain_impl)
 
