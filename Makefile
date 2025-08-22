@@ -1564,6 +1564,7 @@ typeset = \
 	fi; \
 	rmfile=; \
 	touch $@; \
+	$(call mv_target,$*.synctex.gz); \
 	$(call mk_fls_dep,$@,$(build_prefix)$*.fls); \
 	$(call mk_blg_dep,$@,$(build_prefix)$*.blg); \
 	$(check_reffile) && $(call mk_ref_dep,$@,$*.ref); \
