@@ -212,7 +212,11 @@ WGET =
 CURL =
 
 # Command options.
+ifeq ($(USE_LATEX_WORKSHOP),)
 LATEX_OPT = -interaction=nonstopmode -halt-on-error
+else
+LATEX_OPT = -synctex=1 -interaction=nonstopmode -file-line-error
+endif
 PDFLATEX_DVI_OPT = -output-format=dvi
 DVIPS_OPT = -Ppdf -z
 DVIPDF_OPT =
