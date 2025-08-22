@@ -9,7 +9,7 @@ trim_trailing_whitespace = true
 [{Makefile,*.mk}]
 indent_style = tab
 
-[*.md]
+[*.{md,patch}]
 trim_trailing_whitespace = false
 
 [*.{bats,sh,tex,yml}]

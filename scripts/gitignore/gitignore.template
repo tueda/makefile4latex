@@ -1,0 +1,83 @@
+# This file is provided under the MIT License:
+#
+# MIT License
+#
+# Copyright (c) 2018-${year} Takahiro Ueda
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+# latest-raw-url: https://raw.githubusercontent.com/tueda/makefile4latex/master/.gitignore
+
+# Based on https://github.com/github/gitignore/blob/${commit_hash}/TeX.gitignore
+# (${commit_date}, CC0-1.0).
+
+${tex_gitignore}
+
+#####
+# makefile4latex additional rules
+
+# axodraw2
+*.ax1
+*.ax2
+
+# bib2gls
+*.glstex
+
+# sortref
+*_ref.tex
+
+# convbkmk intermediate files.
+*-convbkmk.ps
+
+# dviout caches.
+*.bmc
+*.pbm
+
+# Bounding boxes for dvipdfm/dvipdfmx.
+*.bb
+*.xbb
+
+# latexindent
+*.bak[0-9]*
+
+# textlint
+.textlintcache
+node_modules
+package-lock.json
+yarn.lock
+
+# arXiv tarballs.
+*.tar.gz
+
+# Temporary files.
+*.tmp
+*.tmp*.*
+*_tmp.???
+
+# Directories created by the Makefile for LaTeX.
+.dep/
+.diff/
+
+# cache directories.
+*cache/
+
+##########
+# user-defined rules
+# You can add your own rules here if needed.
