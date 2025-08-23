@@ -18,10 +18,12 @@ test_dir() {(
       fi
     fi
     [ -n "$NO_CLEAN" ] || make clean
+    # shellcheck disable=SC2086
     make $MAKE_ARGS | tee make.out
   )
 
-  if grep 'Rerun\|Please rerun LaTeX' $1/*.log $1/*/*.log $1/.build/*.log | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty'; then
+  if grep 'Rerun\|Please rerun LaTeX' "$1"/*.log "$1"/*/*.log "$1"/.build/*.log \
+      | grep -v 'Package: rerunfilecheck\|rerunfilecheck.sty'; then
     echo "FAIL: documents incomplete" >&2
     exit 1
   fi
@@ -29,11 +31,11 @@ test_dir() {(
   [ $# -le 1 ] && exit
 
   if grep -q halt-on-error "$1/make.out"; then
-    num=$(grep halt-on-error "$1/make.out" | wc -l)
+    num=$(grep -c halt-on-error "$1/make.out")
   else
     num=0
   fi
-  if [ $2 -ne $num ]; then
+  if [ "$2" -ne "$num" ]; then
     echo "FAIL: wrong number of running LaTeX: $num (must be $2)" >&2
     exit 1
   fi
@@ -47,7 +49,7 @@ check_tarball() {(
   set -o pipefail
 
   num=$(tar tf "$1" | wc -l)
-  if [ $2 -ne $num ]; then
+  if [ "$2" -ne "$num" ]; then
     echo "FAIL: wrong number of files in archive $1: $num (must be $2)" >&2
     exit 1
   fi
@@ -55,7 +57,7 @@ check_tarball() {(
 
 # require_executable <file>
 require_executable() {
-  if command -v $1 >/dev/null; then :; else
+  if command -v "$1" >/dev/null; then :; else
     skip "$1 not available"
   fi
 }
@@ -63,7 +65,7 @@ require_executable() {
 # require_package <file>
 require_package() {
   require_executable kpsewhich
-  if kpsewhich $1 >/dev/null; then :; else
+  if kpsewhich "$1" >/dev/null; then :; else
     skip "$1 not available"
   fi
 }

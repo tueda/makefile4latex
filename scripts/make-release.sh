@@ -7,8 +7,7 @@
 #   make-release.sh NEW-VERSION
 #   make-release.sh NEW-VERSION NEW-DEV-VERSION
 
-set -eu
-set -o pipefail
+set -euo pipefail
 
 # Trap ERR to print the stack trace when a command fails.
 # See: https://gist.github.com/ahendrix/7030300
@@ -19,7 +18,7 @@ function _errexit() {
   echo "Error in ${BASH_SOURCE[1]}:${BASH_LINENO[0]}: '${BASH_COMMAND}' exited with status $err" >&2
   # Print out the stack trace described by $FUNCNAME
   if [ ${#FUNCNAME[@]} -gt 2 ]; then
-    echo "Traceback:" >&2
+    echo 'Traceback:' >&2
     for ((i=1;i<${#FUNCNAME[@]}-1;i++)); do
       echo "  [$i]: at ${BASH_SOURCE[$i+1]}:${BASH_LINENO[$i]} in function ${FUNCNAME[$i]}" >&2
     done
@@ -30,23 +29,52 @@ function _errexit() {
 trap '_errexit' ERR
 set -o errtrace
 
+##
+
 # Tag prefix.
 v='v'
 
 # pre_version_message <current_version_number> <version_number> <dev_version_number>:
 # a hook function to print some message before bumping the version number.
 function pre_version_message() {
-  echo 'Please make sure that CHANGELOG is up-to-date.'
+  echo 'Please make sure that CHANGELOG.md is up-to-date.'
   echo 'You can use the output of the following command:'
   echo
   echo "  git-chglog --next-tag $v$2"
   echo
 }
 
+# get_current_version: prints the current version.
+function get_current_version() {
+  # Extract the current version number from the Makefile.
+  local main_file
+  main_file=Makefile
+  [[ -f $main_file ]] || abort "$main_file not found"
+  grep MAKEFILE4LATEX_VERSION $main_file | head -1 | sed 's/.*= *//' || :
+}
+
+# get_next_version <current_version_number>: prints the next version.
+function get_next_version() {
+  # Remove the "-dev" suffix from the current version number.
+  [[ $1 == *-dev ]] || abort "current version doesn't end with -dev: $1"
+  echo "${1%-dev}"
+}
+
+# get_next_dev_version <current_version_number> <next_version_number>: prints the next dev-version.
+function get_next_dev_version() {
+  # Increase the patch number and add the "-dev" suffix.
+  local next_version_xyz a
+  next_version_xyz=${1%-*}  # remove any suffix
+  IFS=. read -r -a a <<<"$next_version_xyz"
+  [[ ${#a[@]} == 3 ]] || abort "next version should be semantic: $next_version"
+  ((a[2]++)) || :
+  echo "${a[0]}.${a[1]}.${a[2]}-dev"
+}
+
 # version_bump <version_number>: a hook function to bump the version for documents.
 function version_bump() {
-  dev_version_bump $1
-  sed -i 's|makefile4latex/v[^/]*/Makefile|makefile4latex/v'$next_version'/Makefile|' README.md
+  dev_version_bump "$1"
+  sed -i 's|makefile4latex/v[^/]*/Makefile|makefile4latex/v'"$next_version"'/Makefile|' README.md
   # Check if the files are changed.
   [[ $(numstat Makefile) == '1,1' ]]
   [[ $(numstat README.md) == '2,2' ]]
@@ -59,9 +87,11 @@ function dev_version_bump() {
   [[ $(numstat Makefile) == '1,1' ]]
 }
 
+##
+
 # abort <message>: aborts the program with the given message.
 function abort {
-  echo "error: $@" 1>&2
+  echo "error: $*" 1>&2
   exit 1
 }
 
@@ -81,49 +111,44 @@ function numstat() {
   fi
 }
 
+# Require the git command.
+command -v git >/dev/null || abort 'git not available'
+
 # Stop if the working directory is dirty.
 isclean || abort 'working directory is dirty'
 
 # Ensure that we are in the project root.
-cd $(git rev-parse --show-toplevel)
+cd "$(git rev-parse --show-toplevel)"
 
 # Determine the current version.
-main_file=Makefile
-[[ -f $main_file ]] || abort "$main_file not found"
-current_version=$(grep MAKEFILE4LATEX_VERSION $main_file | head -1 | sed 's/.*= *//' || :)
-current_version=$(echo $current_version)  # strip spaces
-[[ $current_version != '' ]] || abort "current version not determined"
+current_version=$(get_current_version)
+[[ $current_version != '' ]] || abort 'current version not determined'
 
 # Determine the next version.
 if [[ $# == 0 ]]; then
-  # Default: remove the "-dev" suffix.
-  [[ $current_version == *-dev ]] || abort "current version $current_version doesn't end with -dev"
-  next_version=${current_version%-dev}
+  next_version=$(get_next_version "$current_version")
+  [[ $next_version != '' ]] || abort 'next version not determined'
 else
   next_version=$1
 fi
 
 # Determine the next dev-version.
-if [[ $# < 2 ]]; then
-  # Default: increase the patch number and add the "-dev" suffix.
-  next_version_xyz=${next_version%-*}  # remove any suffix
-  a=( ${next_version_xyz//./ } )
-  [[ ${#a[@]} == 3 ]] || abort "next version $next_version should be semantic"
-  ((a[2]++)) || :
-  next_dev_version="${a[0]}.${a[1]}.${a[2]}-dev"
+if [[ $# -lt 2 ]]; then
+  next_dev_version=$(get_next_dev_version "$current_version" "$next_version")
+  [[ $next_dev_version != '' ]] || abort 'next dev-version not determined'
 else
   next_dev_version=$2
 fi
 
 # Print the versions and confirm if they are fine.
-pre_version_message $current_version $next_version $next_dev_version
+pre_version_message "$current_version" "$next_version" "$next_dev_version"
 echo 'This script will bump the version number.'
 echo "  current commit      : $(git rev-parse --short HEAD)"
 echo "  current version     : $current_version"
 echo "  next version        : $next_version"
 echo "  next dev-version    : $next_dev_version"
 while :; do
-  read -p 'ok? (y/N): ' yn
+  read -r -p 'ok? (y/N): ' yn
   case "$yn" in
     [yY]*)
       break
@@ -138,10 +163,10 @@ while :; do
 done
 
 # Bump the version.
-version_bump $next_version
+version_bump "$next_version"
 git commit -a -m "chore(release): bump version to $next_version"
-git tag $v$next_version
-dev_version_bump $next_dev_version
+git tag "$v$next_version"
+dev_version_bump "$next_dev_version"
 git commit -a -m "chore: bump version to $next_dev_version"
 
 # Completed. Show some information.

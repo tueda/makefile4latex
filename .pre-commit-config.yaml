@@ -2,7 +2,7 @@ default_install_hook_types: [pre-commit, commit-msg]
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
     -   id: check-added-large-files
     -   id: check-case-conflict
@@ -20,13 +20,13 @@ repos:
         exclude: '\.patch$'
 
 -   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.2.1
+    rev: 3.4.0
     hooks:
     -   id: editorconfig-checker
         exclude: Makefile
 
 -   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.2.1
+    rev: 3.4.0
     hooks:
     -   id: editorconfig-checker
         name: editorconfig-checker (Makefile)
@@ -34,9 +34,15 @@ repos:
         args: [-disable-indentation]
 
 -   repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.0
+    rev: 0.33.3
     hooks:
     -   id: check-github-workflows
+
+-   repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+    -   id: shellcheck
+        args: [-x]
 
 -   repo: https://github.com/jorisroovers/gitlint
     rev: v0.19.1
