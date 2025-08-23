@@ -1,5 +1,56 @@
 # Changelog
 
+<a name="0.12.0"></a>
+## [0.12.0] (2025-08-23)
+### Added
+- Support for partial updates to `.gitignore`.
+  The root `.gitignore` file now contains a user section, separated from
+  the main part by a 10-hash marker line:
+  ```
+  ##########
+  # user-defined rules
+  # You can add your own rules here if needed.
+  ```
+  `make upgrade` preserves user-defined rules written below the marker line.
+  ([#58](https://github.com/tueda/makefile4latex/issues/58))
+- Support for [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop).
+  Configuration example:
+  ```json
+  {
+    "latex-workshop.latex.recipes": [
+      {
+        "name": "make 🔃",
+        "tools": [
+          "make"
+        ]
+      }
+    ],
+    "latex-workshop.latex.tools": [
+      {
+        "name": "make",
+        "command": "make",
+        "args": [
+          "-C",
+          "%DIR%",
+          "USE_LATEX_WORKSHOP=1",
+          "%DOCFILE%.pdf"
+        ]
+      }
+    ]
+  }
+  ```
+  ([e56697e](https://github.com/tueda/makefile4latex/commit/e56697e7b7f0393b53d79457df11b9f7b84e696b), [3d62a2b](https://github.com/tueda/makefile4latex/commit/3d62a2b131d5dcfd1936419c26cab05a43f571a3))
+- Support SyncTeX with `BUILDDIR`.
+  ([3268d4f](https://github.com/tueda/makefile4latex/commit/3268d4fe2120e84625bec1c860bb2d5988a94ff5))
+### Changed
+- Updated `.gitignore`, which is now based on
+  [`TeX.gitignore` (2025-06-13)](https://github.com/github/gitignore/blob/b1f858fdfd024dcc64276a19c8a48644f7d5be0b/TeX.gitignore).
+  ([28d7a16](https://github.com/tueda/makefile4latex/commit/28d7a16a684d2ce344479fc394fdd0abb57854d1))
+### Fixed
+- LaTeX errors were not being colorized when using `-file-line-error`.
+  ([20c1c40](https://github.com/tueda/makefile4latex/commit/20c1c400cc9dbd7332cce4fa23c717fcaf7e6ab6))
+
+
 <a name="0.11.1"></a>
 ## [0.11.1] (2024-01-29)
 ### Fixed
@@ -224,6 +275,7 @@
   ```
 
 
+[0.12.0]: https://github.com/tueda/makefile4latex/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/tueda/makefile4latex/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/tueda/makefile4latex/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/tueda/makefile4latex/compare/v0.9.1...v0.10.0
