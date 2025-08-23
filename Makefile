@@ -1486,8 +1486,18 @@ upgrade:
 	fi
 
 # $(call upgrade,FILE,URL) tries to upgrade the given file.
+#
+# For the .gitignore in the root directory, replace the content above a marker
+# line of ten hashes (##########); keep the rest unchanged.
 upgrade = \
 	$(download) "$1.tmp" "$2" && { \
+		if [ "x$1" = "x.gitignore" ] \
+				&& grep -q '^\#\#\#\#\#\#\#\#\#\#' "$1" \
+				&& [ $$(grep -c '^\#\#\#\#\#\#\#\#\#\#' "$1.tmp") -eq 1 ]; then \
+			$(_get_before_marker_excl) "$1.tmp" >"$1.tmp.tmp"; \
+			$(_get_after_marker_incl) "$1" >>"$1.tmp.tmp"; \
+			mv "$1.tmp.tmp" "$1.tmp"; \
+		fi; \
 		if diff -q "$1" "$1.tmp" >/dev/null 2>&1; then \
 			$(call notification_message,$1 is up-to-date); \
 			rm -f "$1.tmp"; \
@@ -1497,6 +1507,9 @@ upgrade = \
 		fi; \
 		:; \
 	}
+
+_get_before_marker_excl = awk '/^\#\#\#\#\#\#\#\#\#\#/ { exit } { print }'
+_get_after_marker_incl = awk 'f { print } /^\#\#\#\#\#\#\#\#\#\#/ { f = 1; print }'
 
 _FORCE:
 
