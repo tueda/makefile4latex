@@ -64,7 +64,7 @@ function get_next_version() {
 function get_next_dev_version() {
   # Increase the patch number and add the "-dev" suffix.
   local next_version_xyz a
-  next_version_xyz=${1%-*}  # remove any suffix
+  next_version_xyz=${2%-*}  # remove any suffix
   IFS=. read -r -a a <<<"$next_version_xyz"
   [[ ${#a[@]} == 3 ]] || abort "next version should be semantic: $next_version"
   ((a[2]++)) || :
