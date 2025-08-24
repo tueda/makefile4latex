@@ -7,7 +7,7 @@
 #   make-release.sh NEW-VERSION
 #   make-release.sh NEW-VERSION NEW-DEV-VERSION
 #
-# Script Core Version: 20250824
+# Script Core Version: 2025.08.24
 #
 set -euo pipefail
 
