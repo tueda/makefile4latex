@@ -1,5 +1,13 @@
 # Changelog
 
+
+<a name="0.13.0"></a>
+## [0.13.0] (2025-09-07)
+### Added
+- New target `bundle` to create an archive from the current Git repository.
+  ([#61](https://github.com/tueda/makefile4latex/pull/61))
+
+
 <a name="0.12.0"></a>
 ## [0.12.0] (2025-08-23)
 ### Added
@@ -275,6 +283,7 @@
   ```
 
 
+[0.13.0]: https://github.com/tueda/makefile4latex/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/tueda/makefile4latex/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/tueda/makefile4latex/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/tueda/makefile4latex/compare/v0.10.0...v0.11.0
