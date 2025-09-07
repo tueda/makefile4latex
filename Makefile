@@ -64,6 +64,9 @@ Targets
   dist:
     Create tar-gzipped archives for arXiv submission.
 
+  bundle:
+    Create an archive containing all files from the current Git repository.
+
   watch:
     Watch the changes and automatically rebuild documents.
 
@@ -138,6 +141,9 @@ EXTRADISTFILES =
 
 # Files to be copied in "anc" directory in a distribution.
 ANCILLARYFILES =
+
+# Bundle filename (including extension).
+BUNDLEFILE = bundle.tar.gz
 
 # Additional files to mostly-clean.
 MOSTLYCLEANFILES =
@@ -893,6 +899,7 @@ cleanfiles_impl = $(wildcard $(strip \
 	$(srcltxfiles:.ltx=.fmt) \
 	$(srcdtxfiles:.dtx=.cls) \
 	$(srcdtxfiles:.dtx=.sty) \
+	$(BUNDLEFILE) \
 	$(CLEANFILES) \
 	$(mostlycleanfiles) \
 ))
@@ -1377,6 +1384,53 @@ _check_rule = \
 		$(MAKE) --no-print-directory $1 1="$(call TESTS_OPT,$1)" || exit 1; \
 	)
 
+bundle:
+	@$(if $(strip $(BUNDLEFILE)), \
+		$(if $(or $(filter %.tar.gz,$(BUNDLEFILE)),$(filter %.tgz,$(BUNDLEFILE))), \
+			$(call _make_bundle,$(_make_bundle_tar_gz)) \
+		,$(if $(filter %.zip,$(BUNDLEFILE)), \
+			$(call _make_bundle,$(_make_bundle_zip)) \
+		, \
+			$(error unsupported BUNDLEFILE extension: $(BUNDLEFILE)) \
+		)) \
+	, \
+		$(error BUNDLEFILE is not set) \
+	)
+
+_make_bundle = \
+	temp_dir=.tmp_bundle_$$$$ \
+	&& mkdir "$$temp_dir" \
+	&& temp_dir=$$(cd "$$temp_dir" && pwd) \
+	$(if $(KEEP_TEMP),,&& trap 'rm -rf $$temp_dir' 0 1 2 3 15) \
+	&& cd "$$temp_dir" \
+	&& git clone .. "$(_bundle_name)" \
+	&& cd "$(_bundle_name)" \
+	&& git remote remove origin \
+	&& git reflog expire --expire=now --expire-unreachable=now --all \
+	&& git prune --expire=now \
+	&& git pack-refs --all --prune \
+	&& git gc --aggressive --prune=now \
+	&& cd .. \
+	&& $1 \
+	&& cd .. \
+	&& mv "$$temp_dir/$(notdir $(BUNDLEFILE))" "$(BUNDLEFILE)"
+
+_make_bundle_tar_gz = \
+	$(call exec,tar cfv - --exclude $(notdir $(BUNDLEFILE)) * | gzip -9 -n >$(notdir $(BUNDLEFILE)))
+
+_make_bundle_zip = \
+	$(call exec,TZ=UTC zip -X -9 -r $(notdir $(BUNDLEFILE)) *)
+
+_bundle_name = $(strip \
+	$(if $(filter %.tar.gz,$(BUNDLEFILE)), \
+		$(basename $(basename $(notdir $(BUNDLEFILE)))) \
+	,$(if $(or $(filter %.tgz,$(BUNDLEFILE)),$(filter %.zip,$(BUNDLEFILE))), \
+		$(basename $(notdir $(BUNDLEFILE))) \
+	, \
+		$(notdir $(BUNDLEFILE)) \
+	)) \
+)
+
 # The "watch" mode. Try to update .log files instead of .pdf/.dvi files,
 # otherwise make would continuously try to typeset for sources previously
 # failed.
@@ -1516,7 +1570,7 @@ _FORCE:
 _run_testsuite:
 	@$(run_testsuite)
 
-.PHONY : all all-recursive check clean dist dvi eps fmt help jpg lint mostlyclean pdf png pretty ps prerequisite postprocess svg upgrade watch _FORCE _run_testsuite
+.PHONY : all all-recursive bundle check clean dist dvi eps fmt help jpg lint mostlyclean pdf png pretty ps prerequisite postprocess svg upgrade watch _FORCE _run_testsuite
 
 # $(call typeset,LATEX-COMMAND) tries to typeset the document.
 # $(call typeset,LATEX-COMMAND,false) doesn't delete the output file on failure.
