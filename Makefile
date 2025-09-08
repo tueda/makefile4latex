@@ -169,8 +169,14 @@ POSTPROCESS =
 # List of prettifier commands/rules, invoked by "make pretty".
 PRETTIFIERS = latexindent
 
+# Files not to be processed by prettifiers.
+NOPRETTYFILES =
+
 # List of linter commands/rules, invoked by "make lint".
 LINTS = chktex
+
+# Files not to be processed by linters.
+NOLINTFILES =
 
 # List of test scripts/rules, invoked by "make check".
 TESTS =
@@ -1205,14 +1211,14 @@ pretty:
 
 # $(call _pretty_run,EXECUTABLE) runs EXECUTABLE.
 _pretty_run = \
-	$(foreach texfile,$(call _rule_wildcard,$1), \
+	$(foreach texfile,$(call _rule_wildcard,$1,$(NOPRETTYFILES)), \
 		$(call exec,$1 $(texfile),false); \
 		$$failed && pretty_ok=false; \
 	)
 
 # $(call _pretty_rule,RULE) runs RULE.
 _pretty_rule = \
-	$(foreach texfile,$(call _rule_wildcard,$1), \
+	$(foreach texfile,$(call _rule_wildcard,$1,$(NOPRETTYFILES)), \
 		$(call colorize, \
 			printf "\033$(CL_NOTICE)$(MAKE) $1 1=$(texfile)\033$(CL_NORMAL)\n" \
 		, \
@@ -1223,14 +1229,14 @@ _pretty_rule = \
 
 # $(call _pretty_builtin_rule,RULE) runs the builtin RULE.
 _pretty_builtin_rule = \
-	$(foreach texfile,$(call _rule_wildcard,$1), \
+	$(foreach texfile,$(call _rule_wildcard,$1,$(NOPRETTYFILES)), \
 		$(MAKE) --no-print-directory _builtin_pretty_$1 1=$(texfile) || pretty_ok=false; \
 	)
 
-# $(call _rule_wildcard,RULE,DEFAULT_PATTERN) gives target files for RULE.
-# $(call _rule_wildcard,RULE) is the same but with DEFAULT_PATTERN=*.tex.
+# $(call _rule_wildcard,RULE,EXCLUDE_PATTERN,DEFAULT_PATTERN) gives target files for RULE.
+# $(call _rule_wildcard,RULE,EXCLUDE_PATTERN) is the same but with DEFAULT_PATTERN=*.tex.
 _rule_wildcard = \
-	$(wildcard $(or $($(call uppercase,$(call sanitize,$1))_TARGET),$2,*.tex))
+	$(filter-out $(wildcard $2),$(wildcard $(or $($(call uppercase,$(call sanitize,$1))_TARGET),$3,*.tex)))
 
 # NOTE: $(ensure_build_dir) needed for old versions, latexindent < 3.22.2.
 #       See https://github.com/cmhughes/latexindent.pl/issues/452.
@@ -1255,14 +1261,14 @@ lint:
 
 # $(call _lint_run,EXECUTABLE) runs EXECUTABLE.
 _lint_run = \
-	$(foreach texfile,$(call _rule_wildcard,$1), \
+	$(foreach texfile,$(call _rule_wildcard,$1,$(NOLINTFILES)), \
 		$(call exec,$1 $(texfile),false); \
 		$$failed && lint_ok=false; \
 	)
 
 # $(call _lint_rule,RULE) runs RULE.
 _lint_rule = \
-	$(foreach texfile,$(call _rule_wildcard,$1), \
+	$(foreach texfile,$(call _rule_wildcard,$1,$(NOLINTFILES)), \
 		$(call colorize, \
 			printf "\033$(CL_NOTICE)$(MAKE) $1 1=$(texfile)\033$(CL_NORMAL)\n" \
 		, \
@@ -1273,7 +1279,7 @@ _lint_rule = \
 
 # $(call _lint_builtin_rule,RULE) runs the builtin RULE.
 _lint_builtin_rule = \
-	$(foreach texfile,$(call _rule_wildcard,$1), \
+	$(foreach texfile,$(call _rule_wildcard,$1,$(NOLINTFILES)), \
 		$(MAKE) --no-print-directory _builtin_lint_$1 1=$(texfile) || lint_ok=false; \
 	)
 
