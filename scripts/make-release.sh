@@ -7,7 +7,7 @@
 #   make-release.sh NEW-VERSION
 #   make-release.sh NEW-VERSION NEW-DEV-VERSION
 #
-# Script Core Version: 2025.08.24
+# Script Core Version: 2025.12.03
 #
 set -euo pipefail
 
@@ -18,7 +18,7 @@ v='v'
 
 # pre_version_message <current_version_number> <version_number> <dev_version_number>:
 # a hook function to print some message before bumping the version number.
-function pre_version_message() {
+pre_version_message() {
   echo 'Please make sure that CHANGELOG.md is up-to-date.'
   echo 'You can use the output of the following command:'
   echo
@@ -27,7 +27,7 @@ function pre_version_message() {
 }
 
 # get_current_version: prints the current version.
-function get_current_version() {
+get_current_version() {
   # Extract the current version number from the Makefile.
   local main_file=Makefile
   [[ -f $main_file ]] || abort "$main_file not found"
@@ -35,14 +35,14 @@ function get_current_version() {
 }
 
 # get_next_version <current_version_number>: prints the next version.
-function get_next_version() {
+get_next_version() {
   # Remove the "-dev" suffix from the current version number.
   [[ $1 == *-dev ]] || abort "current version doesn't end with -dev: $1"
   echo "${1%-dev}"
 }
 
 # get_next_dev_version <current_version_number> <next_version_number>: prints the next dev-version.
-function get_next_dev_version() {
+get_next_dev_version() {
   # Increase the patch number and add the "-dev" suffix.
   local next_version_xyz=${2%-*}  # remove any suffix
   local a
@@ -53,25 +53,25 @@ function get_next_dev_version() {
 }
 
 # version_bump <version_number>: a hook function to bump the version for documents.
-function version_bump() {
+version_bump() {
   dev_version_bump "$1"
   sed_i 's|makefile4latex/v[^/]*/Makefile|makefile4latex/v'"$1"'/Makefile|' README.md
   check_file_changed README.md 2 2
 }
 
 # dev_version_bump <dev_version_number>: a hook function to bump the version for code.
-function dev_version_bump() {
+dev_version_bump() {
   sed_i "s/^MAKEFILE4LATEX_VERSION *= .*$/MAKEFILE4LATEX_VERSION = $1/" Makefile
   check_file_changed Makefile 1 1
 }
 
 # release_commit_message <version_number>: generates the commit message for a release version.
-function release_commit_message() {
+release_commit_message() {
   echo "chore(release): bump version to $1"
 }
 
 # dev_commit_message <version_number>: generates the commit message for a development version.
-function dev_commit_message() {
+dev_commit_message() {
   echo "chore: bump version to $1"
 }
 
@@ -79,7 +79,7 @@ function dev_commit_message() {
 
 # Trap ERR to print the stack trace when a command fails.
 # See: https://gist.github.com/ahendrix/7030300
-function _errexit() {
+_errexit() {
   local err=$?
   set +o xtrace
   local code="${1:-1}"
@@ -98,20 +98,20 @@ trap '_errexit' ERR
 set -o errtrace
 
 # abort <message>: aborts the program with the given message.
-function abort {
+abort() {
   echo "error: $*" 1>&2
   exit 1
 }
 
 # is_clean: checks if the working repository is clean (untracked files are ignored).
-function is_clean() {
+is_clean() {
   git diff --quiet && git diff --cached --quiet
 }
 
 # sed_i: portable sed -i for GNU/BSD.
 # Usage: sed_i <options...> <script> <file>
 # Note: works only with a single file.
-function sed_i() {
+sed_i() {
   local file="${!#}"
   local temp="$file.$$.$RANDOM"
   if sed "$@" >"$temp"; then
@@ -123,7 +123,7 @@ function sed_i() {
 }
 
 # check_file_changed <file> <expected_added_lines_count> <expected_deleted_lines_count>
-function check_file_changed() {
+check_file_changed() {
   local stat added_lines_count deleted_lines_count
   stat=$(git diff --numstat "$1")
   if [[ $stat =~ ([0-9]+)[[:blank:]]+([0-9]+) ]]; then
