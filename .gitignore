@@ -397,8 +397,10 @@ node_modules
 package-lock.json
 yarn.lock
 
-# arXiv tarballs.
+# dist/bundle archives.
 *.tar.gz
+*.tgz
+*.zip
 
 # Temporary files.
 *.tmp
