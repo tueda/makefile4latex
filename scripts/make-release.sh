@@ -22,7 +22,7 @@ pre_version_message() {
   echo 'Please make sure that CHANGELOG.md is up-to-date.'
   echo 'You can use the output of the following command:'
   echo
-  echo "  git-chglog --next-tag $v$2"
+  echo "  git cliff --unreleased --tag $v$2"
   echo
 }
 
