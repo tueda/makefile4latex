@@ -5,10 +5,12 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    allow:
-      - dependency-type: direct
+    cooldown:
+      default-days: 7
 
-  - package-ecosystem: gitsubmodule
+  - package-ecosystem: pre-commit
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
