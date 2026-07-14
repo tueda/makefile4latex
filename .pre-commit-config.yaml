@@ -20,13 +20,13 @@ repos:
         exclude: '\.patch$'
 
 -   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.4.0
+    rev: 3.6.1
     hooks:
     -   id: editorconfig-checker
         exclude: Makefile
 
 -   repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.4.0
+    rev: 3.6.1
     hooks:
     -   id: editorconfig-checker
         name: editorconfig-checker (Makefile)
