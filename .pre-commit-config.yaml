@@ -34,7 +34,7 @@ repos:
         args: [-disable-indentation]
 
 -   repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.3
+    rev: 0.37.4
     hooks:
     -   id: check-github-workflows
 
